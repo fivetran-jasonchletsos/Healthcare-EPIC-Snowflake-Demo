@@ -21,11 +21,14 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
-import random
 import shutil
 import sys
 from pathlib import Path
 from typing import Any
+
+# Local module — keeps the realistic-Epic synthetic dataset isolated.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _synthetic import generate as synth_generate  # type: ignore  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "frontend" / "public" / "data"
@@ -144,7 +147,11 @@ PROVIDERS = ["Dr. Patel", "Dr. Nguyen", "Dr. Williams", "Dr. Chen", "Dr. Garcia"
              "Dr. Rodriguez", "Dr. Kim", "Dr. O'Connor"]
 
 
-def fallback_dataset(n: int = 240) -> dict[str, Any]:
+def fallback_dataset(n: int = 10000) -> dict[str, Any]:
+    return synth_generate(n_patients=n)
+
+
+def _legacy_demo_dataset(n: int = 240) -> dict[str, Any]:
     rng = random.Random(42)
     today = dt.date.today()
     patients: list[dict[str, Any]] = []
@@ -209,30 +216,18 @@ def write_snapshot(bundle: dict[str, Any], source: str):
         json.dumps({"count": len(rows), "columns": LIST_COLUMNS, "rows": rows}, separators=(",", ":"))
     )
 
-    # Lightweight per-patient detail bundles for the first 50 (demo path)
-    # — production path will materialize from fct_encounters / fct_diagnoses
-    # joined per-patient at query time.
-    for p in patients[:50]:
-        pid = p["pat_id"]
-        bundle = {
-            "patient": {**p, "race": None, "ethnicity": None, "mailing_address": None, "state": "PA", "phone": None, "primary_care_department": None},
-            "encounters": {"pat_id": pid, "encounters": []},
-            "diagnoses": {"pat_id": pid, "diagnoses": []},
-            "accounts": {
-                "pat_id": pid,
-                "summary": {
-                    "total_charges": p["total_charges"],
-                    "total_payments": int(p["total_charges"] * 0.65),
-                    "outstanding_balance": int(p["total_charges"] * 0.35),
-                    "account_count": 1,
-                },
-                "accounts": [],
-            },
-            "comparables": {"pat_id": pid, "comparables": []},
-        }
-        (PATIENT_DIR / f"{pid}.json").write_text(json.dumps(bundle, indent=2))
+    # Real per-patient detail bundles come from the generator (or in
+    # production from per-patient SELECTs against Snowflake). Frontend
+    # synthesizes the rest from the list view if a detail is missing.
+    details = bundle.get("details") if isinstance(bundle, dict) else None
+    if details:
+        for pid, detail in details.items():
+            (PATIENT_DIR / f"{pid}.json").write_text(json.dumps(detail, indent=2))
+        n_details = len(details)
+    else:
+        n_details = 0
 
-    print(f"Wrote snapshot ({source}): {len(patients)} patients, {min(50, len(patients))} detail bundles")
+    print(f"Wrote snapshot ({source}): {len(patients)} patients, {n_details} detail bundles")
 
 
 def main() -> int:

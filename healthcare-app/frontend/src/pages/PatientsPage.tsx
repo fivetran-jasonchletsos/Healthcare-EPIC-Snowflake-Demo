@@ -75,7 +75,7 @@ export default function PatientsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="e.g. Smith"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-2 focus:outline-teal-200"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-2 focus:outline-brand-200"
           />
         </div>
         <div className="md:col-span-3">
@@ -85,7 +85,7 @@ export default function PatientsPage() {
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Pittsburgh"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-2 focus:outline-teal-200"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-2 focus:outline-brand-200"
           />
         </div>
         <div className="md:col-span-2">
@@ -95,11 +95,11 @@ export default function PatientsPage() {
             value={zip}
             onChange={(e) => setZip(e.target.value)}
             placeholder="15217"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-2 focus:outline-teal-200"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-2 focus:outline-brand-200"
           />
         </div>
         <div className="md:col-span-2 flex items-end gap-2">
-          <button type="submit" className="flex-1 rounded-md bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2">
+          <button type="submit" className="flex-1 rounded-md bg-brand-700 hover:bg-brand-800 text-white text-sm font-medium px-4 py-2">
             Apply
           </button>
           <button type="button" onClick={clearFilters} className="rounded-md border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3 py-2">
@@ -132,7 +132,7 @@ export default function PatientsPage() {
       ) : sorted.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-12 text-center">
           <div className="text-slate-700 font-medium">No patients matched your filters.</div>
-          <button onClick={clearFilters} className="mt-3 text-sm text-teal-700 hover:text-teal-900 font-medium">
+          <button onClick={clearFilters} className="mt-3 text-sm text-brand-700 hover:text-brand-900 font-medium">
             Clear filters
           </button>
         </div>
@@ -156,7 +156,7 @@ export default function PatientsPage() {
                 <tr
                   key={p.pat_id}
                   onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)}
-                  className="cursor-pointer hover:bg-teal-50/50 transition-colors"
+                  className="cursor-pointer hover:bg-brand-50/50 transition-colors"
                 >
                   <td className="px-4 py-3 text-xs font-mono text-slate-600">{p.med_rec_num}</td>
                   <td className="px-4 py-3">

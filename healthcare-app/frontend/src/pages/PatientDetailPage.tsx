@@ -8,6 +8,9 @@ import type {
   AccountsResponse,
   ComparablesResponse,
 } from '../types';
+import CareCostEstimator from '../components/CareCostEstimator';
+import CohortPercentile from '../components/CohortPercentile';
+import WatchlistButton from '../components/WatchlistButton';
 
 export default function PatientDetailPage() {
   const { patId = '' } = useParams();
@@ -46,22 +49,22 @@ export default function PatientDetailPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <nav className="text-sm text-slate-500 mb-4">
-        <Link to="/" className="hover:text-teal-700">Home</Link> /{' '}
-        <Link to="/patients" className="hover:text-teal-700">Patients</Link> /{' '}
+        <Link to="/" className="hover:text-brand-700">Home</Link> /{' '}
+        <Link to="/patients" className="hover:text-brand-700">Patients</Link> /{' '}
         <span className="text-slate-700">{patient.med_rec_num}</span>
       </nav>
 
-      <header className="rounded-2xl bg-gradient-to-br from-teal-700 to-teal-900 text-white p-6 sm:p-8 shadow-lg">
+      <header className="rounded-2xl bg-gradient-to-br from-brand-700 to-brand-900 text-white p-6 sm:p-8 shadow-lg">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-wider text-teal-200 font-mono">
+            <div className="text-xs uppercase tracking-wider text-brand-200 font-mono">
               MRN {patient.med_rec_num} · pat_id {patient.pat_id}
             </div>
             <h1 className="mt-1 text-3xl sm:text-4xl font-bold">{patient.full_name}</h1>
-            <div className="mt-1 text-teal-100">
+            <div className="mt-1 text-brand-100">
               {patient.age} y/o · {patient.sex} · DOB {patient.birth_date}
             </div>
-            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               {patient.city && <Pill>{patient.city}{patient.zip_code ? `, ${patient.zip_code}` : ''}</Pill>}
               {patient.race && <Pill>{patient.race}</Pill>}
               {patient.primary_care_provider && <Pill>PCP: {patient.primary_care_provider}</Pill>}
@@ -70,6 +73,7 @@ export default function PatientDetailPage() {
                   {patient.active_chronic_count} chronic condition{patient.active_chronic_count === 1 ? '' : 's'}
                 </span>
               )}
+              <WatchlistButton patId={patient.pat_id} />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3 lg:gap-4">
@@ -132,6 +136,22 @@ export default function PatientDetailPage() {
           )}
         </section>
 
+        <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CohortPercentile
+            patId={patient.pat_id}
+            age={patient.age}
+            sex={patient.sex}
+            encounters={encounters?.encounters.length ?? 0}
+            charges={accounts?.summary.total_charges ?? 0}
+            chronic={patient.active_chronic_count}
+          />
+          <CareCostEstimator
+            totalCharges={accounts?.summary.total_charges ?? 0}
+            encounters={encounters?.encounters.length ?? 0}
+            payerHint={accounts?.accounts[0]?.primary_payer ?? null}
+          />
+        </div>
+
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
           <h2 className="text-lg font-semibold text-slate-900 mb-3">Hospital accounts</h2>
           {accounts && accounts.accounts.length > 0 ? (
@@ -177,12 +197,12 @@ export default function PatientDetailPage() {
                 <Link
                   key={c.pat_id}
                   to={`/patients/${encodeURIComponent(c.pat_id)}`}
-                  className="text-left rounded-lg border border-slate-200 p-4 hover:border-teal-300 hover:shadow-md transition-all"
+                  className="text-left rounded-lg border border-slate-200 p-4 hover:border-brand-300 hover:shadow-md transition-all"
                 >
                   <div className="font-medium text-slate-900">{c.full_name}</div>
                   <div className="text-xs text-slate-500">{c.age} y/o · {c.sex}</div>
                   <div className="mt-3 flex items-center justify-between text-sm">
-                    <span className="text-teal-700 font-semibold">{c.encounter_count} visits</span>
+                    <span className="text-brand-700 font-semibold">{c.encounter_count} visits</span>
                     <span className="text-xs text-rose-700">{c.chronic_overlap_count} chronic overlap</span>
                   </div>
                 </Link>
@@ -202,7 +222,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-white/10 backdrop-blur-sm p-3">
-      <div className="text-[10px] sm:text-xs uppercase tracking-wider text-teal-200">{label}</div>
+      <div className="text-[10px] sm:text-xs uppercase tracking-wider text-brand-200">{label}</div>
       <div className="mt-1 text-base sm:text-lg lg:text-xl font-bold leading-tight">{value}</div>
     </div>
   );

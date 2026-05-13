@@ -29,7 +29,7 @@ export default function AboutPage() {
           {STEPS.map((s) => (
             <div key={s.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold shrink-0">
+                <div className="h-10 w-10 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold shrink-0">
                   {s.icon}
                 </div>
                 <div>

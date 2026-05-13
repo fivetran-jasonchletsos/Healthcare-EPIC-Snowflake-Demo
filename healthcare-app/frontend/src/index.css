@@ -1,47 +1,71 @@
 @import "tailwindcss";
 @import 'leaflet/dist/leaflet.css';
 
+/*
+ * Two brand themes. Fivetran is the default; Snowflake is opt-in via a header
+ * toggle that flips `data-theme="snowflake"` on the <html> element. Every
+ * color used in the SPA goes through the `brand-*` CSS variables so the
+ * switch is instant and complete.
+ */
+:root,
+:root[data-theme="fivetran"] {
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;  /* Fivetran blue */
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-accent-500: #00d4ff;
+  --brand-name: "Fivetran";
+}
+
+:root[data-theme="snowflake"] {
+  --color-brand-50:  #ecfeff;
+  --color-brand-100: #cffafe;
+  --color-brand-200: #a5f3fc;
+  --color-brand-300: #67e8f9;
+  --color-brand-400: #22d3ee;
+  --color-brand-500: #06b6d4;
+  --color-brand-600: #29b5e8;  /* Snowflake azure */
+  --color-brand-700: #0891b2;
+  --color-brand-800: #155e75;
+  --color-brand-900: #164e63;
+  --color-accent-500: #11567f;
+  --brand-name: "Snowflake";
+}
+
 @theme {
-  --color-primary-50:  #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #0ea5e9;
-  --color-primary-600: #0284c7;
-  --color-primary-700: #0369a1;
-  --color-primary-800: #075985;
-  --color-primary-900: #0c4a6e;
+  --color-brand-50:  var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-900: var(--color-brand-900);
 }
 
-/* Custom styles */
 body {
-  background-color: rgb(249 250 251);
-  color: rgb(17 24 39);
+  background-color: rgb(248 250 252);
+  color: rgb(15 23 42);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Leaflet map container */
 .leaflet-container {
   height: 100%;
   width: 100%;
   z-index: 0;
+  border-radius: 0.5rem;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background-color: rgb(243 244 246);
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgb(156 163 175);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(107 114 128);
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgb(241 245 249); }
+::-webkit-scrollbar-thumb { background: rgb(148 163 184); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(100 116 139); }

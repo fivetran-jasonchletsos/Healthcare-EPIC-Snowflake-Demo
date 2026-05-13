@@ -19,13 +19,13 @@ export default function HomePage() {
   return (
     <>
       {/* Title strip */}
-      <section className="bg-gradient-to-r from-teal-700 to-teal-900 text-white">
+      <section className="bg-gradient-to-r from-brand-700 to-brand-900 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-4">
             <h1 className="text-lg sm:text-xl font-bold tracking-tight whitespace-nowrap">
               Epic Clarity in plain English.
             </h1>
-            <span className="hidden md:inline text-xs text-teal-200">
+            <span className="hidden md:inline text-xs text-brand-200">
               SQL Server → Fivetran → Snowflake → dbt → React
             </span>
           </div>
@@ -59,7 +59,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-slate-900">Recent patient cohort</h2>
             <p className="text-sm text-slate-500">A snapshot of patients with recent encounters in the marts layer.</p>
           </div>
-          <button onClick={() => navigate('/patients')} className="text-sm font-medium text-teal-700 hover:text-teal-900">
+          <button onClick={() => navigate('/patients')} className="text-sm font-medium text-brand-700 hover:text-brand-900">
             View all patients →
           </button>
         </div>
@@ -72,7 +72,7 @@ export default function HomePage() {
                 <button
                   key={p.pat_id}
                   onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)}
-                  className="text-left rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-teal-300 transition-all"
+                  className="text-left rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand-300 transition-all"
                 >
                   <div className="text-xs text-slate-500 font-mono">MRN {p.med_rec_num}</div>
                   <div className="mt-2 font-semibold text-slate-900">{p.full_name}</div>
@@ -80,7 +80,7 @@ export default function HomePage() {
                     {p.age} y/o · {p.sex} · {p.city ?? '—'}
                   </div>
                   <div className="mt-4 flex items-baseline justify-between">
-                    <div className="text-lg font-bold text-teal-700">
+                    <div className="text-lg font-bold text-brand-700">
                       {formatNumber(p.encounter_count)} <span className="text-xs font-normal text-slate-500">visits</span>
                     </div>
                     {p.active_chronic_count > 0 && (
@@ -105,7 +105,7 @@ export default function HomePage() {
               { step: '1', name: 'Fivetran', desc: 'CDC connector mirrors Epic Clarity from SQL Server.', color: 'from-sky-500 to-sky-700' },
               { step: '2', name: 'Snowflake', desc: 'Lands raw CDC + hosts staging / intermediate / marts.', color: 'from-cyan-500 to-cyan-700' },
               { step: '3', name: 'dbt', desc: 'Tested transformations produce clinical + financial marts.', color: 'from-orange-500 to-orange-700' },
-              { step: '4', name: 'React + Recharts', desc: 'Static SPA reads daily JSON exports of the marts.', color: 'from-teal-500 to-teal-700' },
+              { step: '4', name: 'React + Recharts', desc: 'Static SPA reads daily JSON exports of the marts.', color: 'from-brand-500 to-brand-700' },
             ].map((s) => (
               <div key={s.name} className="rounded-xl border border-slate-200 overflow-hidden">
                 <div className={`h-1.5 bg-gradient-to-r ${s.color}`} />
@@ -126,7 +126,7 @@ export default function HomePage() {
 function InlineStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="leading-tight">
-      <div className="text-[10px] uppercase tracking-wider text-teal-200 font-medium">{label}</div>
+      <div className="text-[10px] uppercase tracking-wider text-brand-200 font-medium">{label}</div>
       <div className="text-sm sm:text-base font-semibold tabular-nums">{value}</div>
     </div>
   );
@@ -140,14 +140,14 @@ function FindPatientSpotlight({ onGo }: { onGo: (q: string) => void }) {
   };
   const samples = ['Smith', 'MRN 100042', '15217', 'Pittsburgh', 'Diabetes'];
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 via-teal-600 to-teal-800 text-white shadow-xl h-full flex flex-col">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 via-brand-600 to-brand-800 text-white shadow-xl h-full flex flex-col">
       <div className="relative p-6 sm:p-7 flex flex-col gap-5 flex-1">
         <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-xs font-medium uppercase tracking-wider">
           🩺 Find Patient
         </div>
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold leading-tight">Look up any patient record</h2>
-          <p className="mt-2 text-sm sm:text-base text-teal-100">
+          <p className="mt-2 text-sm sm:text-base text-brand-100">
             Name, MRN, ZIP, or condition. Returns encounter history, diagnoses, account balance, and care-team comparables.
           </p>
         </div>
@@ -167,7 +167,7 @@ function FindPatientSpotlight({ onGo }: { onGo: (q: string) => void }) {
           </button>
         </form>
         <div className="flex flex-wrap gap-2 mt-auto">
-          <span className="text-xs text-teal-200 self-center mr-1">Try:</span>
+          <span className="text-xs text-brand-200 self-center mr-1">Try:</span>
           {samples.map((s) => (
             <button
               key={s}

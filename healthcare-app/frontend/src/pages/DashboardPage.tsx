@@ -74,7 +74,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <header className="mb-6 max-w-3xl">
-        <div className="inline-flex items-center rounded-full bg-teal-100 text-teal-700 px-3 py-1 text-xs font-medium uppercase tracking-wider mb-3">
+        <div className="inline-flex items-center rounded-full bg-brand-100 text-brand-700 px-3 py-1 text-xs font-medium uppercase tracking-wider mb-3">
           Dashboard
         </div>
         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Clinical population overview</h1>
@@ -156,8 +156,8 @@ export default function DashboardPage() {
 
 function KPI({ label, value, primary }: { label: string; value: string; primary?: boolean }) {
   return (
-    <div className={`rounded-lg p-4 ${primary ? 'bg-teal-700 text-white shadow-md' : 'bg-white border border-slate-200'}`}>
-      <div className={`text-[10px] uppercase tracking-wider font-medium ${primary ? 'text-teal-100' : 'text-slate-500'}`}>{label}</div>
+    <div className={`rounded-lg p-4 ${primary ? 'bg-brand-700 text-white shadow-md' : 'bg-white border border-slate-200'}`}>
+      <div className={`text-[10px] uppercase tracking-wider font-medium ${primary ? 'text-brand-100' : 'text-slate-500'}`}>{label}</div>
       <div className={`mt-1 text-xl sm:text-2xl font-semibold tabular-nums ${primary ? 'text-white' : 'text-slate-900'}`}>{value}</div>
     </div>
   );
