@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100044",
+    "med_rec_num": "MRN100350",
+    "full_name": "Kenji Jackson",
+    "birth_date": "1986-07-18",
+    "age": 40,
+    "sex": "M",
+    "city": "Lawrenceville",
+    "zip_code": "15212",
+    "primary_care_provider": "Dr. O'Connor",
+    "active_chronic_count": 0,
+    "encounter_count": 9,
+    "total_charges": 25101,
+    "latitude": 40.43,
+    "longitude": -80.00999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100044",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100044",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100044",
+    "summary": {
+      "total_charges": 25101,
+      "total_payments": 16315,
+      "outstanding_balance": 8785,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100044",
+    "comparables": []
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100038",
+    "med_rec_num": "MRN100308",
+    "full_name": "Elizabeth Davis",
+    "birth_date": "1996-01-22",
+    "age": 30,
+    "sex": "M",
+    "city": "Highland Park",
+    "zip_code": "15228",
+    "primary_care_provider": "Dr. Garcia",
+    "active_chronic_count": 0,
+    "encounter_count": 10,
+    "total_charges": 7180,
+    "latitude": 40.470000000000006,
+    "longitude": -79.97,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100038",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100038",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100038",
+    "summary": {
+      "total_charges": 7180,
+      "total_payments": 4667,
+      "outstanding_balance": 2513,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100038",
+    "comparables": []
+  }
+}

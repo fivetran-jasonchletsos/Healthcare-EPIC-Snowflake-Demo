@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100039",
+    "med_rec_num": "MRN100315",
+    "full_name": "Barbara Patel",
+    "birth_date": "1959-07-22",
+    "age": 67,
+    "sex": "F",
+    "city": "Pittsburgh",
+    "zip_code": "15116",
+    "primary_care_provider": "Dr. Williams",
+    "active_chronic_count": 2,
+    "encounter_count": 3,
+    "total_charges": 6867,
+    "latitude": 40.35,
+    "longitude": -80.08999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100039",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100039",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100039",
+    "summary": {
+      "total_charges": 6867,
+      "total_payments": 4463,
+      "outstanding_balance": 2403,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100039",
+    "comparables": []
+  }
+}

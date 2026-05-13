@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100049",
+    "med_rec_num": "MRN100385",
+    "full_name": "Robert Anderson",
+    "birth_date": "1939-09-18",
+    "age": 87,
+    "sex": "F",
+    "city": "Aspinwall",
+    "zip_code": "15215",
+    "primary_care_provider": "Dr. Kim",
+    "active_chronic_count": 2,
+    "encounter_count": 19,
+    "total_charges": 81415,
+    "latitude": 40.49,
+    "longitude": -79.94999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100049",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100049",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100049",
+    "summary": {
+      "total_charges": 81415,
+      "total_payments": 52919,
+      "outstanding_balance": 28495,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100049",
+    "comparables": []
+  }
+}

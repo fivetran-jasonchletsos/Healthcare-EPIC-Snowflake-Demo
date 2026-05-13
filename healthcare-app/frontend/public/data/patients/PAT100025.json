@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100025",
+    "med_rec_num": "MRN100217",
+    "full_name": "David Johnson",
+    "birth_date": "2018-10-16",
+    "age": 8,
+    "sex": "M",
+    "city": "Pittsburgh",
+    "zip_code": "15116",
+    "primary_care_provider": "Dr. Nguyen",
+    "active_chronic_count": 0,
+    "encounter_count": 16,
+    "total_charges": 26752,
+    "latitude": 40.35,
+    "longitude": -80.08999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100025",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100025",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100025",
+    "summary": {
+      "total_charges": 26752,
+      "total_payments": 17388,
+      "outstanding_balance": 9363,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100025",
+    "comparables": []
+  }
+}

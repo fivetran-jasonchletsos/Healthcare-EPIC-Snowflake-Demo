@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100034",
+    "med_rec_num": "MRN100280",
+    "full_name": "John Walsh",
+    "birth_date": "2005-09-02",
+    "age": 21,
+    "sex": "F",
+    "city": "Shadyside",
+    "zip_code": "15232",
+    "primary_care_provider": "Dr. Patel",
+    "active_chronic_count": 0,
+    "encounter_count": 17,
+    "total_charges": 20298,
+    "latitude": 40.53,
+    "longitude": -79.91,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100034",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100034",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100034",
+    "summary": {
+      "total_charges": 20298,
+      "total_payments": 13193,
+      "outstanding_balance": 7104,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100034",
+    "comparables": []
+  }
+}

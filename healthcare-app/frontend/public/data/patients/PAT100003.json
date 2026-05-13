@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100003",
+    "med_rec_num": "MRN100063",
+    "full_name": "Patricia Williams",
+    "birth_date": "1976-02-12",
+    "age": 50,
+    "sex": "F",
+    "city": "Shadyside",
+    "zip_code": "15232",
+    "primary_care_provider": "Dr. Nguyen",
+    "active_chronic_count": 2,
+    "encounter_count": 8,
+    "total_charges": 31304,
+    "latitude": 40.53,
+    "longitude": -79.91,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100003",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100003",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100003",
+    "summary": {
+      "total_charges": 31304,
+      "total_payments": 20347,
+      "outstanding_balance": 10956,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100003",
+    "comparables": []
+  }
+}

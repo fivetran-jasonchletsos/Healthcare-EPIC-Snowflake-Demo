@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100046",
+    "med_rec_num": "MRN100364",
+    "full_name": "John Chen",
+    "birth_date": "1994-11-10",
+    "age": 32,
+    "sex": "M",
+    "city": "Squirrel Hill",
+    "zip_code": "15206",
+    "primary_care_provider": "Dr. O'Connor",
+    "active_chronic_count": 0,
+    "encounter_count": 4,
+    "total_charges": 8620,
+    "latitude": 40.410000000000004,
+    "longitude": -80.03,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100046",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100046",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100046",
+    "summary": {
+      "total_charges": 8620,
+      "total_payments": 5603,
+      "outstanding_balance": 3017,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100046",
+    "comparables": []
+  }
+}

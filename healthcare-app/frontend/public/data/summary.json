@@ -1,0 +1,10 @@
+{
+  "total_patients": 240,
+  "total_encounters": 3017,
+  "total_diagnoses": 462,
+  "avg_encounter_cost": 2400.65,
+  "active_chronic_count": 231,
+  "current_year": 2026,
+  "generated_at": "2026-05-13T19:33:52+00:00",
+  "source": "demo"
+}

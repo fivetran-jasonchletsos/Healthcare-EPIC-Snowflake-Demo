@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100037",
+    "med_rec_num": "MRN100301",
+    "full_name": "Jennifer Walsh",
+    "birth_date": "2011-07-28",
+    "age": 15,
+    "sex": "M",
+    "city": "Aspinwall",
+    "zip_code": "15215",
+    "primary_care_provider": "Dr. Rodriguez",
+    "active_chronic_count": 0,
+    "encounter_count": 7,
+    "total_charges": 27440,
+    "latitude": 40.49,
+    "longitude": -79.94999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100037",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100037",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100037",
+    "summary": {
+      "total_charges": 27440,
+      "total_payments": 17836,
+      "outstanding_balance": 9604,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100037",
+    "comparables": []
+  }
+}

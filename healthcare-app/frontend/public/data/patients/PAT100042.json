@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100042",
+    "med_rec_num": "MRN100336",
+    "full_name": "Reshma Williams",
+    "birth_date": "1939-06-20",
+    "age": 87,
+    "sex": "F",
+    "city": "Shaler",
+    "zip_code": "15217",
+    "primary_care_provider": "Dr. Garcia",
+    "active_chronic_count": 3,
+    "encounter_count": 23,
+    "total_charges": 98992,
+    "latitude": 40.370000000000005,
+    "longitude": -80.07,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100042",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100042",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100042",
+    "summary": {
+      "total_charges": 98992,
+      "total_payments": 64344,
+      "outstanding_balance": 34647,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100042",
+    "comparables": []
+  }
+}

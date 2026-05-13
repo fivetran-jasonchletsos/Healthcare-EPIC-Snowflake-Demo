@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100033",
+    "med_rec_num": "MRN100273",
+    "full_name": "James Hernandez",
+    "birth_date": "2008-11-09",
+    "age": 18,
+    "sex": "M",
+    "city": "Aspinwall",
+    "zip_code": "15215",
+    "primary_care_provider": "Dr. Nguyen",
+    "active_chronic_count": 1,
+    "encounter_count": 17,
+    "total_charges": 3893,
+    "latitude": 40.49,
+    "longitude": -79.94999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100033",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100033",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100033",
+    "summary": {
+      "total_charges": 3893,
+      "total_payments": 2530,
+      "outstanding_balance": 1362,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100033",
+    "comparables": []
+  }
+}

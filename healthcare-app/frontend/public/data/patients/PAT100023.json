@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100023",
+    "med_rec_num": "MRN100203",
+    "full_name": "Linda Garcia",
+    "birth_date": "1972-08-16",
+    "age": 54,
+    "sex": "M",
+    "city": "Highland Park",
+    "zip_code": "15228",
+    "primary_care_provider": "Dr. Kim",
+    "active_chronic_count": 0,
+    "encounter_count": 1,
+    "total_charges": 167,
+    "latitude": 40.470000000000006,
+    "longitude": -79.97,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100023",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100023",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100023",
+    "summary": {
+      "total_charges": 167,
+      "total_payments": 108,
+      "outstanding_balance": 58,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100023",
+    "comparables": []
+  }
+}

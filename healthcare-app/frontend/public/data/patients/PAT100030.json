@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100030",
+    "med_rec_num": "MRN100252",
+    "full_name": "Linda Lopez",
+    "birth_date": "1988-03-15",
+    "age": 38,
+    "sex": "F",
+    "city": "Shadyside",
+    "zip_code": "15232",
+    "primary_care_provider": "Dr. Garcia",
+    "active_chronic_count": 1,
+    "encounter_count": 25,
+    "total_charges": 5350,
+    "latitude": 40.53,
+    "longitude": -79.91,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100030",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100030",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100030",
+    "summary": {
+      "total_charges": 5350,
+      "total_payments": 3477,
+      "outstanding_balance": 1872,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100030",
+    "comparables": []
+  }
+}

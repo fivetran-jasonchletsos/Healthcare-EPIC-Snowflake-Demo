@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100035",
+    "med_rec_num": "MRN100287",
+    "full_name": "Elizabeth Lopez",
+    "birth_date": "2019-06-07",
+    "age": 7,
+    "sex": "M",
+    "city": "Shaler",
+    "zip_code": "15217",
+    "primary_care_provider": "Dr. Williams",
+    "active_chronic_count": 2,
+    "encounter_count": 11,
+    "total_charges": 38269,
+    "latitude": 40.370000000000005,
+    "longitude": -80.07,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100035",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100035",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100035",
+    "summary": {
+      "total_charges": 38269,
+      "total_payments": 24874,
+      "outstanding_balance": 13394,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100035",
+    "comparables": []
+  }
+}

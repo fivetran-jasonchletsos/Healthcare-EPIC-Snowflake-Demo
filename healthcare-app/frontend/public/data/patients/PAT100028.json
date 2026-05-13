@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100028",
+    "med_rec_num": "MRN100238",
+    "full_name": "William Gonzalez",
+    "birth_date": "2008-11-21",
+    "age": 18,
+    "sex": "F",
+    "city": "Aspinwall",
+    "zip_code": "15215",
+    "primary_care_provider": "Dr. Patel",
+    "active_chronic_count": 3,
+    "encounter_count": 10,
+    "total_charges": 7440,
+    "latitude": 40.49,
+    "longitude": -79.94999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100028",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100028",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100028",
+    "summary": {
+      "total_charges": 7440,
+      "total_payments": 4836,
+      "outstanding_balance": 2604,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100028",
+    "comparables": []
+  }
+}

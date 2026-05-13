@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100020",
+    "med_rec_num": "MRN100182",
+    "full_name": "Patricia Brown",
+    "birth_date": "1940-07-12",
+    "age": 86,
+    "sex": "F",
+    "city": "Highland Park",
+    "zip_code": "15228",
+    "primary_care_provider": "Dr. Nguyen",
+    "active_chronic_count": 2,
+    "encounter_count": 14,
+    "total_charges": 8302,
+    "latitude": 40.470000000000006,
+    "longitude": -79.97,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100020",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100020",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100020",
+    "summary": {
+      "total_charges": 8302,
+      "total_payments": 5396,
+      "outstanding_balance": 2905,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100020",
+    "comparables": []
+  }
+}

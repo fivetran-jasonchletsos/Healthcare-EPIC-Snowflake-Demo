@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100000",
+    "med_rec_num": "MRN100042",
+    "full_name": "Patricia Smith",
+    "birth_date": "1989-04-08",
+    "age": 37,
+    "sex": "M",
+    "city": "Shaler",
+    "zip_code": "15217",
+    "primary_care_provider": "Dr. Kim",
+    "active_chronic_count": 1,
+    "encounter_count": 21,
+    "total_charges": 18102,
+    "latitude": 40.370000000000005,
+    "longitude": -80.07,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100000",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100000",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100000",
+    "summary": {
+      "total_charges": 18102,
+      "total_payments": 11766,
+      "outstanding_balance": 6335,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100000",
+    "comparables": []
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100008",
+    "med_rec_num": "MRN100098",
+    "full_name": "David Gonzalez",
+    "birth_date": "1990-02-07",
+    "age": 36,
+    "sex": "F",
+    "city": "Squirrel Hill",
+    "zip_code": "15206",
+    "primary_care_provider": "Dr. Williams",
+    "active_chronic_count": 0,
+    "encounter_count": 20,
+    "total_charges": 78160,
+    "latitude": 40.410000000000004,
+    "longitude": -80.03,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100008",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100008",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100008",
+    "summary": {
+      "total_charges": 78160,
+      "total_payments": 50804,
+      "outstanding_balance": 27356,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100008",
+    "comparables": []
+  }
+}

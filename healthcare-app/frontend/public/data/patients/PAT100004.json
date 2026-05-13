@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100004",
+    "med_rec_num": "MRN100070",
+    "full_name": "Anil Williams",
+    "birth_date": "1954-05-27",
+    "age": 72,
+    "sex": "F",
+    "city": "Shadyside",
+    "zip_code": "15232",
+    "primary_care_provider": "Dr. Chen",
+    "active_chronic_count": 1,
+    "encounter_count": 6,
+    "total_charges": 3150,
+    "latitude": 40.53,
+    "longitude": -79.91,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100004",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100004",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100004",
+    "summary": {
+      "total_charges": 3150,
+      "total_payments": 2047,
+      "outstanding_balance": 1102,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100004",
+    "comparables": []
+  }
+}

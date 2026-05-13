@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100014",
+    "med_rec_num": "MRN100140",
+    "full_name": "Kenji Hernandez",
+    "birth_date": "1962-01-04",
+    "age": 64,
+    "sex": "F",
+    "city": "Lawrenceville",
+    "zip_code": "15212",
+    "primary_care_provider": "Dr. Nguyen",
+    "active_chronic_count": 0,
+    "encounter_count": 7,
+    "total_charges": 5565,
+    "latitude": 40.43,
+    "longitude": -80.00999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100014",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100014",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100014",
+    "summary": {
+      "total_charges": 5565,
+      "total_payments": 3617,
+      "outstanding_balance": 1947,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100014",
+    "comparables": []
+  }
+}

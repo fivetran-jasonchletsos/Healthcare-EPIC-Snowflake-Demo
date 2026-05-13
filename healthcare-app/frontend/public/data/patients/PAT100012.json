@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100012",
+    "med_rec_num": "MRN100126",
+    "full_name": "David Brown",
+    "birth_date": "1987-07-06",
+    "age": 39,
+    "sex": "F",
+    "city": "Pittsburgh",
+    "zip_code": "15116",
+    "primary_care_provider": "Dr. Williams",
+    "active_chronic_count": 2,
+    "encounter_count": 23,
+    "total_charges": 53061,
+    "latitude": 40.35,
+    "longitude": -80.08999999999999,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100012",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100012",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100012",
+    "summary": {
+      "total_charges": 53061,
+      "total_payments": 34489,
+      "outstanding_balance": 18571,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100012",
+    "comparables": []
+  }
+}

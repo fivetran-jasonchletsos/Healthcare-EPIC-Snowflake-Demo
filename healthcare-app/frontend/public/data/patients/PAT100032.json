@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100032",
+    "med_rec_num": "MRN100266",
+    "full_name": "William Taylor",
+    "birth_date": "1962-05-28",
+    "age": 64,
+    "sex": "M",
+    "city": "Shaler",
+    "zip_code": "15217",
+    "primary_care_provider": "Dr. Patel",
+    "active_chronic_count": 0,
+    "encounter_count": 20,
+    "total_charges": 48320,
+    "latitude": 40.370000000000005,
+    "longitude": -80.07,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100032",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100032",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100032",
+    "summary": {
+      "total_charges": 48320,
+      "total_payments": 31408,
+      "outstanding_balance": 16912,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100032",
+    "comparables": []
+  }
+}

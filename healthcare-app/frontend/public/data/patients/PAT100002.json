@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "pat_id": "PAT100002",
+    "med_rec_num": "MRN100056",
+    "full_name": "Sofia Jackson",
+    "birth_date": "1989-01-25",
+    "age": 37,
+    "sex": "M",
+    "city": "Highland Park",
+    "zip_code": "15228",
+    "primary_care_provider": "Dr. Rodriguez",
+    "active_chronic_count": 0,
+    "encounter_count": 10,
+    "total_charges": 19130,
+    "latitude": 40.470000000000006,
+    "longitude": -79.97,
+    "race": null,
+    "ethnicity": null,
+    "mailing_address": null,
+    "state": "PA",
+    "phone": null,
+    "primary_care_department": null
+  },
+  "encounters": {
+    "pat_id": "PAT100002",
+    "encounters": []
+  },
+  "diagnoses": {
+    "pat_id": "PAT100002",
+    "diagnoses": []
+  },
+  "accounts": {
+    "pat_id": "PAT100002",
+    "summary": {
+      "total_charges": 19130,
+      "total_payments": 12434,
+      "outstanding_balance": 6695,
+      "account_count": 1
+    },
+    "accounts": []
+  },
+  "comparables": {
+    "pat_id": "PAT100002",
+    "comparables": []
+  }
+}
