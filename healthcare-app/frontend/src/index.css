@@ -2,11 +2,22 @@
 @import 'leaflet/dist/leaflet.css';
 
 /*
- * Two brand themes. Fivetran is the default; Snowflake is opt-in via a header
- * toggle that flips `data-theme="snowflake"` on the <html> element. Every
- * color used in the SPA goes through the `brand-*` CSS variables so the
- * switch is instant and complete.
+ * Epic Clarity — clinical institution design system.
+ *
+ * The visual language references academic medical centers (Mayo, Cleveland
+ * Clinic, Mass General, Johns Hopkins): serif headers for authority, generous
+ * whitespace, hairline dividers, restrained color, and clinical status hues.
+ *
+ * Brand (Fivetran / Snowflake) operates as an *accent* — the calm clinical
+ * palette is consistent across both themes. Only the link/CTA color and the
+ * institutional accent rail at the top of the page shift between themes.
  */
+
+/* Institutional serif for headers + a clean sans for body.
+   Source Serif 4 reads like a teaching hospital wordmark; Inter is the modern
+   EHR-app standard. */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 :root,
 :root[data-theme="fivetran"] {
   --color-brand-50:  #eff6ff;
@@ -15,12 +26,13 @@
   --color-brand-300: #93c5fd;
   --color-brand-400: #60a5fa;
   --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;  /* Fivetran blue */
+  --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
   --color-brand-800: #1e40af;
   --color-brand-900: #1e3a8a;
   --color-accent-500: #00d4ff;
   --brand-name: "Fivetran";
+  --institutional-accent: linear-gradient(90deg, #0e7490 0%, #1e40af 100%);
 }
 
 :root[data-theme="snowflake"] {
@@ -30,12 +42,42 @@
   --color-brand-300: #67e8f9;
   --color-brand-400: #22d3ee;
   --color-brand-500: #06b6d4;
-  --color-brand-600: #29b5e8;  /* Snowflake azure */
+  --color-brand-600: #29b5e8;
   --color-brand-700: #0891b2;
   --color-brand-800: #155e75;
   --color-brand-900: #164e63;
   --color-accent-500: #11567f;
   --brand-name: "Snowflake";
+  --institutional-accent: linear-gradient(90deg, #155e75 0%, #29b5e8 100%);
+}
+
+/*
+ * Clinical neutral palette — shared across themes. These take precedence over
+ * Tailwind's default slate for the EHR look (warmer paper background, cooler
+ * ink, more contrast in mid-tones).
+ */
+:root {
+  --paper:         #f8fafc;  /* page background — warm-cool clinical paper */
+  --paper-deep:    #f1f5f9;  /* alternating row / banner backgrounds */
+  --card:          #ffffff;
+  --hairline:      #e2e8f0;  /* divider lines */
+  --hairline-soft: #eef2f6;  /* subtle table row separators */
+  --ink-strong:    #0b1220;  /* primary headings */
+  --ink:           #1e293b;  /* body */
+  --ink-muted:     #475569;  /* secondary copy */
+  --ink-soft:      #64748b;  /* tertiary copy, axis labels */
+
+  /* Clinical status palette — muted, evidence-based-medicine tones */
+  --clinical-green:    #047857;
+  --clinical-green-bg: #ecfdf5;
+  --clinical-amber:    #b45309;
+  --clinical-amber-bg: #fffbeb;
+  --clinical-rose:     #be123c;
+  --clinical-rose-bg:  #fff1f2;
+  --clinical-teal:     #0e7490;
+  --clinical-teal-bg:  #ecfeff;
+  --clinical-violet:   #6d28d9;
+  --clinical-violet-bg:#f5f3ff;
 }
 
 @theme {
@@ -49,15 +91,117 @@
   --color-brand-700: var(--color-brand-700);
   --color-brand-800: var(--color-brand-800);
   --color-brand-900: var(--color-brand-900);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-body {
-  background-color: rgb(248 250 252);
-  color: rgb(15 23 42);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+html, body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "cv11", "ss01", "ss03";
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Institutional headings use the serif. Tailwind text-* classes still set
+   weight + size; the family swap is the design lever. */
+h1, h2, h3, .font-serif {
+  font-family: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+}
+
+h1 { color: var(--ink-strong); }
+
+/* Used on the institutional accent rail across the top of the page. */
+.institutional-rail {
+  height: 3px;
+  background: var(--institutional-accent);
+}
+
+/* Patient banner — EHR-chart style strip at the top of the patient detail page. */
+.patient-banner {
+  background: linear-gradient(180deg, #ffffff 0%, var(--paper-deep) 100%);
+  border: 1px solid var(--hairline);
+  border-left: 4px solid var(--color-brand-600);
+}
+
+/* Clinical status pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+}
+.status-pill::before {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: currentColor;
+}
+.status-pill.healthy { background: var(--clinical-green-bg); color: var(--clinical-green); border-color: #a7f3d0; }
+.status-pill.caution { background: var(--clinical-amber-bg); color: var(--clinical-amber); border-color: #fde68a; }
+.status-pill.alert   { background: var(--clinical-rose-bg);  color: var(--clinical-rose);  border-color: #fecdd3; }
+.status-pill.info    { background: var(--clinical-teal-bg);  color: var(--clinical-teal);  border-color: #a5f3fc; }
+
+/* Card surfaces — restrained shadows, hairline borders. */
+.clinical-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.clinical-card-header {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--hairline-soft);
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+}
+
+/* Section eyebrow — the little uppercase label above section titles, like
+   academic-medicine section headers. */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--clinical-teal);
+}
+
+/* Vital-tile — used for KPI displays on the homepage and patient banner. */
+.vital-tile {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 0.5rem;
+  padding: 1rem 1.125rem;
+}
+.vital-tile-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.vital-tile-value {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: var(--ink-strong);
+  line-height: 1.1;
+  margin-top: 0.25rem;
+}
+
+/* Map + Leaflet */
 .leaflet-container {
   height: 100%;
   width: 100%;
@@ -65,7 +209,18 @@ body {
   border-radius: 0.5rem;
 }
 
+/* Scrollbars */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: rgb(241 245 249); }
-::-webkit-scrollbar-thumb { background: rgb(148 163 184); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgb(100 116 139); }
+::-webkit-scrollbar-track { background: var(--paper-deep); }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* Focus ring — clinical institutional look (cyan ring, no glow). */
+*:focus-visible {
+  outline: 2px solid var(--clinical-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Tabular numbers everywhere they appear in data tables / KPIs. */
+.tabular { font-variant-numeric: tabular-nums; }

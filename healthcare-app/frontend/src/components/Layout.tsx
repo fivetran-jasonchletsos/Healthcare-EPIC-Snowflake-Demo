@@ -7,9 +7,9 @@ import * as watchlist from '../watchlist';
 const NAV_ITEMS: [string, string][] = [
   ['/', 'Home'],
   ['/patients', 'Patients'],
-  ['/dashboard', 'Dashboard'],
-  ['/map', 'Map'],
-  ['/agent', 'Ask AI'],
+  ['/dashboard', 'Population Health'],
+  ['/map', 'Geographic'],
+  ['/agent', 'Clinical Insights'],
   ['/pipeline', 'Pipeline'],
   ['/about', 'About'],
 ];
@@ -44,64 +44,77 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-full flex flex-col">
-      <header className="bg-brand-800 text-white shadow-sm sticky top-0 z-30">
+    <div className="min-h-full flex flex-col bg-[var(--paper)]">
+      <div className="institutional-rail" />
+
+      <header className="bg-white border-b border-[var(--hairline)] sticky top-0 z-30 backdrop-blur-sm bg-white/95">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex h-14 sm:h-16 items-center justify-between gap-2 sm:gap-4">
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
-              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-brand-500 flex items-center justify-center font-bold text-sm">
-                EC
+          <div className="flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-6">
+            <Link to="/" className="flex items-center gap-3 shrink-0 min-w-0 group">
+              <div className="h-10 w-10 rounded-md flex items-center justify-center shadow-sm" style={{ background: 'var(--institutional-accent)' }}>
+                <CaduceusMark className="h-5 w-5 text-white" />
               </div>
               <div className="leading-tight min-w-0">
-                <div className="font-semibold text-sm sm:text-base truncate">Epic Clarity</div>
-                <div className="text-[10px] sm:text-xs text-brand-200">Snowflake Demo</div>
+                <div className="font-serif font-semibold text-lg sm:text-xl text-[var(--ink-strong)] tracking-tight truncate">
+                  Epic Clarity
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-medium text-[var(--ink-soft)] uppercase tracking-[0.14em]">
+                  Clinical Analytics Platform
+                </div>
               </div>
             </Link>
 
-            <form onSubmit={onSubmit} className="hidden md:flex flex-1 max-w-xl">
+            <form onSubmit={onSubmit} className="hidden md:flex flex-1 max-w-md relative">
+              <span className="absolute inset-y-0 left-3 flex items-center text-[var(--ink-soft)] pointer-events-none">
+                <SearchIcon className="h-4 w-4" />
+              </span>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name, MRN, ZIP..."
-                className="flex-1 rounded-l-md border-0 px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-2 focus:outline-brand-300"
+                placeholder="Search patient by name, MRN, or city…"
+                className="flex-1 rounded-md bg-[var(--paper-deep)] border border-[var(--hairline)] pl-9 pr-3 py-2 text-sm placeholder:text-[var(--ink-soft)] focus:bg-white focus:border-[var(--clinical-teal)] focus:outline-none"
               />
-              <button
-                type="submit"
-                aria-label="Search"
-                className="inline-flex items-center justify-center rounded-r-md bg-brand-600 hover:bg-brand-500 px-3 border border-brand-600"
-              >
-                <SearchIcon className="h-4 w-4" />
-              </button>
             </form>
 
-            <nav className="hidden lg:flex items-center gap-1 text-sm">
+            <nav className="hidden lg:flex items-center gap-0.5 text-sm">
               {NAV_ITEMS.map(([to, label]) => (
                 <NavLink
                   key={to}
                   to={to}
                   end={to === '/'}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-brand-700' : 'hover:bg-brand-700/60'}`
+                    `relative px-3 py-2 font-medium transition-colors ${
+                      isActive
+                        ? 'text-[var(--ink-strong)]'
+                        : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
+                    }`
                   }
                 >
-                  {label}
+                  {({ isActive }) => (
+                    <>
+                      {label}
+                      {isActive && (
+                        <span className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full" style={{ background: 'var(--color-brand-600)' }} />
+                      )}
+                    </>
+                  )}
                 </NavLink>
               ))}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={() => navigate('/watchlist')}
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-brand-700/70"
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-[var(--ink-muted)] hover:text-[var(--ink-strong)] hover:bg-[var(--paper-deep)]"
                 aria-label="Watchlist"
                 title="Watchlist"
               >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill={watchCount > 0 ? '#fbbf24' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill={watchCount > 0 ? '#f59e0b' : 'none'} stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round">
                   <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                 </svg>
                 {watchCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 inline-flex items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-slate-900">
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 inline-flex items-center justify-center rounded-full bg-[var(--clinical-amber)] text-[10px] font-bold text-white">
                     {watchCount}
                   </span>
                 )}
@@ -112,7 +125,7 @@ export default function Layout() {
                 type="button"
                 onClick={() => setMobileOpen((o) => !o)}
                 aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                className="lg:hidden h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-brand-700/70"
+                className="lg:hidden h-9 w-9 inline-flex items-center justify-center rounded-md text-[var(--ink-muted)] hover:bg-[var(--paper-deep)]"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                   {mobileOpen ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" /> : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
@@ -122,18 +135,18 @@ export default function Layout() {
           </div>
 
           {mobileOpen && (
-            <div className="lg:hidden pb-3 border-t border-brand-700/40 pt-3 space-y-3">
-              <form onSubmit={onSubmit} className="md:hidden flex">
+            <div className="lg:hidden pb-4 border-t border-[var(--hairline-soft)] pt-3 space-y-3">
+              <form onSubmit={onSubmit} className="md:hidden flex relative">
+                <span className="absolute inset-y-0 left-3 flex items-center text-[var(--ink-soft)]">
+                  <SearchIcon className="h-4 w-4" />
+                </span>
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search name, MRN..."
-                  className="flex-1 rounded-l-md border-0 px-3 py-2 text-sm text-slate-900"
+                  placeholder="Search patient…"
+                  className="flex-1 rounded-md bg-[var(--paper-deep)] border border-[var(--hairline)] pl-9 pr-3 py-2 text-sm"
                 />
-                <button type="submit" aria-label="Search" className="rounded-r-md bg-brand-600 hover:bg-brand-500 px-3 inline-flex items-center justify-center">
-                  <SearchIcon className="h-4 w-4" />
-                </button>
               </form>
               <nav className="grid grid-cols-2 gap-1 text-sm">
                 {NAV_ITEMS.map(([to, label]) => (
@@ -142,7 +155,11 @@ export default function Layout() {
                     to={to}
                     end={to === '/'}
                     className={({ isActive }) =>
-                      `px-3 py-2 rounded-md text-center ${isActive ? 'bg-brand-700' : 'bg-brand-700/30 hover:bg-brand-700/60'}`
+                      `px-3 py-2 rounded-md text-center font-medium border ${
+                        isActive
+                          ? 'bg-[var(--paper-deep)] text-[var(--ink-strong)] border-[var(--clinical-teal)]'
+                          : 'border-[var(--hairline)] text-[var(--ink-muted)] hover:bg-[var(--paper-deep)]'
+                      }`
                     }
                   >
                     {label}
@@ -158,12 +175,33 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs sm:text-sm text-slate-500 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+      <footer className="border-t border-[var(--hairline)] bg-white mt-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-xs sm:text-sm text-[var(--ink-muted)] grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            Data flow: <strong className="text-slate-700">SQL Server → Fivetran → Snowflake → dbt → JSON snapshot</strong>
+            <div className="font-serif font-semibold text-[var(--ink-strong)] mb-1.5">Epic Clarity · Analytics</div>
+            <p className="leading-relaxed text-[var(--ink-soft)]">
+              A reference architecture for clinical analytics on Epic Clarity-shaped data, built on the modern
+              data stack. Synthetic data — not for clinical use.
+            </p>
           </div>
-          <div>© 2026 Healthcare EPIC Snowflake Demo · Synthetic data</div>
+          <div>
+            <div className="eyebrow mb-2">Data Pipeline</div>
+            <p className="leading-relaxed">
+              SQL Server CDC → Fivetran → Snowflake → dbt → static JSON snapshot
+            </p>
+          </div>
+          <div>
+            <div className="eyebrow mb-2">Compliance Posture</div>
+            <p className="leading-relaxed">
+              Synthetic data only · No PHI · HIPAA-aligned design patterns · Snowflake access history audit
+            </p>
+          </div>
+        </div>
+        <div className="border-t border-[var(--hairline-soft)]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 text-[11px] text-[var(--ink-soft)] flex flex-col sm:flex-row gap-1 sm:items-center sm:justify-between">
+            <div>© 2026 Healthcare EPIC Snowflake Demo · For demonstration only</div>
+            <div>Snapshot generated {snapshotAt ? new Date(snapshotAt).toLocaleString() : '—'}</div>
+          </div>
         </div>
       </footer>
     </div>
@@ -175,11 +213,13 @@ function SourceBadge({ source, snapshotAt: _snapshotAt }: { source: DataSource; 
   return (
     <div
       title={live ? 'Live Snowflake snapshot' : 'Demo data — load real data via scripts/build_snapshot.py'}
-      className={`hidden sm:flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${
-        live ? 'bg-emerald-500/20 text-emerald-100' : 'bg-amber-500/20 text-amber-100'
+      className={`hidden sm:inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider border ${
+        live
+          ? 'bg-[var(--clinical-green-bg)] text-[var(--clinical-green)] border-emerald-200'
+          : 'bg-[var(--clinical-amber-bg)] text-[var(--clinical-amber)] border-amber-200'
       }`}
     >
-      <span className={`h-2 w-2 rounded-full ${live ? 'bg-emerald-400' : 'bg-amber-300'} animate-pulse`} />
+      <span className={`h-1.5 w-1.5 rounded-full ${live ? 'bg-[var(--clinical-green)]' : 'bg-[var(--clinical-amber)]'} animate-pulse`} />
       {live ? 'Snowflake · live' : 'Demo'}
     </div>
   );
@@ -187,15 +227,17 @@ function SourceBadge({ source, snapshotAt: _snapshotAt }: { source: DataSource; 
 
 function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (t: Theme) => void }) {
   return (
-    <div className="hidden md:inline-flex items-center gap-0.5 rounded-full bg-white/10 p-0.5 text-[11px] font-medium">
+    <div className="hidden md:inline-flex items-center rounded-md border border-[var(--hairline)] bg-white p-0.5 text-[11px] font-medium">
       {(['fivetran', 'snowflake'] as Theme[]).map((t) => (
         <button
           key={t}
           onClick={() => onChange(t)}
-          className={`px-2.5 py-1 rounded-full transition-colors ${
-            theme === t ? 'bg-white text-brand-800 shadow' : 'text-white/80 hover:text-white'
+          className={`px-2.5 py-1 rounded transition-colors ${
+            theme === t
+              ? 'bg-[var(--paper-deep)] text-[var(--ink-strong)]'
+              : 'text-[var(--ink-soft)] hover:text-[var(--ink)]'
           }`}
-          title={`${t === 'fivetran' ? 'Fivetran' : 'Snowflake'} theme`}
+          title={`${t === 'fivetran' ? 'Fivetran' : 'Snowflake'} accent`}
         >
           {t === 'fivetran' ? 'Fivetran' : 'Snowflake'}
         </button>
@@ -209,6 +251,18 @@ function SearchIcon({ className = '' }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
       <circle cx="11" cy="11" r="7" />
       <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
+
+function CaduceusMark({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 3v18" />
+      <path d="M8 6c0 2 4 3 4 3s4-1 4-3" />
+      <path d="M8 10c0 2 4 3 4 3s4-1 4-3" />
+      <path d="M8 14c0 2 4 3 4 3s4-1 4-3" />
+      <path d="M9 4l3-1 3 1" />
     </svg>
   );
 }
