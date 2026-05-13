@@ -26,11 +26,9 @@ export default function WatchlistPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <div className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-3 py-1 text-xs font-medium uppercase tracking-wider mb-3">
-          ★ Watchlist
-        </div>
-        <h1 className="text-3xl font-bold text-slate-900">Saved patients</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <div className="eyebrow mb-1">Saved</div>
+        <h1 className="font-serif text-3xl font-semibold text-[var(--ink-strong)] tracking-tight">Watchlist</h1>
+        <p className="text-sm text-[var(--ink-muted)] mt-1">
           {ids.length === 0
             ? "You haven't saved any patients yet."
             : `${ids.length} ${ids.length === 1 ? 'patient' : 'patients'} saved in this browser.`}
@@ -38,46 +36,65 @@ export default function WatchlistPage() {
       </header>
 
       {ids.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-          <div className="text-slate-700 font-medium">Nothing here yet.</div>
-          <p className="text-sm text-slate-500 mt-1">
+        <div className="clinical-card p-10 text-center border-dashed">
+          <div className="font-serif text-lg font-semibold text-[var(--ink-strong)]">Nothing here yet.</div>
+          <p className="text-sm text-[var(--ink-muted)] mt-1">
             Open any patient and click <strong>"Add to watchlist"</strong> in the header.
           </p>
-          <Link to="/patients" className="mt-4 inline-block rounded-md bg-brand-700 hover:bg-brand-800 text-white text-sm font-medium px-4 py-2">
+          <Link
+            to="/patients"
+            className="mt-4 inline-block rounded-md text-white text-sm font-semibold px-4 py-2"
+            style={{ background: 'var(--color-brand-700)' }}
+          >
             Browse patients
           </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map(({ id, p }) => (
-            <Link
-              key={id}
-              to={`/patients/${encodeURIComponent(id)}`}
-              className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand-300 transition-all"
-            >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="text-xs font-mono text-slate-500 truncate">MRN {p.med_rec_num}</div>
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); watchlist.remove(id); }}
-                  className="text-xs text-slate-400 hover:text-rose-600"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="font-semibold text-slate-900">{p.full_name}</div>
-              <div className="text-sm text-slate-500">{p.age} y/o · {p.sex} · {p.city ?? '—'}</div>
-              <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-lg font-bold text-brand-700">{formatNumber(p.encounter_count)} visits</span>
-                {p.active_chronic_count > 0 && (
-                  <span className="text-xs font-semibold rounded-full px-2 py-0.5 bg-rose-50 text-rose-700">
-                    {p.active_chronic_count} chronic
+          {items.map(({ id, p }) => {
+            const burden = p.active_chronic_count;
+            const burdenTone =
+              burden >= 3 ? { cls: 'alert', label: 'High burden' } :
+              burden >= 1 ? { cls: 'caution', label: `${burden} chronic` } :
+              { cls: 'healthy', label: 'Stable' };
+            return (
+              <Link
+                key={id}
+                to={`/patients/${encodeURIComponent(id)}`}
+                className="block clinical-card hover:border-[var(--clinical-teal)] transition-colors group"
+              >
+                <div className="px-5 pt-4 pb-3 border-b border-[var(--hairline-soft)] flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-mono text-[var(--ink-soft)] tracking-tight truncate">MRN {p.med_rec_num}</div>
+                    <div className="mt-1 font-serif font-semibold text-[var(--ink-strong)] truncate group-hover:underline underline-offset-2">
+                      {p.full_name}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); watchlist.remove(id); }}
+                    className="text-xs text-[var(--ink-soft)] hover:text-[var(--clinical-rose)] shrink-0"
+                    aria-label="Remove from watchlist"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="px-5 py-3 flex items-center justify-between gap-2">
+                  <div className="text-xs text-[var(--ink-muted)] tabular">
+                    {p.age} y/o · {p.sex} · {p.city ?? '—'}
+                  </div>
+                  <span className={`status-pill ${burdenTone.cls}`}>{burdenTone.label}</span>
+                </div>
+                <div className="px-5 pb-4 flex items-baseline justify-between">
+                  <span className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular">
+                    {formatNumber(p.encounter_count)}
+                    <span className="ml-1 text-xs font-sans font-medium text-[var(--ink-soft)]">visits</span>
                   </span>
-                )}
-              </div>
-              <div className="mt-1 text-xs text-slate-400">{formatCurrency(p.total_charges)} lifetime</div>
-            </Link>
-          ))}
+                  <span className="text-xs text-[var(--ink-soft)] tabular">{formatCurrency(p.total_charges)} lifetime</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

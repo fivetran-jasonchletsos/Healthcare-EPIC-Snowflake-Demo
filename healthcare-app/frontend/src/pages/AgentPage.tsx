@@ -66,40 +66,38 @@ export default function AgentPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <div className="inline-flex items-center rounded-full bg-violet-100 text-violet-700 px-3 py-1 text-xs font-medium uppercase tracking-wider mb-3">
-          Clinical Insight Agent
-        </div>
+        <div className="eyebrow mb-1" style={{ color: 'var(--clinical-violet)' }}>Clinical Insights</div>
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-bold text-slate-900">Ask anything about the patient population</h1>
-          <Link to="/about-agent" className="hidden sm:inline-flex shrink-0 items-center gap-1 text-sm text-violet-700 hover:text-violet-900 font-medium">
+          <h1 className="font-serif text-3xl font-semibold text-[var(--ink-strong)] tracking-tight">Ask anything about the patient population</h1>
+          <Link to="/about-agent" className="hidden sm:inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--clinical-violet)] hover:text-[var(--ink-strong)]">
             How it works <span aria-hidden>→</span>
           </Link>
         </div>
       </header>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
-        <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between bg-slate-50">
+      <div className="clinical-card overflow-hidden">
+        <div className="clinical-card-header flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-500">Mode:</span>
+            <span className="text-[var(--ink-muted)]">Mode:</span>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="radio" checked={!useClaude} onChange={() => setUseClaude(false)} className="accent-brand-600" />
-              <span className="font-medium">Local rules</span>
-              <span className="text-xs text-slate-400">(always on)</span>
+              <span className="font-medium text-[var(--ink)]">Local rules</span>
+              <span className="text-xs text-[var(--ink-soft)]">(always on)</span>
             </label>
             <label className={`flex items-center gap-2 cursor-pointer ${!hasKey ? 'opacity-50' : ''}`}>
               <input type="radio" checked={useClaude} onChange={() => hasKey && setUseClaude(true)} disabled={!hasKey} className="accent-violet-600" />
-              <span className="font-medium">Ask Claude</span>
-              {!hasKey && <span className="text-xs text-slate-400">(needs API key)</span>}
+              <span className="font-medium text-[var(--ink)]">Ask Claude</span>
+              {!hasKey && <span className="text-xs text-[var(--ink-soft)]">(needs API key)</span>}
             </label>
           </div>
-          <button onClick={() => setShowSettings(!showSettings)} className="text-xs text-slate-500 hover:text-slate-800">
+          <button onClick={() => setShowSettings(!showSettings)} className="text-xs text-[var(--ink-muted)] hover:text-[var(--ink-strong)]">
             ⚙ Settings
           </button>
         </div>
 
         {showSettings && (
-          <div className="border-b border-slate-100 px-4 py-4 bg-amber-50 text-sm">
-            <p className="text-amber-900 mb-3">
+          <div className="border-b border-[var(--hairline-soft)] px-4 py-4 bg-[var(--clinical-amber-bg)] text-sm border-t border-amber-200">
+            <p className="text-[var(--clinical-amber)] mb-3">
               Paste your Anthropic API key to enable Claude mode. Stored only in this browser's localStorage.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -108,11 +106,11 @@ export default function AgentPage() {
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 placeholder={hasKey ? '••••••••••••••• (key saved)' : 'sk-ant-api03-...'}
-                className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-mono"
+                className="flex-1 rounded-md border border-[var(--hairline)] px-3 py-2 text-sm font-mono"
               />
-              <button onClick={saveKey} className="rounded-md bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-4 py-2">Save</button>
+              <button onClick={saveKey} className="rounded-md text-white text-sm font-medium px-4 py-2" style={{ background: 'var(--clinical-violet)' }}>Save</button>
               {hasKey && (
-                <button onClick={clearKey} className="rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm px-3 py-2">Clear</button>
+                <button onClick={clearKey} className="rounded-md border border-[var(--hairline)] text-[var(--ink)] hover:bg-[var(--paper-deep)] text-sm px-3 py-2">Clear</button>
               )}
             </div>
           </div>
@@ -124,10 +122,15 @@ export default function AgentPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={loading ? 'Loading snapshot…' : 'Ask in plain English'}
-            className="flex-1 rounded-md border border-slate-300 px-4 py-3 text-sm"
+            className="flex-1 rounded-md border border-[var(--hairline)] bg-white px-4 py-3 text-sm focus:border-[var(--clinical-teal)] focus:outline-none"
             disabled={loading}
           />
-          <button type="submit" disabled={loading || !q.trim()} className="rounded-md bg-brand-700 hover:bg-brand-800 disabled:bg-slate-300 text-white text-sm font-medium px-5 py-3">
+          <button
+            type="submit"
+            disabled={loading || !q.trim()}
+            className="rounded-md text-white text-sm font-semibold px-5 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'var(--color-brand-700)' }}
+          >
             Ask
           </button>
         </form>
@@ -138,7 +141,7 @@ export default function AgentPage() {
               key={s}
               onClick={() => ask(s)}
               disabled={loading}
-              className="text-xs rounded-full bg-slate-100 hover:bg-brand-100 hover:text-brand-700 text-slate-700 px-3 py-1.5 transition-colors"
+              className="text-xs rounded-md border border-[var(--hairline)] bg-[var(--paper-deep)] hover:bg-white hover:border-[var(--clinical-violet)] hover:text-[var(--clinical-violet)] text-[var(--ink-muted)] px-3 py-1.5 transition-colors"
             >
               {s}
             </button>
@@ -148,39 +151,45 @@ export default function AgentPage() {
 
       <div className="mt-6 space-y-4">
         {history.length === 0 && !loading && (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+          <div className="clinical-card border-dashed p-8 text-center text-sm text-[var(--ink-muted)]">
             Ask a question to see how the agent reasons over the snapshot.
           </div>
         )}
         {[...history].reverse().map((h, i) => {
           const isClaude = h.r.source === 'claude';
           return (
-            <article key={history.length - i} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <header className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-start justify-between gap-3">
+            <article key={history.length - i} className="clinical-card overflow-hidden">
+              <header className="clinical-card-header flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] uppercase tracking-wider text-slate-500 font-medium">Question</div>
-                  <div className="font-medium text-slate-900">{h.q}</div>
+                  <div className="eyebrow">Question</div>
+                  <div className="mt-0.5 font-serif text-base font-semibold text-[var(--ink-strong)]">{h.q}</div>
                 </div>
-                <span className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${isClaude ? 'bg-violet-100 text-violet-700' : 'bg-brand-100 text-brand-700'}`}>
-                  {isClaude ? 'Claude' : 'Rules'}
-                </span>
+                {isClaude ? (
+                  <span className="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--clinical-violet-bg)', color: 'var(--clinical-violet)' }}>
+                    Claude
+                  </span>
+                ) : (
+                  <span className="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--clinical-teal-bg)', color: 'var(--clinical-teal)' }}>
+                    Rules
+                  </span>
+                )}
               </header>
               <div className="p-4 text-sm">
                 {h.error && (
-                  <div className="mb-3 rounded-md bg-rose-50 text-rose-700 px-3 py-2 text-xs">
+                  <div className="mb-3 rounded-md bg-[var(--clinical-rose-bg)] text-[var(--clinical-rose)] px-3 py-2 text-xs border border-rose-200">
                     Claude error — falling back to local rules. {h.error}
                   </div>
                 )}
-                <p className={`whitespace-pre-wrap ${h.pending ? 'text-slate-400 animate-pulse' : 'text-slate-800'}`}>{h.r.summary}</p>
+                <p className={`whitespace-pre-wrap ${h.pending ? 'text-[var(--ink-soft)] animate-pulse' : 'text-[var(--ink)]'}`}>{h.r.summary}</p>
                 {h.r.table && h.r.table.rows.length > 0 && (
                   <div className="mt-4 overflow-x-auto -mx-2 px-2">
-                    <table className="min-w-full text-xs">
-                      <thead className="bg-slate-50 uppercase tracking-wider text-slate-500">
-                        <tr>{h.r.table.columns.map((c) => <th key={c} className="px-3 py-2 text-left whitespace-nowrap">{c}</th>)}</tr>
+                    <table className="min-w-full text-xs tabular">
+                      <thead className="bg-[var(--paper-deep)] uppercase tracking-wider text-[var(--ink-soft)]">
+                        <tr>{h.r.table.columns.map((c) => <th key={c} className="px-3 py-2 text-left whitespace-nowrap font-medium">{c}</th>)}</tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-[var(--hairline-soft)]">
                         {h.r.table.rows.map((row, ri) => (
-                          <tr key={ri} className={h.r.patIds?.[ri] ? 'cursor-pointer hover:bg-brand-50/40' : ''} onClick={() => {
+                          <tr key={ri} className={h.r.patIds?.[ri] ? 'cursor-pointer hover:bg-[var(--paper-deep)]' : ''} onClick={() => {
                             const id = h.r.patIds?.[ri];
                             if (id) navigate(`/patients/${encodeURIComponent(id)}`);
                           }}>
@@ -189,7 +198,7 @@ export default function AgentPage() {
                         ))}
                       </tbody>
                     </table>
-                    {h.r.patIds && <div className="mt-2 text-[11px] text-slate-400">Tip: click a row to open the patient.</div>}
+                    {h.r.patIds && <div className="mt-2 text-[11px] text-[var(--ink-soft)]">Tip: click a row to open the patient.</div>}
                   </div>
                 )}
               </div>

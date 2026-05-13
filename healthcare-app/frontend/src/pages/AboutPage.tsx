@@ -1,43 +1,52 @@
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-slate-900">About this demo</h1>
-      <p className="mt-3 text-slate-600">
-        A reference build that demonstrates an end-to-end Epic Clarity → Snowflake → dbt → React data
-        pipeline. The source is an Epic Clarity-shaped SQL Server instance on AWS EC2; Fivetran's
-        SQL Server CDC connector mirrors changes into Snowflake; dbt builds staging, intermediate,
-        and mart layers; a Python script exports the marts to JSON and a static React SPA serves
-        the user-facing experience.
-      </p>
+      <header className="mb-8">
+        <div className="eyebrow mb-1">Reference Architecture</div>
+        <h1 className="font-serif text-3xl font-semibold text-[var(--ink-strong)] tracking-tight">About this demo</h1>
+        <p className="mt-3 text-[var(--ink-muted)] leading-relaxed">
+          A reference build that demonstrates an end-to-end Epic Clarity → Snowflake → dbt → React data
+          pipeline. The source is an Epic Clarity-shaped SQL Server instance on AWS EC2; Fivetran's
+          SQL Server CDC connector mirrors changes into Snowflake; dbt builds staging, intermediate,
+          and mart layers; a Python script exports the marts to JSON and a static React SPA serves
+          the user-facing experience.
+        </p>
+      </header>
 
       <section className="mt-10">
-        <h2 className="text-xl font-semibold text-slate-900 mb-3">Data sources</h2>
+        <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] border-b border-[var(--hairline)] pb-2 mb-3">Data sources</h2>
         <div className="space-y-3">
           {DATA_SOURCES.map((s) => (
-            <article key={s.title} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="font-semibold text-slate-900">{s.title}</h3>
-              <p className="mt-1 text-sm text-slate-600">{s.description}</p>
-              {s.note && <p className="mt-2 text-xs text-slate-500">{s.note}</p>}
+            <article key={s.title} className="clinical-card p-5">
+              <h3 className="font-serif text-lg font-semibold text-[var(--ink-strong)]">{s.title}</h3>
+              <p className="mt-1 text-sm text-[var(--ink-muted)] leading-relaxed">{s.description}</p>
+              {s.note && <p className="mt-2 text-xs text-[var(--ink-soft)]">{s.note}</p>}
             </article>
           ))}
         </div>
       </section>
 
       <section className="mt-10">
-        <h2 className="text-xl font-semibold text-slate-900 mb-3">Architecture</h2>
+        <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] border-b border-[var(--hairline)] pb-2 mb-3">Architecture</h2>
         <div className="space-y-3">
           {STEPS.map((s) => (
-            <div key={s.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div key={s.name} className="clinical-card p-5">
               <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold shrink-0">
+                <div
+                  className="h-10 w-10 rounded-md flex items-center justify-center font-serif font-semibold shrink-0"
+                  style={{ background: 'var(--clinical-teal-bg)', color: 'var(--clinical-teal)' }}
+                >
                   {s.icon}
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-900">{s.name}</div>
-                  <p className="mt-1 text-sm text-slate-600">{s.desc}</p>
+                  <div className="font-serif text-lg font-semibold text-[var(--ink-strong)]">{s.name}</div>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)] leading-relaxed">{s.desc}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {s.tags.map((t) => (
-                      <span key={t} className="text-[11px] font-medium uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                      <span
+                        key={t}
+                        className="text-[11px] font-medium uppercase tracking-wider text-[var(--ink-muted)] bg-[var(--paper-deep)] border border-[var(--hairline)] px-2 py-0.5 rounded"
+                      >
                         {t}
                       </span>
                     ))}
@@ -49,10 +58,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-xl bg-amber-50 border border-amber-200 p-5 text-sm text-amber-900">
-        <strong>Disclaimer:</strong> All patient data shown is synthetic, generated for demonstration
-        purposes. The schema is modeled after Epic's Clarity reporting database but contains no
-        real Protected Health Information (PHI).
+      <section className="mt-10 rounded-lg bg-[var(--paper-deep)] border border-[var(--hairline)] p-5 text-sm text-[var(--ink)]">
+        <div className="eyebrow mb-2" style={{ color: 'var(--clinical-amber)' }}>Disclaimer</div>
+        <p className="text-[var(--ink-muted)] leading-relaxed">
+          <strong className="text-[var(--ink-strong)]">All patient data shown is synthetic</strong>, generated for demonstration
+          purposes. The schema is modeled after Epic's Clarity reporting database but contains no
+          real Protected Health Information (PHI).
+        </p>
       </section>
     </div>
   );

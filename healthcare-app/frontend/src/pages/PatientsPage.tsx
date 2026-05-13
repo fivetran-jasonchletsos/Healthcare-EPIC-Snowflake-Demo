@@ -54,63 +54,74 @@ export default function PatientsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-end justify-between mb-6 border-b border-[var(--hairline)] pb-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Patient lookup</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Search the <code className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">dim_patients</code> mart joined with{' '}
-            <code className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">fct_encounters</code> for visit + chronic-condition counts.
+          <div className="eyebrow mb-1">Patient Registry</div>
+          <h1 className="font-serif text-3xl font-semibold text-[var(--ink-strong)] tracking-tight">
+            Patient lookup
+          </h1>
+          <p className="text-sm text-[var(--ink-muted)] mt-1 max-w-2xl">
+            Search the <code className="font-mono text-xs bg-[var(--paper-deep)] px-1.5 py-0.5 rounded border border-[var(--hairline)]">dim_patients</code> mart joined with{' '}
+            <code className="font-mono text-xs bg-[var(--paper-deep)] px-1.5 py-0.5 rounded border border-[var(--hairline)]">fct_encounters</code> for visit and chronic-condition counts.
           </p>
         </div>
-        <div className="text-sm text-slate-500">
-          {loading ? 'Searching...' : `${sorted.length} ${sorted.length === 1 ? 'patient' : 'patients'}`}
+        <div className="text-sm text-[var(--ink-soft)] tabular shrink-0">
+          {loading ? 'Searching…' : <><span className="font-serif font-semibold text-xl text-[var(--ink-strong)]">{sorted.length}</span> {sorted.length === 1 ? 'patient' : 'patients'}</>}
         </div>
       </div>
 
-      <form onSubmit={applyFilters} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
+      <form onSubmit={applyFilters} className="clinical-card p-4 grid grid-cols-1 md:grid-cols-12 gap-3 mb-6">
         <div className="md:col-span-5">
-          <label className="block text-xs font-medium text-slate-500 mb-1">Name / MRN / ID</label>
+          <label className="block text-[10px] font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-1">Name · MRN · ID</label>
           <input
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="e.g. Smith"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-2 focus:outline-brand-200"
+            className="w-full rounded-md border border-[var(--hairline)] bg-white px-3 py-2 text-sm focus:border-[var(--clinical-teal)] focus:outline-none"
           />
         </div>
         <div className="md:col-span-3">
-          <label className="block text-xs font-medium text-slate-500 mb-1">City</label>
+          <label className="block text-[10px] font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-1">City</label>
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Pittsburgh"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-2 focus:outline-brand-200"
+            className="w-full rounded-md border border-[var(--hairline)] bg-white px-3 py-2 text-sm focus:border-[var(--clinical-teal)] focus:outline-none"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium text-slate-500 mb-1">ZIP</label>
+          <label className="block text-[10px] font-semibold text-[var(--ink-soft)] uppercase tracking-wider mb-1">ZIP</label>
           <input
             type="text"
             value={zip}
             onChange={(e) => setZip(e.target.value)}
             placeholder="15217"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-2 focus:outline-brand-200"
+            className="w-full rounded-md border border-[var(--hairline)] bg-white px-3 py-2 text-sm focus:border-[var(--clinical-teal)] focus:outline-none"
           />
         </div>
         <div className="md:col-span-2 flex items-end gap-2">
-          <button type="submit" className="flex-1 rounded-md bg-brand-700 hover:bg-brand-800 text-white text-sm font-medium px-4 py-2">
+          <button
+            type="submit"
+            className="flex-1 rounded-md text-white text-sm font-semibold px-4 py-2"
+            style={{ background: 'var(--color-brand-700)' }}
+          >
             Apply
           </button>
-          <button type="button" onClick={clearFilters} className="rounded-md border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm px-3 py-2">
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="rounded-md border border-[var(--hairline)] hover:bg-[var(--paper-deep)] text-[var(--ink-muted)] text-sm px-3 py-2"
+          >
             Clear
           </button>
         </div>
       </form>
 
       <div className="flex items-center justify-between mb-3">
-        <div className="text-xs text-slate-500">Sort:</div>
-        <div className="flex gap-1 rounded-md bg-slate-100 p-1 text-xs">
+        <div className="text-[10px] font-semibold text-[var(--ink-soft)] uppercase tracking-wider">Sort by</div>
+        <div className="inline-flex gap-0.5 rounded-md border border-[var(--hairline)] bg-white p-0.5 text-xs">
           {[
             ['visits', 'Visits ↓'],
             ['chronic', 'Chronic ↓'],
@@ -119,7 +130,7 @@ export default function PatientsPage() {
             <button
               key={key}
               onClick={() => setSort(key as typeof sort)}
-              className={`px-3 py-1 rounded ${sort === key ? 'bg-white shadow text-slate-900' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`px-3 py-1.5 rounded font-medium ${sort === key ? 'bg-[var(--paper-deep)] text-[var(--ink-strong)]' : 'text-[var(--ink-soft)] hover:text-[var(--ink)]'}`}
             >
               {label}
             </button>
@@ -128,18 +139,18 @@ export default function PatientsPage() {
       </div>
 
       {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-12 text-center text-slate-500">Loading...</div>
+        <div className="clinical-card p-12 text-center text-[var(--ink-soft)]">Loading…</div>
       ) : sorted.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-12 text-center">
-          <div className="text-slate-700 font-medium">No patients matched your filters.</div>
-          <button onClick={clearFilters} className="mt-3 text-sm text-brand-700 hover:text-brand-900 font-medium">
-            Clear filters
+        <div className="clinical-card p-12 text-center">
+          <div className="text-[var(--ink-strong)] font-medium">No patients matched your filters.</div>
+          <button onClick={clearFilters} className="mt-3 text-sm text-[var(--clinical-teal)] hover:text-[var(--ink-strong)] font-medium">
+            Clear filters →
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+        <div className="clinical-card overflow-x-auto">
+          <table className="min-w-full text-sm tabular">
+            <thead className="bg-[var(--paper-deep)] border-b border-[var(--hairline)]">
               <tr>
                 <Th>MRN</Th>
                 <Th>Patient</Th>
@@ -151,32 +162,34 @@ export default function PatientsPage() {
                 <Th align="right">Charges</Th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[var(--hairline-soft)]">
               {sorted.map((p) => (
                 <tr
                   key={p.pat_id}
                   onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)}
-                  className="cursor-pointer hover:bg-brand-50/50 transition-colors"
+                  className="cursor-pointer hover:bg-[var(--paper-deep)] transition-colors"
                 >
-                  <td className="px-4 py-3 text-xs font-mono text-slate-600">{p.med_rec_num}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-slate-900">{p.full_name}</div>
-                    <div className="text-xs text-slate-400 font-mono">{p.pat_id}</div>
+                  <td className="px-4 py-2.5 text-[11px] font-mono text-[var(--ink-soft)]">{p.med_rec_num}</td>
+                  <td className="px-4 py-2.5">
+                    <div className="font-serif font-semibold text-[var(--ink-strong)]">{p.full_name}</div>
+                    <div className="text-[10px] text-[var(--ink-soft)] font-mono">{p.pat_id}</div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700">{p.age} · {p.sex}</td>
-                  <td className="px-4 py-3 text-sm text-slate-500">{p.city ?? '—'} · {p.zip_code ?? ''}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500">{p.primary_care_provider ?? '—'}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-slate-900">{formatNumber(p.encounter_count)}</td>
-                  <td className="px-4 py-3 text-right">
-                    {p.active_chronic_count > 0 ? (
-                      <span className="text-xs font-semibold rounded-full px-2 py-0.5 bg-rose-50 text-rose-700">
-                        {p.active_chronic_count}
-                      </span>
+                  <td className="px-4 py-2.5 text-[var(--ink)]">{p.age} · {p.sex}</td>
+                  <td className="px-4 py-2.5 text-[var(--ink-muted)]">
+                    {p.city ?? '—'}{p.zip_code ? ` · ${p.zip_code}` : ''}
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-[var(--ink-muted)]">{p.primary_care_provider ?? '—'}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold text-[var(--ink-strong)]">{formatNumber(p.encounter_count)}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    {p.active_chronic_count >= 3 ? (
+                      <span className="status-pill alert">{p.active_chronic_count}</span>
+                    ) : p.active_chronic_count > 0 ? (
+                      <span className="status-pill caution">{p.active_chronic_count}</span>
                     ) : (
-                      <span className="text-xs text-slate-400">—</span>
+                      <span className="text-xs text-[var(--ink-soft)]">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right text-slate-700">{formatCurrency(p.total_charges)}</td>
+                  <td className="px-4 py-2.5 text-right text-[var(--ink)]">{formatCurrency(p.total_charges)}</td>
                 </tr>
               ))}
             </tbody>
@@ -189,7 +202,7 @@ export default function PatientsPage() {
 
 function Th({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) {
   return (
-    <th className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 ${align === 'right' ? 'text-right' : 'text-left'}`}>
+    <th className={`px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-soft)] ${align === 'right' ? 'text-right' : 'text-left'}`}>
       {children}
     </th>
   );

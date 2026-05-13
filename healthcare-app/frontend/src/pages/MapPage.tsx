@@ -18,7 +18,8 @@ const MODE_META: Record<Mode, { label: string; pick: (p: PatientSearchResult) =>
   chronic:  { label: 'Median chronic count',   pick: (p) => p.active_chronic_count },
 };
 
-const RAMP = ['#dbeafe', '#93c5fd', '#3b82f6', '#1d4ed8', '#1e3a8a'];
+// Calm clinical-teal ramp for ZIP bubbles.
+const RAMP = ['#cffafe', '#a5f3fc', '#67e8f9', '#0e7490', '#155e75'];
 
 function median(vals: number[]): number {
   if (vals.length === 0) return 0;
@@ -109,14 +110,15 @@ export default function MapPage() {
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col">
-      <div className="border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-3">
+      <div className="border-b border-[var(--hairline)] bg-white px-4 sm:px-6 lg:px-8 py-3">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900">
+            <div className="eyebrow mb-0.5">Geographic</div>
+            <h1 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--ink-strong)] tracking-tight">
               {selected ? `ZIP ${selected.zip}` : 'Patient density map'}{' '}
-              <span className="text-slate-400 text-sm font-normal">— {MODE_META[mode].label}</span>
+              <span className="text-[var(--ink-soft)] text-sm font-normal font-sans">— {MODE_META[mode].label}</span>
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[var(--ink-muted)] mt-0.5">
               {loading
                 ? 'Loading patients…'
                 : selected
@@ -126,20 +128,30 @@ export default function MapPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {selected && (
-              <button onClick={() => setSelectedZip(null)} className="rounded-md border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium px-3 py-1.5">
-                ← Back to county
+              <button
+                onClick={() => setSelectedZip(null)}
+                className="rounded-md border border-[var(--hairline)] bg-white hover:bg-[var(--paper-deep)] text-[var(--ink)] text-xs font-medium px-3 py-1.5"
+              >
+                ← Back to ZIPs
               </button>
             )}
-            <div className="flex flex-wrap gap-1 rounded-md bg-slate-100 p-1 text-xs">
-              {(Object.keys(MODE_META) as Mode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`px-3 py-1.5 rounded font-medium ${mode === m ? 'bg-white shadow text-slate-900' : 'text-slate-600 hover:text-slate-900'}`}
-                >
-                  {MODE_META[m].label}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-1 rounded-md border border-[var(--hairline)] bg-[var(--paper-deep)] p-1 text-xs">
+              {(Object.keys(MODE_META) as Mode[]).map((m) => {
+                const active = mode === m;
+                return (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                      active
+                        ? 'bg-white shadow-sm text-[var(--clinical-teal)] border border-[var(--clinical-teal)]'
+                        : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
+                    }`}
+                  >
+                    {MODE_META[m].label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -166,15 +178,15 @@ export default function MapPage() {
                 >
                   <Popup>
                     <div className="text-xs space-y-0.5">
-                      <div className="font-mono text-slate-500">ZIP {z.zip}</div>
-                      <div className="font-semibold text-slate-900">{z.city}</div>
-                      <div className="mt-2">
+                      <div className="font-mono text-[var(--ink-soft)]">ZIP {z.zip}</div>
+                      <div className="font-serif font-semibold text-[var(--ink-strong)]">{z.city}</div>
+                      <div className="mt-2 tabular">
                         <strong>Patients:</strong> {formatNumber(z.count)}
                       </div>
-                      <div className="text-slate-500">
+                      <div className="text-[var(--ink-muted)] tabular">
                         Median charges {formatCurrency(z.medianCharges)} · Median chronic dx {z.medianChronic}
                       </div>
-                      <button onClick={() => setSelectedZip(z.zip)} className="mt-2 text-brand-700 hover:text-brand-900 font-medium">
+                      <button onClick={() => setSelectedZip(z.zip)} className="mt-2 font-medium text-[var(--clinical-teal)] hover:text-[var(--ink-strong)]">
                         Drill into ZIP →
                       </button>
                     </div>
@@ -190,19 +202,19 @@ export default function MapPage() {
                   pathOptions={{
                     color: '#fff',
                     weight: 1,
-                    fillColor: p.active_chronic_count >= 3 ? '#b91c1c' : p.active_chronic_count >= 1 ? '#f59e0b' : '#10b981',
+                    fillColor: p.active_chronic_count >= 3 ? '#be123c' : p.active_chronic_count >= 1 ? '#b45309' : '#047857',
                     fillOpacity: 0.85,
                   }}
                 >
                   <Popup>
                     <div className="text-xs">
-                      <div className="font-mono text-slate-500">MRN {p.med_rec_num}</div>
-                      <div className="font-semibold text-slate-900 mt-0.5">{p.full_name}</div>
-                      <div className="text-slate-500">{p.age} y/o · {p.sex}</div>
-                      <div className="mt-2 text-sm">
+                      <div className="font-mono text-[var(--ink-soft)]">MRN {p.med_rec_num}</div>
+                      <div className="font-serif font-semibold text-[var(--ink-strong)] mt-0.5">{p.full_name}</div>
+                      <div className="text-[var(--ink-muted)] tabular">{p.age} y/o · {p.sex}</div>
+                      <div className="mt-2 text-sm tabular">
                         <strong>{p.encounter_count} visits</strong> · {p.active_chronic_count} chronic
                       </div>
-                      <button onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)} className="mt-2 text-brand-700 hover:text-brand-900 font-medium">
+                      <button onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)} className="mt-2 font-medium text-[var(--clinical-teal)] hover:text-[var(--ink-strong)]">
                         Open patient →
                       </button>
                     </div>
@@ -212,16 +224,16 @@ export default function MapPage() {
           </MapContainer>
         )}
 
-        <div className="absolute bottom-4 right-4 z-[400] rounded-xl bg-white/95 backdrop-blur shadow-lg border border-slate-200 p-3 text-xs max-w-[280px]">
-          <div className="font-semibold text-slate-900 mb-2">
+        <div className="absolute bottom-4 right-4 z-[400] clinical-card p-3 text-xs max-w-[280px] bg-white/95 backdrop-blur">
+          <div className="eyebrow mb-2">
             {selected ? 'Chronic burden' : MODE_META[mode].label + ' per ZIP'}
           </div>
           <div className="space-y-1.5">
             {selected ? (
               <>
-                <LegendDot color="#10b981" label="0 chronic conditions" />
-                <LegendDot color="#f59e0b" label="1–2 chronic conditions" />
-                <LegendDot color="#b91c1c" label="3+ chronic conditions" />
+                <LegendDot color="#047857" label="0 chronic conditions" />
+                <LegendDot color="#b45309" label="1–2 chronic conditions" />
+                <LegendDot color="#be123c" label="3+ chronic conditions" />
               </>
             ) : (
               RAMP.map((color, i) => {
@@ -233,7 +245,7 @@ export default function MapPage() {
                     <span className="inline-flex shrink-0 items-center justify-center" style={{ width: 22, height: 22 }}>
                       <span className="rounded-full ring-2 ring-white" style={{ backgroundColor: color, width: px, height: px }} />
                     </span>
-                    <span className="tabular-nums text-slate-700">
+                    <span className="tabular text-[var(--ink)]">
                       {lo === null ? '< ' : `${fmt(lo)} – `}
                       {hi === null ? `${fmt(breakpoints[3])}+` : fmt(hi)}
                     </span>
@@ -242,7 +254,7 @@ export default function MapPage() {
               })
             )}
           </div>
-          <div className="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+          <div className="mt-2 pt-2 border-t border-[var(--hairline-soft)] text-[10px] text-[var(--ink-soft)]">
             {selected ? 'Each dot is one patient (jittered within ZIP).' : 'Bubble size = patient count. Color = quintile of selected metric.'}
           </div>
         </div>
@@ -268,7 +280,7 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <span className="inline-block h-3 w-3 rounded-full ring-2 ring-white" style={{ backgroundColor: color }} />
-      <span className="text-slate-700">{label}</span>
+      <span className="text-[var(--ink)]">{label}</span>
     </div>
   );
 }
