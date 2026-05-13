@@ -9,8 +9,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 import { api, formatCurrency, formatCurrencyShort, formatNumber } from '../api/queries';
 import type { PatientSearchResult } from '../types';
+import { KPISkeleton, LoadingBanner, PanelSkeleton } from '../components/Skeleton';
 
 const TOOLTIP_STYLE = {
   border: 'none',
@@ -19,15 +21,63 @@ const TOOLTIP_STYLE = {
   boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
   padding: '8px 10px',
 } as const;
-const ACCENT = '#0f766e';
+const ACCENT = '#1d4ed8';
+
+interface Filter {
+  ageBucket?: { label: string; lo: number; hi: number };
+  chronicBucket?: { label: string; lo: number; hi: number };
+  city?: string;
+}
+
+const AGE_BUCKETS = [
+  { label: '0–17', lo: 0, hi: 18 },
+  { label: '18–34', lo: 18, hi: 35 },
+  { label: '35–54', lo: 35, hi: 55 },
+  { label: '55–64', lo: 55, hi: 65 },
+  { label: '65–79', lo: 65, hi: 80 },
+  { label: '80+', lo: 80, hi: 200 },
+];
+
+const CHRONIC_BUCKETS = [
+  { label: '0', lo: 0, hi: 1 },
+  { label: '1', lo: 1, hi: 2 },
+  { label: '2', lo: 2, hi: 3 },
+  { label: '3', lo: 3, hi: 4 },
+  { label: '4', lo: 4, hi: 5 },
+  { label: '5+', lo: 5, hi: 99 },
+];
 
 export default function DashboardPage() {
-  const [patients, setPatients] = useState<PatientSearchResult[]>([]);
+  const [all, setAll] = useState<PatientSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<Filter>({});
+  const navigate = useNavigate();
 
   useEffect(() => {
-    api.searchPatients({ limit: 200000 }).then((r) => setPatients(r.results)).finally(() => setLoading(false));
+    api.searchPatients({ limit: 200000 }).then((r) => setAll(r.results)).finally(() => setLoading(false));
   }, []);
+
+  const patients = useMemo(() => {
+    let rows = all;
+    if (filter.ageBucket) rows = rows.filter((p) => p.age >= filter.ageBucket!.lo && p.age < filter.ageBucket!.hi);
+    if (filter.chronicBucket)
+      rows = rows.filter((p) => p.active_chronic_count >= filter.chronicBucket!.lo && p.active_chronic_count < filter.chronicBucket!.hi);
+    if (filter.city) rows = rows.filter((p) => p.city === filter.city);
+    return rows;
+  }, [all, filter]);
+
+  const filterCount = Object.values(filter).filter(Boolean).length;
+  const filtered = filterCount > 0;
+
+  const ageData = useMemo(() => AGE_BUCKETS.map((b) => ({
+    ...b,
+    count: patients.filter((p) => p.age >= b.lo && p.age < b.hi).length,
+  })), [patients]);
+
+  const chronicData = useMemo(() => CHRONIC_BUCKETS.map((b) => ({
+    ...b,
+    count: patients.filter((p) => p.active_chronic_count >= b.lo && p.active_chronic_count < b.hi).length,
+  })), [patients]);
 
   const byCity = useMemo(() => {
     const m = new Map<string, PatientSearchResult[]>();
@@ -37,39 +87,41 @@ export default function DashboardPage() {
       list.push(p);
       m.set(c, list);
     }
-    return Array.from(m.entries()).map(([city, rows]) => ({
-      city,
-      count: rows.length,
-      encounters: rows.reduce((s, r) => s + r.encounter_count, 0),
-      charges: rows.reduce((s, r) => s + r.total_charges, 0),
-      chronic: rows.reduce((s, r) => s + r.active_chronic_count, 0),
-    }));
+    return Array.from(m.entries())
+      .map(([city, rows]) => ({
+        city,
+        count: rows.length,
+        encounters: rows.reduce((s, r) => s + r.encounter_count, 0),
+        charges: rows.reduce((s, r) => s + r.total_charges, 0),
+        chronic: rows.reduce((s, r) => s + r.active_chronic_count, 0),
+      }))
+      .sort((a, b) => b.count - a.count);
   }, [patients]);
 
-  const ageBuckets = useMemo(() => {
-    const buckets = [
-      { label: '0–17', lo: 0, hi: 18, count: 0 },
-      { label: '18–34', lo: 18, hi: 35, count: 0 },
-      { label: '35–54', lo: 35, hi: 55, count: 0 },
-      { label: '55–64', lo: 55, hi: 65, count: 0 },
-      { label: '65–79', lo: 65, hi: 80, count: 0 },
-      { label: '80+', lo: 80, hi: 200, count: 0 },
-    ];
-    for (const p of patients) {
-      const b = buckets.find((b) => p.age >= b.lo && p.age < b.hi);
-      if (b) b.count += 1;
-    }
-    return buckets;
-  }, [patients]);
-
-  const chronicHist = useMemo(() => {
-    const buckets = [0, 1, 2, 3, 4, 5].map((n) => ({ label: `${n}${n === 5 ? '+' : ''}`, count: 0 }));
-    for (const p of patients) {
-      const idx = Math.min(5, p.active_chronic_count);
-      buckets[idx].count += 1;
-    }
-    return buckets;
-  }, [patients]);
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <header className="mb-6 max-w-3xl">
+          <div className="inline-flex items-center rounded-full bg-brand-100 text-brand-700 px-3 py-1 text-xs font-medium uppercase tracking-wider mb-3">
+            Dashboard
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900">Clinical population overview</h1>
+          <p className="text-sm text-slate-500 mt-2">Loading patient snapshot…</p>
+          <div className="mt-3">
+            <LoadingBanner label="Downloading patients.json" detail="One-time fetch · cached for the rest of the session" />
+          </div>
+        </header>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => <KPISkeleton key={i} primary={i === 2} />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <PanelSkeleton title="Age distribution" />
+          <PanelSkeleton title="Chronic burden" />
+          <PanelSkeleton title="Top cities" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -81,68 +133,148 @@ export default function DashboardPage() {
         <p className="text-sm text-slate-500 mt-2">
           Aggregations across the gold-layer marts in Snowflake. All numbers computed in your browser from the published snapshot.
         </p>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs text-amber-900">
+          <span aria-hidden>👉</span>
+          <span><strong>Interactive:</strong> click any bar or row to cross-filter every chart, KPI, and table.</span>
+        </div>
       </header>
 
+      {filtered && (
+        <div className="mb-6 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs uppercase tracking-wider text-brand-700 font-semibold mr-1">Filtered:</span>
+          {filter.ageBucket && <Chip label={`Age ${filter.ageBucket.label}`} onClear={() => setFilter((p) => ({ ...p, ageBucket: undefined }))} />}
+          {filter.chronicBucket && <Chip label={`Chronic ${filter.chronicBucket.label}`} onClear={() => setFilter((p) => ({ ...p, chronicBucket: undefined }))} />}
+          {filter.city && <Chip label={`City ${filter.city}`} onClear={() => setFilter((p) => ({ ...p, city: undefined }))} />}
+          <span className="text-xs text-brand-700 ml-1">Showing {formatNumber(patients.length)} of {formatNumber(all.length)}</span>
+          <button onClick={() => setFilter({})} className="ml-auto text-xs font-medium text-brand-700 hover:text-brand-900">
+            Clear all
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <KPI label="Patients" value={loading ? '—' : formatNumber(patients.length)} />
-        <KPI label="Encounters (sum)" value={loading ? '—' : formatNumber(patients.reduce((s, p) => s + p.encounter_count, 0))} />
-        <KPI label="Active chronic dx" value={loading ? '—' : formatNumber(patients.reduce((s, p) => s + p.active_chronic_count, 0))} primary />
-        <KPI label="Total charges" value={loading ? '—' : formatCurrency(patients.reduce((s, p) => s + p.total_charges, 0))} />
+        <KPI label="Patients" value={formatNumber(patients.length)} />
+        <KPI label="Encounters" value={formatNumber(patients.reduce((s, p) => s + p.encounter_count, 0))} />
+        <KPI label="Active chronic dx" value={formatNumber(patients.reduce((s, p) => s + p.active_chronic_count, 0))} primary />
+        <KPI label="Total charges" value={formatCurrency(patients.reduce((s, p) => s + p.total_charges, 0))} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Panel title="Age distribution" subtitle="All patients in the snapshot">
+        <Panel title="Age distribution" subtitle="Click a bar to filter the dashboard">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageBuckets}>
+              <BarChart data={ageData}>
                 <CartesianGrid stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
                 <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: any) => [`${v} patients`, '']} separator="" />
-                <Bar dataKey="count" fill={ACCENT} radius={[3, 3, 0, 0]} maxBarSize={48} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Panel>
-
-        <Panel title="Chronic-condition burden" subtitle="How many active chronic conditions each patient carries">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chronicHist}>
-                <CartesianGrid stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
-                <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: any) => [`${v} patients`, '']} separator="" />
-                <Bar dataKey="count" radius={[3, 3, 0, 0]} maxBarSize={48}>
-                  {chronicHist.map((_, i) => (
-                    <Cell key={i} fill={['#10b981', '#65a30d', '#eab308', '#f59e0b', '#ef4444', '#b91c1c'][i]} />
-                  ))}
+                <Bar
+                  dataKey="count"
+                  radius={[3, 3, 0, 0]}
+                  maxBarSize={48}
+                  cursor="pointer"
+                  onClick={(d: any) => setFilter((prev) => ({ ...prev, ageBucket: prev.ageBucket?.label === d.label ? undefined : d }))}
+                >
+                  {ageData.map((b, i) => {
+                    const sel = filter.ageBucket?.label === b.label;
+                    const dim = filter.ageBucket && !sel;
+                    return <Cell key={i} fill={sel ? '#1e3a8a' : ACCENT} opacity={dim ? 0.3 : 1} />;
+                  })}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Panel>
 
-        <Panel title="Top cities by patient count" className="lg:col-span-2">
+        <Panel title="Chronic-condition burden" subtitle="Click a bar to filter by chronic count">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chronicData}>
+                <CartesianGrid stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
+                <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: any) => [`${v} patients`, '']} separator="" />
+                <Bar
+                  dataKey="count"
+                  radius={[3, 3, 0, 0]}
+                  maxBarSize={48}
+                  cursor="pointer"
+                  onClick={(d: any) => setFilter((prev) => ({ ...prev, chronicBucket: prev.chronicBucket?.label === d.label ? undefined : d }))}
+                >
+                  {chronicData.map((b, i) => {
+                    const sel = filter.chronicBucket?.label === b.label;
+                    const dim = filter.chronicBucket && !sel;
+                    return <Cell key={i} fill={sel ? '#7f1d1d' : ['#10b981', '#65a30d', '#eab308', '#f59e0b', '#ef4444', '#b91c1c'][i]} opacity={dim ? 0.3 : 1} />;
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+
+        <Panel title="Top cities by patient count" subtitle="Click a row to filter the dashboard" className="lg:col-span-2">
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="min-w-full text-sm tabular-nums">
               <thead className="text-[11px] uppercase tracking-wider text-slate-500">
                 <tr className="border-b border-slate-200">
                   <th className="px-3 py-2 text-left font-medium">City</th>
                   <th className="px-3 py-2 text-right font-medium">Patients</th>
+                  <th className="px-3 py-2 text-left font-medium w-[28%]">Share</th>
                   <th className="px-3 py-2 text-right font-medium">Encounters</th>
                   <th className="px-3 py-2 text-right font-medium">Chronic dx</th>
+                  <th className="px-3 py-2 text-right font-medium">Total charges</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {byCity.slice(0, 15).map((c) => {
+                  const maxCount = Math.max(...byCity.map((x) => x.count));
+                  const sel = filter.city === c.city;
+                  return (
+                    <tr
+                      key={c.city}
+                      onClick={() => setFilter((prev) => ({ ...prev, city: prev.city === c.city ? undefined : c.city }))}
+                      className={`cursor-pointer ${sel ? 'bg-brand-50' : 'hover:bg-slate-50'}`}
+                    >
+                      <td className="px-3 py-2.5 text-slate-700">{c.city}</td>
+                      <td className="px-3 py-2.5 text-right">{formatNumber(c.count)}</td>
+                      <td className="px-3 py-2.5">
+                        <div className="h-2 rounded bg-slate-100 overflow-hidden">
+                          <div className="h-full bg-brand-700" style={{ width: `${(c.count / maxCount) * 100}%` }} />
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5 text-right">{formatNumber(c.encounters)}</td>
+                      <td className="px-3 py-2.5 text-right">{formatNumber(c.chronic)}</td>
+                      <td className="px-3 py-2.5 text-right text-slate-900 font-medium">{formatCurrencyShort(c.charges)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+
+        <Panel title="Highest-charge patients" subtitle="Top 10 by total billed" className="lg:col-span-2">
+          <div className="overflow-x-auto -mx-2 px-2">
+            <table className="min-w-full text-sm tabular-nums">
+              <thead className="text-[11px] uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-slate-200">
+                  <th className="px-3 py-2 text-left font-medium">MRN</th>
+                  <th className="px-3 py-2 text-left font-medium">Patient</th>
+                  <th className="px-3 py-2 text-left font-medium">City</th>
+                  <th className="px-3 py-2 text-right font-medium">Visits</th>
+                  <th className="px-3 py-2 text-center font-medium w-[120px]">Chronic</th>
                   <th className="px-3 py-2 text-right font-medium">Charges</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {[...byCity].sort((a, b) => b.count - a.count).slice(0, 12).map((c) => (
-                  <tr key={c.city}>
-                    <td className="px-3 py-2.5 text-slate-700">{c.city}</td>
-                    <td className="px-3 py-2.5 text-right">{formatNumber(c.count)}</td>
-                    <td className="px-3 py-2.5 text-right">{formatNumber(c.encounters)}</td>
-                    <td className="px-3 py-2.5 text-right">{formatNumber(c.chronic)}</td>
-                    <td className="px-3 py-2.5 text-right text-slate-900 font-medium">{formatCurrencyShort(c.charges)}</td>
+                {[...patients].sort((a, b) => b.total_charges - a.total_charges).slice(0, 10).map((p) => (
+                  <tr key={p.pat_id} onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)} className="cursor-pointer hover:bg-brand-50/50">
+                    <td className="px-3 py-2.5 font-mono text-slate-500">{p.med_rec_num}</td>
+                    <td className="px-3 py-2.5 text-slate-900 font-medium">{p.full_name}</td>
+                    <td className="px-3 py-2.5 text-slate-500">{p.city ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-right">{p.encounter_count}</td>
+                    <td className="px-3 py-2.5"><ChronicLight n={p.active_chronic_count} /></td>
+                    <td className="px-3 py-2.5 text-right text-slate-900 font-medium">{formatCurrency(p.total_charges)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -151,6 +283,15 @@ export default function DashboardPage() {
         </Panel>
       </div>
     </div>
+  );
+}
+
+function Chip({ label, onClear }: { label: string; onClear: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-brand-300 text-brand-800 text-xs font-medium px-2.5 py-1">
+      {label}
+      <button onClick={onClear} aria-label={`Remove ${label}`} className="text-brand-500 hover:text-brand-700">×</button>
+    </span>
   );
 }
 
@@ -172,5 +313,16 @@ function Panel({ title, subtitle, children, className = '' }: { title: string; s
       </div>
       {children}
     </section>
+  );
+}
+
+// Traffic-light dot — green/amber/red by chronic burden.
+function ChronicLight({ n }: { n: number }) {
+  const color = n >= 3 ? '#b91c1c' : n >= 1 ? '#f59e0b' : '#10b981';
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <span className="inline-block h-3 w-3 rounded-full ring-2 ring-white shadow" style={{ background: color }} />
+      <span className={`text-xs font-semibold tabular-nums ${n >= 3 ? 'text-rose-700' : n >= 1 ? 'text-amber-700' : 'text-emerald-700'}`}>{n}</span>
+    </div>
   );
 }
