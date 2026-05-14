@@ -662,16 +662,41 @@ function drawPlayer(ctx: CanvasRenderingContext2D, p: GameState['player']) {
       default: return 0;
     }
   })();
-  ctx.fillStyle = '#facc15'; // Pac-Man classic, but with Fivetran-style cyan core
+
+  // Fivetran-blue Pac body with mouth wedge
+  ctx.fillStyle = '#0073ea';
   ctx.beginPath();
   ctx.moveTo(p.px, p.py);
   ctx.arc(p.px, p.py, r, angle + p.mouthAngle, angle - p.mouthAngle + Math.PI * 2);
   ctx.closePath();
   ctx.fill();
-  // Cyan core dot — subtle Fivetran nod
-  ctx.fillStyle = 'rgba(34,211,238,0.7)';
+
+  // Mini Fivetran "F" mark inside the body, offset opposite the mouth so it's
+  // never clipped by the mouth wedge. Clip to the body shape so it never leaks
+  // out the open side.
+  ctx.save();
   ctx.beginPath();
-  ctx.arc(p.px, p.py, 2.4, 0, Math.PI * 2);
+  ctx.moveTo(p.px, p.py);
+  ctx.arc(p.px, p.py, r, angle + p.mouthAngle, angle - p.mouthAngle + Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+
+  // F bars — drawn upright regardless of direction so the icon stays readable
+  const fx = p.px - 4;
+  const fy = p.py - 4;
+  ctx.fillStyle = '#ffffff';
+  // Vertical stem
+  ctx.fillRect(fx, fy, 1.6, 8);
+  // Top arm
+  ctx.fillRect(fx, fy, 7, 1.6);
+  // Middle arm
+  ctx.fillRect(fx, fy + 3.4, 5, 1.6);
+  ctx.restore();
+
+  // Cyan accent dot — Fivetran "data flow" mark
+  ctx.fillStyle = '#22d3ee';
+  ctx.beginPath();
+  ctx.arc(p.px + 3, p.py - 3, 1.4, 0, Math.PI * 2);
   ctx.fill();
 }
 
