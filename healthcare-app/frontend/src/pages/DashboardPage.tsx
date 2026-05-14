@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, formatCurrency, formatCurrencyShort, formatNumber } from '../api/queries';
 import type { PatientSearchResult } from '../types';
 import { KPISkeleton, LoadingBanner, PanelSkeleton } from '../components/Skeleton';
+import { Sparkline } from '../components/Sparkline';
 
 const TOOLTIP_STYLE = {
   border: '1px solid #e2e8f0',
@@ -81,6 +82,35 @@ export default function DashboardPage() {
     ...b,
     count: patients.filter((p) => p.active_chronic_count >= b.lo && p.active_chronic_count < b.hi).length,
   })), [patients]);
+
+  // Birth-year cohort series — 12 equal-width buckets from oldest to youngest.
+  // Drives KPI sparklines. Truthful derivation from `birth_date` + row metrics.
+  const cohortSeries = useMemo(() => {
+    const empty = { patients: [] as number[], encounters: [] as number[], chronic: [] as number[], charges: [] as number[] };
+    if (patients.length === 0) return empty;
+    const years = patients.map((p) => Number((p.birth_date ?? '').slice(0, 4))).filter((y) => Number.isFinite(y) && y > 1900);
+    if (years.length < 2) return empty;
+    const minY = Math.min(...years);
+    const maxY = Math.max(...years);
+    const buckets = 12;
+    const span = Math.max(1, maxY - minY);
+    const counts = new Array(buckets).fill(0);
+    const encs = new Array(buckets).fill(0);
+    const chr = new Array(buckets).fill(0);
+    const chg = new Array(buckets).fill(0);
+    for (const p of patients) {
+      const y = Number((p.birth_date ?? '').slice(0, 4));
+      if (!Number.isFinite(y)) continue;
+      let idx = Math.floor(((y - minY) / span) * buckets);
+      if (idx >= buckets) idx = buckets - 1;
+      if (idx < 0) idx = 0;
+      counts[idx] += 1;
+      encs[idx] += p.encounter_count;
+      chr[idx] += p.active_chronic_count;
+      chg[idx] += p.total_charges;
+    }
+    return { patients: counts, encounters: encs, chronic: chr, charges: chg };
+  }, [patients]);
 
   const byCity = useMemo(() => {
     const m = new Map<string, PatientSearchResult[]>();
@@ -152,10 +182,10 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <KPI label="Patients" value={formatNumber(patients.length)} />
-        <KPI label="Encounters" value={formatNumber(patients.reduce((s, p) => s + p.encounter_count, 0))} />
-        <KPI label="Active chronic dx" value={formatNumber(patients.reduce((s, p) => s + p.active_chronic_count, 0))} primary />
-        <KPI label="Total charges" value={formatCurrency(patients.reduce((s, p) => s + p.total_charges, 0))} />
+        <KPI label="Patients" value={formatNumber(patients.length)} series={cohortSeries.patients} accent="var(--clinical-teal)" />
+        <KPI label="Encounters" value={formatNumber(patients.reduce((s, p) => s + p.encounter_count, 0))} series={cohortSeries.encounters} accent="var(--clinical-violet)" />
+        <KPI label="Active chronic dx" value={formatNumber(patients.reduce((s, p) => s + p.active_chronic_count, 0))} primary series={cohortSeries.chronic} />
+        <KPI label="Total charges" value={formatCurrency(patients.reduce((s, p) => s + p.total_charges, 0))} series={cohortSeries.charges} accent="var(--clinical-amber)" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -294,12 +324,27 @@ function Chip({ label, onClear }: { label: string; onClear: () => void }) {
   );
 }
 
-function KPI({ label, value, primary }: { label: string; value: string; primary?: boolean }) {
+function KPI({
+  label,
+  value,
+  primary,
+  series,
+  accent,
+}: {
+  label: string;
+  value: string;
+  primary?: boolean;
+  series?: number[];
+  accent?: string;
+}) {
   if (primary) {
     return (
       <div className="rounded-lg p-4 shadow-sm text-white" style={{ background: 'var(--color-brand-700)' }}>
         <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-white/80">{label}</div>
         <div className="mt-1 font-serif text-2xl sm:text-3xl font-semibold tabular leading-tight">{value}</div>
+        {series && series.length >= 2 && (
+          <Sparkline values={series} width={120} height={22} stroke="rgba(255,255,255,0.9)" fill="rgba(255,255,255,0.9)" className="mt-1.5" />
+        )}
       </div>
     );
   }
@@ -307,6 +352,9 @@ function KPI({ label, value, primary }: { label: string; value: string; primary?
     <div className="vital-tile">
       <div className="vital-tile-label">{label}</div>
       <div className="vital-tile-value tabular">{value}</div>
+      {series && series.length >= 2 && (
+        <Sparkline values={series} width={120} height={22} stroke={accent ?? 'var(--clinical-teal)'} fill={accent ?? 'var(--clinical-teal)'} className="mt-1.5" />
+      )}
     </div>
   );
 }
