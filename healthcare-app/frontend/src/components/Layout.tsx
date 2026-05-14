@@ -1,8 +1,12 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, getSnapshotTime, subscribeSource, type DataSource } from '../api/queries';
 import { getTheme, setTheme, subscribeTheme, type Theme } from '../theme';
 import * as watchlist from '../watchlist';
+import PacSync from './PacSync';
+
+// Konami code: ↑ ↑ ↓ ↓ ← → ← → B A — unlocks the SpaceSync easter egg.
+const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
 
 const NAV_ITEMS: [string, string][] = [
   ['/', 'Home'],
@@ -21,6 +25,8 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [theme, setThemeState] = useState<Theme>(getTheme());
   const [watchCount, setWatchCount] = useState(0);
+  const [spaceSyncOpen, setSpaceSyncOpen] = useState(false);
+  const konamiBufferRef = useRef<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,6 +36,25 @@ export default function Layout() {
     const tsub = subscribeTheme(setThemeState);
     const wsub = watchlist.subscribe((ids) => setWatchCount(ids.length));
     return () => { unsub(); tsub(); wsub(); };
+  }, []);
+
+  // Konami code listener — unlocks the SpaceSync easter egg.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // Ignore when the user is typing into an input/textarea (no surprise launches)
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || (e.target as HTMLElement)?.isContentEditable) return;
+      const key = e.key.toLowerCase();
+      const buf = konamiBufferRef.current;
+      buf.push(key);
+      if (buf.length > KONAMI.length) buf.shift();
+      if (buf.length === KONAMI.length && buf.every((k, i) => k === KONAMI[i])) {
+        konamiBufferRef.current = [];
+        setSpaceSyncOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   useEffect(() => {
@@ -204,6 +229,8 @@ export default function Layout() {
           </div>
         </div>
       </footer>
+
+      {spaceSyncOpen && <PacSync onClose={() => setSpaceSyncOpen(false)} />}
     </div>
   );
 }
