@@ -264,7 +264,7 @@ export default function DashboardPage() {
                   cursor="pointer"
                   onClick={(d: any) => setFilter((prev) => ({ ...prev, ageBucket: prev.ageBucket?.label === d.label ? undefined : d }))}
                 >
-                  <LabelList dataKey="count" position="top" fill="#475569" fontSize={10} formatter={(v: number) => formatNumber(v)} />
+                  <LabelList dataKey="count" position="top" fill="#475569" fontSize={10} formatter={(v: any) => formatNumber(Number(v))} />
                   {ageData.map((b, i) => {
                     const sel = filter.ageBucket?.label === b.label;
                     const dim = filter.ageBucket && !sel;
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                   cursor="pointer"
                   onClick={(d: any) => setFilter((prev) => ({ ...prev, chronicBucket: prev.chronicBucket?.label === d.label ? undefined : d }))}
                 >
-                  <LabelList dataKey="count" position="top" fill="#475569" fontSize={10} formatter={(v: number) => formatNumber(v)} />
+                  <LabelList dataKey="count" position="top" fill="#475569" fontSize={10} formatter={(v: any) => formatNumber(Number(v))} />
                   {chronicData.map((b, i) => {
                     const sel = filter.chronicBucket?.label === b.label;
                     const dim = filter.chronicBucket && !sel;
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--hairline-soft)]">
-                {byCity.slice(0, 15).map((c, idx, arr) => {
+                {byCity.slice(0, 15).map((c, _idx, arr) => {
                   const maxCount = Math.max(...arr.map((x) => x.count));
                   const sel = filter.city === c.city;
                   const visitsPerPt = c.count ? c.encounters / c.count : 0;

@@ -313,7 +313,7 @@ function DemoSwitcher({
   snapshotAt: string | null;
   open: boolean;
   onToggle: () => void;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const live = source === 'live';
   return (
