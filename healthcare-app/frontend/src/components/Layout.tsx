@@ -18,6 +18,14 @@ const NAV_ITEMS: [string, string][] = [
   ['/about', 'About'],
 ];
 
+const DEMOS = [
+  { key: 'healthcare', name: 'Epic Clarity', industry: 'Healthcare · Clinical analytics', url: 'https://fivetran-jasonchletsos.github.io/Healthcare-EPIC-Snowflake-Demo/', accent: '#0d9488' },
+  { key: 'sheetz',     name: 'Allegheny County Tax', industry: 'Public sector · Property assessment', url: 'https://fivetran-jasonchletsos.github.io/fivetran-sheetz-demo/', accent: '#dc2626' },
+  { key: 'finserv',    name: 'Meridian', industry: 'Financial Services · Wealth & banking', url: 'https://fivetran-jasonchletsos.github.io/FinServ-ODI-Demo/', accent: '#1d4ed8' },
+  { key: 'media',      name: 'Lighthouse', industry: 'Media · Audience & content intel', url: 'https://fivetran-jasonchletsos.github.io/Media-ODI-Demo/', accent: '#7c3aed' },
+];
+const CURRENT_DEMO = 'healthcare';
+
 export default function Layout() {
   const [source, setSource] = useState<DataSource>('demo');
   const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
@@ -26,6 +34,8 @@ export default function Layout() {
   const [theme, setThemeState] = useState<Theme>(getTheme());
   const [watchCount, setWatchCount] = useState(0);
   const [spaceSyncOpen, setSpaceSyncOpen] = useState(false);
+  const [demoSwitcherOpen, setDemoSwitcherOpen] = useState(false);
+  const demoSwitcherRef = useRef<HTMLDivElement>(null);
   const konamiBufferRef = useRef<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,6 +70,24 @@ export default function Layout() {
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!demoSwitcherOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (demoSwitcherRef.current && !demoSwitcherRef.current.contains(e.target as Node)) {
+        setDemoSwitcherOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDemoSwitcherOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [demoSwitcherOpen]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,7 +173,13 @@ export default function Layout() {
                 )}
               </button>
               <ThemeToggle theme={theme} onChange={setTheme} />
-              <SourceBadge source={source} snapshotAt={snapshotAt} />
+              <DemoSwitcher
+                source={source}
+                snapshotAt={snapshotAt}
+                open={demoSwitcherOpen}
+                onToggle={() => setDemoSwitcherOpen((o) => !o)}
+                containerRef={demoSwitcherRef}
+              />
               <button
                 type="button"
                 onClick={() => setMobileOpen((o) => !o)}
@@ -191,6 +225,39 @@ export default function Layout() {
                   </NavLink>
                 ))}
               </nav>
+              <div>
+                <div className="eyebrow mb-2">Switch demo</div>
+                <div className="grid grid-cols-1 gap-1">
+                  {DEMOS.map((d) => {
+                    const isCurrent = d.key === CURRENT_DEMO;
+                    const inner = (
+                      <div className="flex items-center gap-2.5 w-full">
+                        <span className="h-2 w-2 rounded-full shrink-0" style={{ background: d.accent }} />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-[var(--ink-strong)] truncate">{d.name}</div>
+                          <div className="text-[11px] text-[var(--ink-muted)] truncate">{d.industry}</div>
+                        </div>
+                        {isCurrent && (
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-soft)] border border-[var(--hairline)] rounded px-1.5 py-0.5">Current</span>
+                        )}
+                      </div>
+                    );
+                    return isCurrent ? (
+                      <div key={d.key} className="px-3 py-2 rounded-md border border-[var(--hairline)] bg-[var(--paper-deep)] opacity-80">
+                        {inner}
+                      </div>
+                    ) : (
+                      <a
+                        key={d.key}
+                        href={d.url}
+                        className="px-3 py-2 rounded-md border border-[var(--hairline)] hover:bg-[var(--paper-deep)] transition-colors"
+                      >
+                        {inner}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -235,19 +302,76 @@ export default function Layout() {
   );
 }
 
-function SourceBadge({ source, snapshotAt: _snapshotAt }: { source: DataSource; snapshotAt: string | null }) {
+function DemoSwitcher({
+  source,
+  snapshotAt: _snapshotAt,
+  open,
+  onToggle,
+  containerRef,
+}: {
+  source: DataSource;
+  snapshotAt: string | null;
+  open: boolean;
+  onToggle: () => void;
+  containerRef: React.RefObject<HTMLDivElement>;
+}) {
   const live = source === 'live';
   return (
-    <div
-      title={live ? 'Live Snowflake snapshot' : 'Demo data — load real data via scripts/build_snapshot.py'}
-      className={`hidden sm:inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider border ${
-        live
-          ? 'bg-[var(--clinical-green-bg)] text-[var(--clinical-green)] border-emerald-200'
-          : 'bg-[var(--clinical-amber-bg)] text-[var(--clinical-amber)] border-amber-200'
-      }`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${live ? 'bg-[var(--clinical-green)]' : 'bg-[var(--clinical-amber)]'} animate-pulse`} />
-      {live ? 'Snowflake · live' : 'Demo'}
+    <div ref={containerRef} className="relative hidden sm:inline-flex">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={live ? 'Live Snowflake snapshot — click to switch demo' : 'Demo data — click to switch demo'}
+        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider border transition-colors ${
+          live
+            ? 'bg-[var(--clinical-green-bg)] text-[var(--clinical-green)] border-emerald-200 hover:brightness-95'
+            : 'bg-[var(--clinical-amber-bg)] text-[var(--clinical-amber)] border-amber-200 hover:brightness-95'
+        }`}
+      >
+        <span className={`h-1.5 w-1.5 rounded-full ${live ? 'bg-[var(--clinical-green)]' : 'bg-[var(--clinical-amber)]'} animate-pulse`} />
+        {live ? 'Snowflake · live' : 'Demo'}
+        <svg viewBox="0 0 24 24" className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full mt-2 w-[280px] rounded-md border border-[var(--hairline)] bg-[var(--paper)] shadow-lg z-40 overflow-hidden"
+        >
+          <div className="px-3 py-2 border-b border-[var(--hairline-soft)] eyebrow text-[var(--ink-soft)]">
+            Switch demo
+          </div>
+          <div className="py-1">
+            {DEMOS.map((d) => {
+              const isCurrent = d.key === CURRENT_DEMO;
+              const inner = (
+                <div className="flex items-center gap-2.5 w-full">
+                  <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: d.accent }} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-[var(--ink-strong)] truncate">{d.name}</div>
+                    <div className="text-[11px] text-[var(--ink-muted)] truncate">{d.industry}</div>
+                  </div>
+                  {isCurrent && (
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-soft)] border border-[var(--hairline)] rounded px-1.5 py-0.5">Current</span>
+                  )}
+                </div>
+              );
+              return isCurrent ? (
+                <div key={d.key} className="px-3 py-2 opacity-80">
+                  {inner}
+                </div>
+              ) : (
+                <a key={d.key} href={d.url} className="block px-3 py-2 hover:bg-[var(--paper-deep)] transition-colors">
+                  {inner}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
