@@ -18,8 +18,10 @@ const MODE_META: Record<Mode, { label: string; pick: (p: PatientSearchResult) =>
   chronic:  { label: 'Median chronic count',   pick: (p) => p.active_chronic_count },
 };
 
-// Calm clinical-teal ramp for ZIP bubbles.
-const RAMP = ['#cffafe', '#a5f3fc', '#67e8f9', '#0e7490', '#155e75'];
+// Single-hue sequential teal ramp — light-to-dark encodes the metric, nothing else.
+// Five steps is the upper limit Tufte/Few suggest for a quantitative legend
+// before colors stop being distinguishable; we keep five but cut chroma noise.
+const RAMP = ['#cffafe', '#67e8f9', '#22b4d1', '#0e7490', '#164e63'];
 
 function median(vals: number[]): number {
   if (vals.length === 0) return 0;
@@ -173,7 +175,7 @@ export default function MapPage() {
                   key={z.zip}
                   center={[z.lat, z.lng]}
                   radius={radiusFor(z)}
-                  pathOptions={{ color: '#ffffff', weight: 2, fillColor: colorFor(z), fillOpacity: 0.78 }}
+                  pathOptions={{ color: '#0b1220', weight: 0.5, fillColor: colorFor(z), fillOpacity: 0.72 }}
                   eventHandlers={{ click: () => setSelectedZip(z.zip) }}
                 >
                   <Popup>
@@ -200,10 +202,10 @@ export default function MapPage() {
                   center={[p.latitude!, p.longitude!]}
                   radius={4 + Math.min(7, p.active_chronic_count * 1.4)}
                   pathOptions={{
-                    color: '#fff',
-                    weight: 1,
-                    fillColor: p.active_chronic_count >= 3 ? '#be123c' : p.active_chronic_count >= 1 ? '#b45309' : '#047857',
-                    fillOpacity: 0.85,
+                    color: '#0b1220',
+                    weight: 0.4,
+                    fillColor: p.active_chronic_count >= 3 ? '#be123c' : p.active_chronic_count >= 1 ? '#94a3b8' : '#94a3b8',
+                    fillOpacity: p.active_chronic_count >= 3 ? 0.9 : 0.55,
                   }}
                 >
                   <Popup>
@@ -231,9 +233,8 @@ export default function MapPage() {
           <div className="space-y-1.5">
             {selected ? (
               <>
-                <LegendDot color="#047857" label="0 chronic conditions" />
-                <LegendDot color="#b45309" label="1–2 chronic conditions" />
-                <LegendDot color="#be123c" label="3+ chronic conditions" />
+                <LegendDot color="#be123c" label="High burden · 3+ chronic dx" />
+                <LegendDot color="#94a3b8" label="Stable / low chronic burden" />
               </>
             ) : (
               RAMP.map((color, i) => {

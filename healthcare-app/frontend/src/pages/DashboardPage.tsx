@@ -4,6 +4,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -16,13 +17,21 @@ import { KPISkeleton, LoadingBanner, PanelSkeleton } from '../components/Skeleto
 import { Sparkline } from '../components/Sparkline';
 
 const TOOLTIP_STYLE = {
-  border: '1px solid #e2e8f0',
-  borderRadius: 6,
-  fontSize: 12,
-  boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
-  padding: '8px 10px',
+  border: '1px solid var(--hairline)',
+  borderRadius: 4,
+  fontSize: 11,
+  boxShadow: 'none',
+  padding: '6px 8px',
+  background: '#fff',
 } as const;
-const ACCENT = '#1d4ed8';
+
+// Single functional accent — everything else stays grayscale. Selected bars
+// get the deep ink color; the "high-burden" cohort gets the rose alert color
+// because that is the executive's call-to-action bar.
+const ACCENT = '#0e7490';        // clinical teal — the one accent
+const ALERT  = '#be123c';        // reserved for the ≥3 chronic bucket only
+const NEUTRAL = '#cbd5e1';        // unselected bars
+const SELECTED = '#0b1220';      // ink-strong for the active selection
 
 interface Filter {
   ageBucket?: { label: string; lo: number; hi: number };
@@ -47,9 +56,6 @@ const CHRONIC_BUCKETS = [
   { label: '4', lo: 4, hi: 5 },
   { label: '5+', lo: 5, hi: 99 },
 ];
-
-// Clinical palette for chronic burden ramp — evidence-medicine green → rose.
-const CHRONIC_RAMP = ['#047857', '#65a30d', '#b45309', '#d97706', '#be123c', '#9f1239'];
 
 export default function DashboardPage() {
   const [all, setAll] = useState<PatientSearchResult[]>([]);
@@ -83,10 +89,16 @@ export default function DashboardPage() {
     count: patients.filter((p) => p.active_chronic_count >= b.lo && p.active_chronic_count < b.hi).length,
   })), [patients]);
 
+  // Executive KPI block. We compute population-level rates the CFO/CMO actually
+  // tracks, plus an "all-population" reference value so filtered views read as
+  // comparisons rather than raw counts.
+  const kpi = useMemo(() => calcKpi(patients), [patients]);
+  const kpiAll = useMemo(() => calcKpi(all), [all]);
+
   // Birth-year cohort series — 12 equal-width buckets from oldest to youngest.
-  // Drives KPI sparklines. Truthful derivation from `birth_date` + row metrics.
+  // Drives KPI sparklines so each metric has a within-population distribution.
   const cohortSeries = useMemo(() => {
-    const empty = { patients: [] as number[], encounters: [] as number[], chronic: [] as number[], charges: [] as number[] };
+    const empty = { patients: [] as number[], visitsPerPt: [] as number[], chargePerEnc: [] as number[], highBurden: [] as number[] };
     if (patients.length === 0) return empty;
     const years = patients.map((p) => Number((p.birth_date ?? '').slice(0, 4))).filter((y) => Number.isFinite(y) && y > 1900);
     if (years.length < 2) return empty;
@@ -96,8 +108,8 @@ export default function DashboardPage() {
     const span = Math.max(1, maxY - minY);
     const counts = new Array(buckets).fill(0);
     const encs = new Array(buckets).fill(0);
-    const chr = new Array(buckets).fill(0);
     const chg = new Array(buckets).fill(0);
+    const highBurdenCount = new Array(buckets).fill(0);
     for (const p of patients) {
       const y = Number((p.birth_date ?? '').slice(0, 4));
       if (!Number.isFinite(y)) continue;
@@ -106,10 +118,13 @@ export default function DashboardPage() {
       if (idx < 0) idx = 0;
       counts[idx] += 1;
       encs[idx] += p.encounter_count;
-      chr[idx] += p.active_chronic_count;
       chg[idx] += p.total_charges;
+      if (p.active_chronic_count >= 3) highBurdenCount[idx] += 1;
     }
-    return { patients: counts, encounters: encs, chronic: chr, charges: chg };
+    const visitsPerPt = counts.map((c, i) => (c ? encs[i] / c : 0));
+    const chargePerEnc = counts.map((_, i) => (encs[i] ? chg[i] / encs[i] : 0));
+    const highBurden = counts.map((c, i) => (c ? (highBurdenCount[i] / c) * 100 : 0));
+    return { patients: counts, visitsPerPt, chargePerEnc, highBurden };
   }, [patients]);
 
   const byCity = useMemo(() => {
@@ -121,15 +136,31 @@ export default function DashboardPage() {
       m.set(c, list);
     }
     return Array.from(m.entries())
-      .map(([city, rows]) => ({
-        city,
-        count: rows.length,
-        encounters: rows.reduce((s, r) => s + r.encounter_count, 0),
-        charges: rows.reduce((s, r) => s + r.total_charges, 0),
-        chronic: rows.reduce((s, r) => s + r.active_chronic_count, 0),
-      }))
+      .map(([city, rows]) => {
+        const highBurden = rows.filter((r) => r.active_chronic_count >= 3).length;
+        return {
+          city,
+          count: rows.length,
+          encounters: rows.reduce((s, r) => s + r.encounter_count, 0),
+          charges: rows.reduce((s, r) => s + r.total_charges, 0),
+          chronic: rows.reduce((s, r) => s + r.active_chronic_count, 0),
+          highBurden,
+          highBurdenPct: rows.length ? (highBurden / rows.length) * 100 : 0,
+        };
+      })
       .sort((a, b) => b.count - a.count);
   }, [patients]);
+
+  // Sort highest-charge patients with a derived $/visit signal so the
+  // executive can distinguish high-utilizers from high-acuity outliers.
+  const topCharge = useMemo(
+    () =>
+      [...patients]
+        .sort((a, b) => b.total_charges - a.total_charges)
+        .slice(0, 10)
+        .map((p) => ({ ...p, perVisit: p.encounter_count > 0 ? p.total_charges / p.encounter_count : 0 })),
+    [patients],
+  );
 
   if (loading) {
     return (
@@ -143,7 +174,7 @@ export default function DashboardPage() {
           </div>
         </header>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          {Array.from({ length: 4 }).map((_, i) => <KPISkeleton key={i} primary={i === 2} />)}
+          {Array.from({ length: 4 }).map((_, i) => <KPISkeleton key={i} primary={i === 0} />)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PanelSkeleton title="Age distribution" />
@@ -160,12 +191,8 @@ export default function DashboardPage() {
         <div className="eyebrow mb-1">Population Analytics</div>
         <h1 className="font-serif text-3xl font-semibold text-[var(--ink-strong)] tracking-tight">Clinical population overview</h1>
         <p className="text-sm text-[var(--ink-muted)] mt-2">
-          Aggregations across the gold-layer marts in Snowflake. All numbers computed in your browser from the published snapshot.
+          Executive KPIs for the active panel. Click any bar, ZIP, or city row to cross-filter every metric.
         </p>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-md bg-[var(--clinical-amber-bg)] border border-amber-200 px-3 py-1.5 text-xs text-[var(--clinical-amber)]">
-          <span aria-hidden>→</span>
-          <span><strong>Interactive:</strong> click any bar or row to cross-filter every chart, KPI, and table.</span>
-        </div>
       </header>
 
       {filtered && (
@@ -181,33 +208,67 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Executive KPIs — the four numbers a CFO/CMO should see first. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <KPI label="Patients" value={formatNumber(patients.length)} series={cohortSeries.patients} accent="var(--clinical-teal)" />
-        <KPI label="Encounters" value={formatNumber(patients.reduce((s, p) => s + p.encounter_count, 0))} series={cohortSeries.encounters} accent="var(--clinical-violet)" />
-        <KPI label="Active chronic dx" value={formatNumber(patients.reduce((s, p) => s + p.active_chronic_count, 0))} primary series={cohortSeries.chronic} />
-        <KPI label="Total charges" value={formatCurrency(patients.reduce((s, p) => s + p.total_charges, 0))} series={cohortSeries.charges} accent="var(--clinical-amber)" />
+        <KPI
+          label="High-burden cohort"
+          sublabel="≥3 chronic dx · care-mgmt candidates"
+          value={`${kpi.highBurdenPct.toFixed(1)}%`}
+          context={`${formatNumber(kpi.highBurden)} of ${formatNumber(kpi.n)} patients`}
+          comparison={filtered ? { ref: kpiAll.highBurdenPct, mine: kpi.highBurdenPct, suffix: 'pp vs panel' } : null}
+          series={cohortSeries.highBurden}
+          primary
+        />
+        <KPI
+          label="Avg visits / patient"
+          sublabel="Utilization intensity"
+          value={kpi.visitsPerPt.toFixed(1)}
+          context={`${formatNumber(kpi.totalEnc)} encounters`}
+          comparison={filtered ? { ref: kpiAll.visitsPerPt, mine: kpi.visitsPerPt, suffix: ' vs panel' } : null}
+          series={cohortSeries.visitsPerPt}
+        />
+        <KPI
+          label="Avg charge / encounter"
+          sublabel="Revenue per case"
+          value={formatCurrency(kpi.chargePerEnc)}
+          context={`${formatCurrencyShort(kpi.totalCharges)} total billed`}
+          comparison={filtered ? { ref: kpiAll.chargePerEnc, mine: kpi.chargePerEnc, suffix: '% vs panel', pct: true } : null}
+          series={cohortSeries.chargePerEnc}
+        />
+        <KPI
+          label="Active panel"
+          sublabel="Patients in current view"
+          value={formatNumber(kpi.n)}
+          context={filtered ? `${((kpi.n / kpiAll.n) * 100).toFixed(0)}% of full panel` : 'Full panel'}
+          comparison={null}
+          series={cohortSeries.patients}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Panel title="Age distribution" subtitle="Click a bar to filter the dashboard">
-          <div className="h-64">
+        <Panel
+          title="Age distribution"
+          subtitle="Where the panel concentrates by decade. Click a bar to filter."
+        >
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageData}>
+              <BarChart data={ageData} margin={{ top: 18, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid stroke="#eef2f6" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
-                <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: any) => [`${v} patients`, '']} separator="" />
+                <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
+                <YAxis hide />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(15,23,42,0.04)' }} formatter={(v: any) => [`${formatNumber(v)} patients`, '']} separator="" />
                 <Bar
                   dataKey="count"
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={48}
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={42}
                   cursor="pointer"
                   onClick={(d: any) => setFilter((prev) => ({ ...prev, ageBucket: prev.ageBucket?.label === d.label ? undefined : d }))}
                 >
+                  <LabelList dataKey="count" position="top" fill="#475569" fontSize={10} formatter={(v: number) => formatNumber(v)} />
                   {ageData.map((b, i) => {
                     const sel = filter.ageBucket?.label === b.label;
                     const dim = filter.ageBucket && !sel;
-                    return <Cell key={i} fill={sel ? '#0e7490' : ACCENT} opacity={dim ? 0.3 : 1} />;
+                    return <Cell key={i} fill={sel ? SELECTED : ACCENT} opacity={dim ? 0.25 : 1} />;
                   })}
                 </Bar>
               </BarChart>
@@ -215,94 +276,128 @@ export default function DashboardPage() {
           </div>
         </Panel>
 
-        <Panel title="Chronic-condition burden" subtitle="Click a bar to filter by chronic count">
-          <div className="h-64">
+        <Panel
+          title="Chronic-condition burden"
+          subtitle="Patients by active chronic dx count. The ≥3 bars are care-management candidates."
+        >
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chronicData}>
+              <BarChart data={chronicData} margin={{ top: 18, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid stroke="#eef2f6" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
-                <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: any) => [`${v} patients`, '']} separator="" />
+                <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
+                <YAxis hide />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(15,23,42,0.04)' }} formatter={(v: any) => [`${formatNumber(v)} patients`, '']} separator="" />
                 <Bar
                   dataKey="count"
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={48}
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={42}
                   cursor="pointer"
                   onClick={(d: any) => setFilter((prev) => ({ ...prev, chronicBucket: prev.chronicBucket?.label === d.label ? undefined : d }))}
                 >
+                  <LabelList dataKey="count" position="top" fill="#475569" fontSize={10} formatter={(v: number) => formatNumber(v)} />
                   {chronicData.map((b, i) => {
                     const sel = filter.chronicBucket?.label === b.label;
                     const dim = filter.chronicBucket && !sel;
-                    return <Cell key={i} fill={sel ? '#0b1220' : CHRONIC_RAMP[i]} opacity={dim ? 0.3 : 1} />;
+                    // Color encodes one thing: which bars are the "alert" cohort
+                    // (≥3 chronic). The rest are neutral so the alert bars carry
+                    // all the visual weight.
+                    const isAlert = b.lo >= 3;
+                    const base = isAlert ? ALERT : NEUTRAL;
+                    return <Cell key={i} fill={sel ? SELECTED : base} opacity={dim ? 0.25 : 1} />;
                   })}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <div className="mt-3 flex items-center gap-4 text-[11px] text-[var(--ink-soft)]">
+            <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-sm" style={{ background: ALERT }} />Care-management candidates ({kpi.highBurdenPct.toFixed(1)}%)</span>
+            <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-sm" style={{ background: NEUTRAL }} />Stable / low-burden</span>
+          </div>
         </Panel>
 
-        <Panel title="Top cities by patient count" subtitle="Click a row to filter the dashboard" className="lg:col-span-2">
+        <Panel
+          title="Geographic risk by city"
+          subtitle="Sorted by patient volume; risk % is the share with ≥3 chronic dx. Click a row to filter."
+          className="lg:col-span-2"
+        >
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="min-w-full text-sm tabular">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--ink-soft)]">
+              <thead className="text-[10px] uppercase tracking-[0.08em] text-[var(--ink-soft)]">
                 <tr className="border-b border-[var(--hairline)]">
-                  <th className="px-3 py-2 text-left font-medium">City</th>
-                  <th className="px-3 py-2 text-right font-medium">Patients</th>
-                  <th className="px-3 py-2 text-left font-medium w-[28%]">Share</th>
-                  <th className="px-3 py-2 text-right font-medium">Encounters</th>
-                  <th className="px-3 py-2 text-right font-medium">Chronic dx</th>
-                  <th className="px-3 py-2 text-right font-medium">Total charges</th>
+                  <th className="px-3 py-2 text-left font-semibold">City</th>
+                  <th className="px-3 py-2 text-right font-semibold">Patients</th>
+                  <th className="px-3 py-2 text-left font-semibold w-[22%]">Share of panel</th>
+                  <th className="px-3 py-2 text-right font-semibold">Visits / pt</th>
+                  <th className="px-3 py-2 text-right font-semibold">High-risk %</th>
+                  <th className="px-3 py-2 text-right font-semibold">Total charges</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--hairline-soft)]">
-                {byCity.slice(0, 15).map((c) => {
-                  const maxCount = Math.max(...byCity.map((x) => x.count));
+                {byCity.slice(0, 15).map((c, idx, arr) => {
+                  const maxCount = Math.max(...arr.map((x) => x.count));
                   const sel = filter.city === c.city;
+                  const visitsPerPt = c.count ? c.encounters / c.count : 0;
+                  const riskHigh = c.highBurdenPct >= kpiAll.highBurdenPct + 2;
                   return (
                     <tr
                       key={c.city}
                       onClick={() => setFilter((prev) => ({ ...prev, city: prev.city === c.city ? undefined : c.city }))}
                       className={`cursor-pointer ${sel ? 'bg-[var(--clinical-teal-bg)]' : 'hover:bg-[var(--paper-deep)]'}`}
                     >
-                      <td className="px-3 py-2.5 text-[var(--ink)]">{c.city}</td>
+                      <td className="px-3 py-2.5 text-[var(--ink-strong)] font-medium">{c.city}</td>
                       <td className="px-3 py-2.5 text-right">{formatNumber(c.count)}</td>
                       <td className="px-3 py-2.5">
-                        <div className="h-2 rounded bg-[var(--paper-deep)] overflow-hidden">
-                          <div className="h-full" style={{ width: `${(c.count / maxCount) * 100}%`, background: 'var(--color-brand-600)' }} />
+                        <div className="h-1.5 rounded-sm bg-[var(--paper-deep)] overflow-hidden">
+                          <div className="h-full" style={{ width: `${(c.count / maxCount) * 100}%`, background: ACCENT }} />
                         </div>
                       </td>
-                      <td className="px-3 py-2.5 text-right">{formatNumber(c.encounters)}</td>
-                      <td className="px-3 py-2.5 text-right">{formatNumber(c.chronic)}</td>
+                      <td className="px-3 py-2.5 text-right text-[var(--ink)]">{visitsPerPt.toFixed(1)}</td>
+                      <td className={`px-3 py-2.5 text-right font-medium ${riskHigh ? 'text-[var(--clinical-rose)]' : 'text-[var(--ink-muted)]'}`}>
+                        {c.highBurdenPct.toFixed(1)}%
+                      </td>
                       <td className="px-3 py-2.5 text-right text-[var(--ink-strong)] font-medium">{formatCurrencyShort(c.charges)}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+            <div className="mt-2 text-[11px] text-[var(--ink-soft)]">
+              Panel average high-risk share: <span className="tabular text-[var(--ink)]">{kpiAll.highBurdenPct.toFixed(1)}%</span>. Cities above panel average are highlighted in rose.
+            </div>
           </div>
         </Panel>
 
-        <Panel title="Highest-charge patients" subtitle="Top 10 by total billed" className="lg:col-span-2">
+        <Panel
+          title="Highest-charge patients"
+          subtitle="Top 10 by total billed. $/visit separates high-utilizers (low $/visit) from high-acuity outliers."
+          className="lg:col-span-2"
+        >
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="min-w-full text-sm tabular">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--ink-soft)]">
+              <thead className="text-[10px] uppercase tracking-[0.08em] text-[var(--ink-soft)]">
                 <tr className="border-b border-[var(--hairline)]">
-                  <th className="px-3 py-2 text-left font-medium">MRN</th>
-                  <th className="px-3 py-2 text-left font-medium">Patient</th>
-                  <th className="px-3 py-2 text-left font-medium">City</th>
-                  <th className="px-3 py-2 text-right font-medium">Visits</th>
-                  <th className="px-3 py-2 text-center font-medium w-[120px]">Chronic</th>
-                  <th className="px-3 py-2 text-right font-medium">Charges</th>
+                  <th className="px-3 py-2 text-left font-semibold">MRN</th>
+                  <th className="px-3 py-2 text-left font-semibold">Patient</th>
+                  <th className="px-3 py-2 text-left font-semibold">City</th>
+                  <th className="px-3 py-2 text-right font-semibold">Visits</th>
+                  <th className="px-3 py-2 text-right font-semibold">Chronic</th>
+                  <th className="px-3 py-2 text-right font-semibold">$ / visit</th>
+                  <th className="px-3 py-2 text-right font-semibold">Total charges</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--hairline-soft)]">
-                {[...patients].sort((a, b) => b.total_charges - a.total_charges).slice(0, 10).map((p) => (
+                {topCharge.map((p) => (
                   <tr key={p.pat_id} onClick={() => navigate(`/patients/${encodeURIComponent(p.pat_id)}`)} className="cursor-pointer hover:bg-[var(--paper-deep)]">
                     <td className="px-3 py-2.5 font-mono text-[var(--ink-soft)]">{p.med_rec_num}</td>
                     <td className="px-3 py-2.5 text-[var(--ink-strong)] font-medium">{p.full_name}</td>
                     <td className="px-3 py-2.5 text-[var(--ink-muted)]">{p.city ?? '—'}</td>
                     <td className="px-3 py-2.5 text-right">{p.encounter_count}</td>
-                    <td className="px-3 py-2.5"><ChronicLight n={p.active_chronic_count} /></td>
+                    <td className="px-3 py-2.5 text-right">
+                      <span className={p.active_chronic_count >= 3 ? 'text-[var(--clinical-rose)] font-semibold' : 'text-[var(--ink-muted)]'}>
+                        {p.active_chronic_count}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-[var(--ink-muted)]">{formatCurrency(Math.round(p.perVisit))}</td>
                     <td className="px-3 py-2.5 text-right text-[var(--ink-strong)] font-medium">{formatCurrency(p.total_charges)}</td>
                   </tr>
                 ))}
@@ -315,6 +410,22 @@ export default function DashboardPage() {
   );
 }
 
+function calcKpi(rows: PatientSearchResult[]) {
+  const n = rows.length;
+  const totalEnc = rows.reduce((s, p) => s + p.encounter_count, 0);
+  const totalCharges = rows.reduce((s, p) => s + p.total_charges, 0);
+  const highBurden = rows.filter((p) => p.active_chronic_count >= 3).length;
+  return {
+    n,
+    totalEnc,
+    totalCharges,
+    highBurden,
+    highBurdenPct: n ? (highBurden / n) * 100 : 0,
+    visitsPerPt: n ? totalEnc / n : 0,
+    chargePerEnc: totalEnc ? totalCharges / totalEnc : 0,
+  };
+}
+
 function Chip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-[var(--clinical-teal)] text-[var(--clinical-teal)] text-xs font-medium px-2.5 py-1">
@@ -324,26 +435,51 @@ function Chip({ label, onClear }: { label: string; onClear: () => void }) {
   );
 }
 
+interface Comparison {
+  ref: number;
+  mine: number;
+  suffix: string;
+  pct?: boolean;
+}
+
 function KPI({
   label,
+  sublabel,
   value,
-  primary,
+  context,
+  comparison,
   series,
-  accent,
+  primary,
 }: {
   label: string;
+  sublabel?: string;
   value: string;
-  primary?: boolean;
+  context?: string;
+  comparison?: Comparison | null;
   series?: number[];
-  accent?: string;
+  primary?: boolean;
 }) {
+  const delta = comparison
+    ? comparison.pct
+      ? comparison.ref
+        ? ((comparison.mine - comparison.ref) / comparison.ref) * 100
+        : 0
+      : comparison.mine - comparison.ref
+    : null;
+  const deltaPositive = delta !== null && delta > 0;
+  const deltaText = delta === null
+    ? null
+    : `${delta >= 0 ? '+' : ''}${comparison?.pct ? delta.toFixed(0) : delta.toFixed(1)}${comparison?.suffix ?? ''}`;
   if (primary) {
     return (
-      <div className="rounded-lg p-4 shadow-sm text-white" style={{ background: 'var(--color-brand-700)' }}>
-        <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-white/80">{label}</div>
-        <div className="mt-1 font-serif text-2xl sm:text-3xl font-semibold tabular leading-tight">{value}</div>
+      <div className="rounded-lg p-4 text-white relative overflow-hidden" style={{ background: 'var(--color-brand-700)' }}>
+        <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-white/85">{label}</div>
+        {sublabel && <div className="text-[10.5px] text-white/70 mt-0.5">{sublabel}</div>}
+        <div className="mt-2 font-serif text-3xl sm:text-4xl font-semibold tabular leading-none">{value}</div>
+        {context && <div className="mt-1.5 text-[11px] text-white/75 tabular">{context}</div>}
+        {deltaText && <div className="mt-0.5 text-[11px] tabular text-white/85">{deltaText}</div>}
         {series && series.length >= 2 && (
-          <Sparkline values={series} width={120} height={22} stroke="rgba(255,255,255,0.9)" fill="rgba(255,255,255,0.9)" className="mt-1.5" />
+          <Sparkline values={series} width={120} height={20} stroke="rgba(255,255,255,0.9)" fill="rgba(255,255,255,0.9)" className="mt-2" />
         )}
       </div>
     );
@@ -351,9 +487,18 @@ function KPI({
   return (
     <div className="vital-tile">
       <div className="vital-tile-label">{label}</div>
+      {sublabel && <div className="text-[10.5px] text-[var(--ink-soft)] mt-0.5">{sublabel}</div>}
       <div className="vital-tile-value tabular">{value}</div>
+      <div className="mt-1 flex items-baseline justify-between gap-2">
+        {context && <div className="text-[11px] text-[var(--ink-soft)] tabular truncate">{context}</div>}
+        {deltaText && (
+          <div className={`text-[11px] tabular shrink-0 ${deltaPositive ? 'text-[var(--clinical-rose)]' : 'text-[var(--clinical-green)]'}`}>
+            {deltaText}
+          </div>
+        )}
+      </div>
       {series && series.length >= 2 && (
-        <Sparkline values={series} width={120} height={22} stroke={accent ?? 'var(--clinical-teal)'} fill={accent ?? 'var(--clinical-teal)'} className="mt-1.5" />
+        <Sparkline values={series} width={120} height={18} stroke={ACCENT} fill={ACCENT} className="mt-2" />
       )}
     </div>
   );
@@ -370,16 +515,5 @@ function Panel({ title, subtitle, children, className = '' }: { title: string; s
         {children}
       </div>
     </section>
-  );
-}
-
-// Traffic-light dot — green/amber/rose by chronic burden.
-function ChronicLight({ n }: { n: number }) {
-  const color = n >= 3 ? '#be123c' : n >= 1 ? '#b45309' : '#047857';
-  return (
-    <div className="flex items-center justify-center gap-2">
-      <span className="inline-block h-3 w-3 rounded-full ring-2 ring-white shadow" style={{ background: color }} />
-      <span className="text-xs font-semibold tabular" style={{ color }}>{n}</span>
-    </div>
   );
 }

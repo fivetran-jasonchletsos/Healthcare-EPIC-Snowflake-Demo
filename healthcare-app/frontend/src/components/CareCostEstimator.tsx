@@ -48,81 +48,97 @@ export default function CareCostEstimator({ totalCharges, encounters, payerHint 
     return { avgPerVisit, billed, insurance, oop, copayTotal };
   }, [totalCharges, encounters, futureVisits, deductible, coverage, copay]);
 
+  const coinsurance = Math.max(0, projection.billed - projection.insurance - deductible - projection.copayTotal);
+  // Stacked composition of the OOP — used for a single horizontal bar in
+  // place of three competing colored tiles.
+  const totalOop = Math.max(1, deductible + coinsurance + projection.copayTotal);
+  const seg = [
+    { key: 'Deductible', value: deductible, color: '#0e7490' },
+    { key: 'Coinsurance', value: coinsurance, color: '#94a3b8' },
+    { key: 'Copays', value: projection.copayTotal, color: '#cbd5e1' },
+  ];
+
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between mb-3 gap-3">
+    <section className="clinical-card overflow-hidden">
+      <header className="clinical-card-header flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Annual care-cost projection</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Estimates this patient's out-of-pocket spend for the next 12 months based on visit
-            frequency and plan coverage. Defaults from the primary payer on file.
+          <div className="eyebrow">Care Cost Projection</div>
+          <h2 className="font-serif text-lg font-semibold text-[var(--ink-strong)] mt-0.5">Annual out-of-pocket estimate</h2>
+          <p className="text-xs text-[var(--ink-muted)] mt-0.5">
+            Patient's projected 12-month OOP at current utilization and plan coverage. Defaults from primary payer on file.
           </p>
         </div>
-        <button onClick={() => setAdvanced((v) => !v)} className="text-xs text-brand-700 hover:text-brand-900 font-medium">
+        <button onClick={() => setAdvanced((v) => !v)} className="text-xs text-[var(--clinical-teal)] hover:text-[var(--ink-strong)] font-medium shrink-0">
           {advanced ? 'Hide assumptions' : 'Adjust assumptions'}
         </button>
-      </div>
+      </header>
 
-      <div className="rounded-lg bg-gradient-to-br from-brand-700 to-brand-900 text-white p-5 mb-4">
-        <div className="text-[11px] uppercase tracking-wider text-brand-200 font-medium">Estimated out-of-pocket / year</div>
-        <div className="mt-1 text-3xl sm:text-4xl font-bold tabular-nums">{formatCurrency(projection.oop)}</div>
-        <div className="mt-1 text-xs text-brand-200">
-          On {formatCurrency(projection.billed)} billed · insurance covers {formatCurrency(projection.insurance)}
+      <div className="p-5">
+        <div className="flex items-end justify-between gap-4 mb-4">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-soft)]">Estimated OOP / year</div>
+            <div className="mt-1 font-serif text-4xl font-semibold text-[var(--ink-strong)] tabular leading-none">{formatCurrency(projection.oop)}</div>
+            <div className="mt-1.5 text-[11px] text-[var(--ink-soft)] tabular">
+              {formatCurrency(projection.billed)} billed · {formatCurrency(projection.insurance)} covered by plan ({plan})
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-3 gap-2 text-sm">
-        <Slice label="Deductible" value={deductible} accent="bg-rose-100 text-rose-700" />
-        <Slice label="Coinsurance" value={projection.billed - projection.insurance - deductible - projection.copayTotal} accent="bg-amber-100 text-amber-700" />
-        <Slice label="Copays" value={projection.copayTotal} accent="bg-brand-100 text-brand-700" />
-      </div>
-
-      {advanced && (
-        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-100">
-          <label className="block">
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-medium">Plan</span>
-            <select
-              value={plan}
-              onChange={(e) => onPlanChange(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            >
-              {Object.keys(PLAN_DEFAULTS).map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
-          </label>
-          <NumInput label="Projected visits / yr" value={futureVisits} onChange={setFutureVisits} step={1} />
-          <NumInput label="Coverage %" value={Math.round(coverage * 100)} onChange={(n) => setCoverage(n / 100)} step={1} />
-          <NumInput label="Copay / visit ($)" value={copay} onChange={setCopay} step={5} />
-          <NumInput label="Deductible ($)" value={deductible} onChange={setDeductible} step={100} />
+        {/* Single composition bar, direct-labeled. Replaces three colored tiles. */}
+        <div>
+          <div className="h-2 w-full rounded-sm overflow-hidden flex bg-[var(--paper-deep)]">
+            {seg.map((s) => (
+              <div key={s.key} style={{ width: `${(s.value / totalOop) * 100}%`, background: s.color }} />
+            ))}
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-3 text-[11px]">
+            {seg.map((s) => (
+              <div key={s.key} className="flex items-baseline gap-1.5">
+                <span className="inline-block h-1.5 w-1.5 rounded-sm shrink-0" style={{ background: s.color }} />
+                <span className="text-[var(--ink-soft)] uppercase tracking-wider text-[10px] font-semibold">{s.key}</span>
+                <span className="ml-auto tabular text-[var(--ink-strong)] font-medium">{formatCurrency(s.value)}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
 
-      <p className="mt-4 text-[11px] text-slate-400 leading-snug">
-        Estimate only — actual costs depend on the patient's exact benefit design, network
-        utilization, and any supplemental coverage.
-      </p>
+        {advanced && (
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-[var(--hairline-soft)]">
+            <label className="block">
+              <span className="text-[10px] uppercase tracking-wider text-[var(--ink-soft)] font-semibold">Plan</span>
+              <select
+                value={plan}
+                onChange={(e) => onPlanChange(e.target.value)}
+                className="mt-1 w-full rounded-md border border-[var(--hairline)] px-3 py-2 text-sm"
+              >
+                {Object.keys(PLAN_DEFAULTS).map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </label>
+            <NumInput label="Projected visits / yr" value={futureVisits} onChange={setFutureVisits} step={1} />
+            <NumInput label="Coverage %" value={Math.round(coverage * 100)} onChange={(n) => setCoverage(n / 100)} step={1} />
+            <NumInput label="Copay / visit ($)" value={copay} onChange={setCopay} step={5} />
+            <NumInput label="Deductible ($)" value={deductible} onChange={setDeductible} step={100} />
+          </div>
+        )}
+
+        <p className="mt-4 text-[11px] text-[var(--ink-soft)] leading-snug">
+          Estimate only — actual costs depend on the patient's exact benefit design, network utilization, and any supplemental coverage.
+        </p>
+      </div>
     </section>
-  );
-}
-
-function Slice({ label, value, accent }: { label: string; value: number; accent: string }) {
-  return (
-    <div className="rounded-lg border border-slate-200 p-3">
-      <div className={`inline-flex text-[10px] uppercase tracking-wider font-medium rounded-full px-2 py-0.5 ${accent}`}>{label}</div>
-      <div className="mt-2 text-lg font-semibold text-slate-900 tabular-nums">{formatCurrency(Math.max(0, value))}</div>
-    </div>
   );
 }
 
 function NumInput({ label, value, onChange, step = 1 }: { label: string; value: number; onChange: (n: number) => void; step?: number }) {
   return (
     <label className="block">
-      <span className="text-[11px] uppercase tracking-wider text-slate-500 font-medium">{label}</span>
+      <span className="text-[10px] uppercase tracking-wider text-[var(--ink-soft)] font-semibold">{label}</span>
       <input
         type="number"
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value) || 0)}
-        className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm tabular-nums"
+        className="mt-1 w-full rounded-md border border-[var(--hairline)] px-3 py-2 text-sm tabular"
       />
     </label>
   );

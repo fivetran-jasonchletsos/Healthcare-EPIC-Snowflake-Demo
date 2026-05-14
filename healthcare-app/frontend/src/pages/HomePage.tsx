@@ -59,10 +59,18 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 divide-x divide-y divide-[var(--hairline-soft)] tabular">
-                  <Vital label="Active patients" value={stats ? formatNumber(stats.total_patients) : '—'} hint="In current panel" />
-                  <Vital label="Encounters" value={stats ? formatNumber(stats.total_encounters) : '—'} hint="Lifetime" />
-                  <Vital label="Avg charge / encounter" value={stats ? formatCurrency(stats.avg_encounter_cost) : '—'} hint="Billable" />
-                  <Vital label="Chronic burden" value={stats ? formatNumber(stats.active_chronic_count) : '—'} hint="Patients with ≥1 chronic dx" />
+                  <Vital label="Active panel" value={stats ? formatNumber(stats.total_patients) : '—'} hint="Patients with current data" />
+                  <Vital
+                    label="Avg visits / patient"
+                    value={stats ? (stats.total_encounters / stats.total_patients).toFixed(1) : '—'}
+                    hint={stats ? `${formatNumber(stats.total_encounters)} encounters` : 'Utilization intensity'}
+                  />
+                  <Vital label="Avg charge / encounter" value={stats ? formatCurrency(stats.avg_encounter_cost) : '—'} hint="Revenue per case" />
+                  <Vital
+                    label="Chronic dx coverage"
+                    value={stats ? `${((stats.active_chronic_count / stats.total_patients) * 100).toFixed(0)}%` : '—'}
+                    hint={stats ? `${formatNumber(stats.active_chronic_count)} patients · ≥1 chronic dx` : ''}
+                  />
                 </div>
                 <div className="px-5 py-3 border-t border-[var(--hairline-soft)] flex items-center justify-between text-[11px] text-[var(--ink-soft)] bg-[var(--paper-deep)]">
                   <span className="inline-flex items-center gap-1.5">
@@ -162,9 +170,9 @@ export default function HomePage() {
 function Vital({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     <div className="px-5 py-4">
-      <div className="text-[10.5px] font-semibold text-[var(--ink-soft)] uppercase tracking-[0.08em]">{label}</div>
-      <div className="mt-1 font-serif text-2xl font-semibold text-[var(--ink-strong)] leading-none">{value}</div>
-      <div className="mt-1 text-[11px] text-[var(--ink-soft)]">{hint}</div>
+      <div className="text-[10px] font-semibold text-[var(--ink-soft)] uppercase tracking-[0.1em]">{label}</div>
+      <div className="mt-1.5 font-serif text-[28px] font-semibold text-[var(--ink-strong)] leading-none tabular">{value}</div>
+      <div className="mt-1.5 text-[11px] text-[var(--ink-soft)] tabular truncate">{hint}</div>
     </div>
   );
 }

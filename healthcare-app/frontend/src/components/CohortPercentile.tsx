@@ -56,16 +56,15 @@ export default function CohortPercentile({ patId, age, sex, encounters, charges,
   const cohortLabel = `${Math.floor(age / 10) * 10}s · ${sex === 'M' ? 'male' : sex === 'F' ? 'female' : sex}`;
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900">Where this patient ranks</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Among {formatNumber(stats.n)} peers in the same age + sex cohort ({cohortLabel}).
-          </p>
-        </div>
-      </div>
-      <div className="space-y-3">
+    <section className="clinical-card overflow-hidden">
+      <header className="clinical-card-header">
+        <div className="eyebrow">Cohort Percentile</div>
+        <h2 className="font-serif text-lg font-semibold text-[var(--ink-strong)] mt-0.5">Where this patient ranks</h2>
+        <p className="text-xs text-[var(--ink-muted)] mt-0.5">
+          Among {formatNumber(stats.n)} peers in the same age + sex cohort ({cohortLabel}). Tick is cohort median.
+        </p>
+      </header>
+      <div className="p-5 space-y-4">
         <Row
           label="Encounters"
           mine={encounters}
@@ -94,24 +93,33 @@ export default function CohortPercentile({ patId, age, sex, encounters, charges,
 
 function Row({ label, mine, median, pct, fmt }: { label: string; mine: number; median: number; pct: number; fmt: (n: number) => string }) {
   const above = mine >= median;
+  const aboveMuch = pct >= 75;
+  // Reserve color for the one thing worth highlighting — being in the upper
+  // quartile of utilization or burden vs cohort.
+  const valueColor = aboveMuch ? 'text-[var(--clinical-rose)]' : 'text-[var(--ink-strong)]';
   return (
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
-        <span className="text-sm font-medium text-slate-700">{label}</span>
-        <span className="text-sm tabular-nums">
-          <strong className={above ? 'text-rose-700' : 'text-emerald-700'}>{fmt(mine)}</strong>
-          <span className="text-slate-400"> vs. median {fmt(median)}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-soft)]">{label}</span>
+        <span className="text-sm tabular">
+          <strong className={valueColor}>{fmt(mine)}</strong>
+          <span className="text-[var(--ink-soft)]"> · median {fmt(median)}</span>
         </span>
       </div>
-      <div className="relative h-2.5 rounded-full bg-gradient-to-r from-emerald-200 via-slate-200 to-rose-200">
-        <div className="absolute top-1/2 left-1/2 -translate-y-1/2 w-px h-3.5 bg-slate-400" />
+      <div className="relative h-2 rounded-sm bg-[var(--paper-deep)]">
+        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-[var(--ink-soft)] opacity-60" />
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-brand-700 border-2 border-white shadow"
-          style={{ left: `${Math.max(2, Math.min(98, pct))}%` }}
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3 w-3 rounded-full border-2 border-white"
+          style={{
+            left: `${Math.max(2, Math.min(98, pct))}%`,
+            background: aboveMuch ? 'var(--clinical-rose)' : 'var(--clinical-teal)',
+          }}
           title={`${pct.toFixed(0)}th percentile`}
         />
       </div>
-      <div className="text-[10px] text-slate-500 mt-0.5">{pct.toFixed(0)}th percentile in cohort</div>
+      <div className={`text-[10px] mt-1 tabular ${above ? 'text-[var(--ink-muted)]' : 'text-[var(--ink-soft)]'}`}>
+        {pct.toFixed(0)}th percentile · {above ? 'above' : 'below'} cohort median
+      </div>
     </div>
   );
 }
