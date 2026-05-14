@@ -33,7 +33,7 @@ const intents: Array<{
 }> = [
   {
     name: 'three_plus_chronic',
-    pattern: /(3\+|three\s+or\s+more|multi.*chronic|complex.*patient)/i,
+    pattern: /(\d+\s*\+\s*chronic|\d+\s+or\s+more\s+chronic|three\s+or\s+more|multi.*chronic|complex.*patient|chronic\s+condition)/i,
     handler: (_, ps) => {
       const hits = ps.filter((p) => p.active_chronic_count >= 3).slice(0, 25);
       return {
