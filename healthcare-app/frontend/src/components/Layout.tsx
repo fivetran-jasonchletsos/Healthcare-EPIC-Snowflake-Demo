@@ -11,6 +11,7 @@ const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'ar
 
 const NAV_ITEMS: [string, string][] = [
   ['/', 'Home'],
+  ['/executive', 'Executive'],
   ['/patients', 'Patients'],
   ['/dashboard', 'Population Health'],
   ['/map', 'Geographic'],
@@ -285,9 +286,20 @@ export default function Layout() {
           </div>
           <div>
             <div className="eyebrow mb-2">Data Pipeline</div>
-            <p className="leading-relaxed">
+            <p className="leading-relaxed mb-3">
               SQL Server CDC → Fivetran → Snowflake → dbt → static JSON snapshot
             </p>
+            <div className="flex items-center gap-2 text-[11px]">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">
+                <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>5x</span>
+                <span className="font-semibold text-[var(--ink-strong)]">Fivetran</span>
+              </span>
+              <span className="text-[var(--ink-soft)]">+</span>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">
+                <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#29B5E8' }}>❄</span>
+                <span className="font-semibold text-[var(--ink-strong)]">Snowflake</span>
+              </span>
+            </div>
           </div>
           <div>
             <div className="eyebrow mb-2">Compliance Posture</div>

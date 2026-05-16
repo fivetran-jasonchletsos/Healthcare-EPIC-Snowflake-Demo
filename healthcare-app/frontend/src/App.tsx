@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import AgentPage from './pages/AgentPage';
 import AboutAgentPage from './pages/AboutAgentPage';
 import PipelinePage from './pages/PipelinePage';
+import ExecutivePage from './pages/ExecutivePage';
 import MapPage from './pages/MapPage';
 import WatchlistPage from './pages/WatchlistPage';
 import AboutPage from './pages/AboutPage';
@@ -28,6 +29,7 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="/patients" element={<PatientsPage />} />
             <Route path="/patients/:patId" element={<PatientDetailPage />} />
+            <Route path="/executive" element={<ExecutivePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/agent" element={<AgentPage />} />
             <Route path="/about-agent" element={<AboutAgentPage />} />

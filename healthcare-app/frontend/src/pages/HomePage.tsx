@@ -34,11 +34,17 @@ export default function HomePage() {
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
-                  onClick={() => navigate('/patients')}
+                  onClick={() => navigate('/executive')}
                   className="inline-flex items-center gap-2 rounded-md text-white font-semibold px-5 py-2.5 shadow-sm hover:opacity-95 transition-opacity"
                   style={{ background: 'var(--color-brand-700)' }}
                 >
-                  Open patient registry <span aria-hidden>→</span>
+                  Open Executive Cockpit <span aria-hidden>→</span>
+                </button>
+                <button
+                  onClick={() => navigate('/patients')}
+                  className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
+                >
+                  Patient registry <span aria-hidden>→</span>
                 </button>
                 <button
                   onClick={() => navigate('/agent')}
