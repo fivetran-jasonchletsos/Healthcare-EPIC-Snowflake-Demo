@@ -359,7 +359,7 @@ export default function DashboardPage() {
         >
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }} barGap={-9999} barCategoryGap="22%">
+              <BarChart data={ageData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }} barCategoryGap="22%">
                 <CartesianGrid stroke="#eef2f6" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
                 <YAxis hide />
@@ -382,10 +382,6 @@ export default function DashboardPage() {
                     return <Cell key={i} fill={sel ? SELECTED : ACCENT} opacity={dim ? 0.25 : 1} />;
                   })}
                 </Bar>
-                {/* Peer-benchmark overlay: dashed cap above each bar at the
-                    national-share expected count. Same x scale → reads as
-                    "where the US median panel would land". */}
-                <Bar dataKey="peer" maxBarSize={42} shape={PeerCapShape as any} legendType="none" isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -400,7 +396,7 @@ export default function DashboardPage() {
         >
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chronicData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }} barGap={-9999} barCategoryGap="22%">
+              <BarChart data={chronicData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }} barCategoryGap="22%">
                 <CartesianGrid stroke="#eef2f6" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
                 <YAxis hide />
@@ -435,7 +431,6 @@ export default function DashboardPage() {
                     return <Cell key={i} fill={sel ? SELECTED : base} opacity={dim ? 0.25 : 1} />;
                   })}
                 </Bar>
-                <Bar dataKey="peer" maxBarSize={42} shape={PeerCapShape as any} legendType="none" isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
