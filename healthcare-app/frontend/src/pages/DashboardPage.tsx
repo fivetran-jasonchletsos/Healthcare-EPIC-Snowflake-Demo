@@ -539,25 +539,6 @@ export default function DashboardPage() {
   );
 }
 
-// Custom shape used by the second `<Bar dataKey="peer">` overlay. Renders
-// only a dashed cap line + tiny end ticks at the top of the peer-expected
-// value — never a filled bar — so the visual reads as a "national reference
-// notch" sitting over the actual count bar.
-function PeerCapShape(props: any) {
-  const { x, y, width, value } = props;
-  if (typeof x !== 'number' || typeof y !== 'number' || typeof width !== 'number') return null;
-  if (!value && value !== 0) return null;
-  const x1 = x;
-  const x2 = x + width;
-  return (
-    <g pointerEvents="none">
-      <line x1={x1} x2={x2} y1={y} y2={y} stroke="var(--ink-strong)" strokeWidth={1.25} strokeDasharray="2 2" opacity={0.75} />
-      <line x1={x1} x2={x1} y1={y - 3} y2={y + 3} stroke="var(--ink-strong)" strokeWidth={1.25} opacity={0.75} />
-      <line x1={x2} x2={x2} y1={y - 3} y2={y + 3} stroke="var(--ink-strong)" strokeWidth={1.25} opacity={0.75} />
-    </g>
-  );
-}
-
 function calcKpi(rows: PatientSearchResult[]) {
   const n = rows.length;
   const totalEnc = rows.reduce((s, p) => s + p.encounter_count, 0);
