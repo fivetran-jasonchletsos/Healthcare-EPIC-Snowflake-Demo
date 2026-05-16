@@ -52,13 +52,12 @@ export function PeerPercentileBand({
   position,
   median,
   topQuartile,
-  invert = false,
   height = 8,
 }: {
-  position: number; // 0..100 — your hospital's percentile
+  position: number; // 0..100 — your hospital's percentile, higher = better
   median?: number;
   topQuartile?: number;
-  invert?: boolean; // if true, low is good (e.g., denial rate)
+  invert?: boolean; // accepted but ignored — convention is always higher-is-better
   height?: number;
 }) {
   // Convention: `position` is "we're in the Nth percentile of peers,

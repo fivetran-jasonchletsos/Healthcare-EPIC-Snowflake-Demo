@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CircleMarker, MapContainer, Tooltip, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,7 @@ type Mode = 'count' | 'charges' | 'chronic';
 
 const MODE_META: Record<
   Mode,
-  { label: string; short: string; pick: (p: PatientSearchResult) => number; icon: JSX.Element }
+  { label: string; short: string; pick: (p: PatientSearchResult) => number; icon: ReactNode }
 > = {
   count: {
     label: 'Patient count',
