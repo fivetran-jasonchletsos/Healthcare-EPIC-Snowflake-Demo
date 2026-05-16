@@ -49,6 +49,43 @@ export default function PatientDetailPage() {
   const burdenTone =
     burden >= 3 ? { cls: 'alert', label: 'High chronic burden' } : burden >= 1 ? { cls: 'caution', label: `${burden} chronic` } : { cls: 'healthy', label: 'Stable' };
 
+  // Next Best Action — simple rule-based recommendation
+  const lastEncounterDate = encounters?.encounters
+    .map((e) => e.contact_date)
+    .filter(Boolean)
+    .sort()
+    .reverse()[0];
+  const daysSinceLast = lastEncounterDate
+    ? Math.floor((Date.now() - new Date(lastEncounterDate).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  let nextAction: { tone: string; label: string; title: string; rationale: string } | null = null;
+  if (burden >= 3) {
+    nextAction = {
+      tone: 'alert',
+      label: 'Care management',
+      title: 'Enroll in care management',
+      rationale: `${burden} active chronic conditions — longitudinal care plan reduces utilization variance.`,
+    };
+  } else if (balance > 500) {
+    nextAction = {
+      tone: 'caution',
+      label: 'AR outreach',
+      title: 'Outreach for AR balance',
+      rationale: `Outstanding balance ${formatCurrency(balance)} — propensity-to-pay workflow recommended.`,
+    };
+  } else if (daysSinceLast === null || daysSinceLast > 90) {
+    nextAction = {
+      tone: 'info',
+      label: 'Wellness',
+      title: 'Schedule wellness visit',
+      rationale:
+        daysSinceLast === null
+          ? 'No encounters on record — initiate primary-care outreach.'
+          : `Last encounter ${daysSinceLast} days ago — preventive visit overdue.`,
+    };
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Breadcrumb — clinical chart navigation feel */}
@@ -111,6 +148,31 @@ export default function PatientDetailPage() {
           </div>
         )}
       </header>
+
+      {/* Next Best Action — rule-based, derived from patient data already loaded */}
+      {nextAction && (
+        <div className="mt-4 clinical-card px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-3 shrink-0">
+            <div
+              className="h-9 w-9 rounded-md flex items-center justify-center font-serif font-semibold shrink-0"
+              style={{ background: 'var(--clinical-teal-bg)', color: 'var(--clinical-teal)' }}
+              aria-hidden
+            >
+              →
+            </div>
+            <div>
+              <div className="eyebrow">Next Best Action</div>
+              <div className="font-serif text-base font-semibold text-[var(--ink-strong)] leading-tight mt-0.5">
+                {nextAction.title}
+              </div>
+            </div>
+          </div>
+          <div className="text-xs text-[var(--ink-muted)] sm:flex-1 sm:border-l sm:border-[var(--hairline-soft)] sm:pl-5 leading-relaxed">
+            {nextAction.rationale}
+          </div>
+          <span className={`status-pill ${nextAction.tone} shrink-0`}>{nextAction.label}</span>
+        </div>
+      )}
 
       {/* Section: Encounters + Diagnoses side-by-side */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">

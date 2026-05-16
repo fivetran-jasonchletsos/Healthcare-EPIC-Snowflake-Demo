@@ -61,19 +61,21 @@ export function PeerPercentileBand({
   invert?: boolean; // if true, low is good (e.g., denial rate)
   height?: number;
 }) {
+  // Convention: `position` is "we're in the Nth percentile of peers,
+  // higher = better." Same for all metrics, inverted or not — the caller
+  // converts raw metric values into a "better-than" percentile. The band
+  // is therefore always red-on-left (bottom quartile), green-on-right (top
+  // quartile), so the needle's lateral position reads consistently.
   const p = Math.max(0, Math.min(100, position));
-  const goodLeft = invert ? 'var(--clinical-green-bg)' : 'var(--clinical-rose-bg)';
-  const goodRight = invert ? 'var(--clinical-rose-bg)' : 'var(--clinical-green-bg)';
-  const mid = 'var(--clinical-amber-bg)';
   return (
     <div className="relative" style={{ height: height + 12 }}>
       <div
         className="absolute left-0 right-0 rounded-full overflow-hidden border border-[var(--hairline)] flex"
         style={{ top: 6, height }}
       >
-        <div style={{ flex: 25, background: goodLeft }} />
-        <div style={{ flex: 50, background: mid }} />
-        <div style={{ flex: 25, background: goodRight }} />
+        <div style={{ flex: 25, background: 'var(--clinical-rose-bg)' }} />
+        <div style={{ flex: 50, background: 'var(--clinical-amber-bg)' }} />
+        <div style={{ flex: 25, background: 'var(--clinical-green-bg)' }} />
       </div>
       {median !== undefined && (
         <div
@@ -497,7 +499,7 @@ export function DataFlowDiagram({ nodes }: { nodes: FlowNode[] }) {
         <div>
           <div className="eyebrow mb-1">Live Data Flow</div>
           <div className="font-serif text-xl font-semibold text-[var(--ink-strong)]">
-            Epic Clarity → Snowflake, every {nodes.length > 0 ? '15' : '60'} minutes
+            Epic Clarity → Snowflake, every 5 minutes
           </div>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-[var(--ink-soft)] tabular">
@@ -506,24 +508,27 @@ export function DataFlowDiagram({ nodes }: { nodes: FlowNode[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-9 gap-2 items-stretch">
+      <div className="flex flex-col md:flex-row md:items-stretch gap-2">
         {nodes.map((n, i) => (
           <Fragmented key={n.id} index={i} last={i === nodes.length - 1} node={n} />
         ))}
       </div>
 
-      {/* Mobile vertical legend */}
       <style>{`
         @keyframes flow-dash {
           to { stroke-dashoffset: -24; }
         }
         .flow-pulse { animation: flow-dash 1.6s linear infinite; }
+        @keyframes node-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
       `}</style>
     </div>
   );
 }
 
-function Fragmented({ index, last, node }: { index: number; last: boolean; node: FlowNode }) {
+function Fragmented({ index: _index, last, node }: { index: number; last: boolean; node: FlowNode }) {
   const tone =
     node.status === 'healthy'
       ? { border: 'var(--clinical-green)', bg: 'var(--clinical-green-bg)', text: 'var(--clinical-green)' }
@@ -533,7 +538,7 @@ function Fragmented({ index, last, node }: { index: number; last: boolean; node:
 
   return (
     <>
-      <div className="md:col-span-2 rounded-lg border bg-white p-3 flex flex-col gap-1.5" style={{ borderColor: 'var(--hairline)' }}>
+      <div className="flex-1 min-w-0 rounded-lg border bg-white p-3 flex flex-col gap-1.5" style={{ borderColor: 'var(--hairline)' }}>
         <div className="flex items-center justify-between gap-2">
           <NodeIcon logo={node.logo} />
           <span
@@ -542,7 +547,7 @@ function Fragmented({ index, last, node }: { index: number; last: boolean; node:
           >
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ background: tone.text, animation: node.status !== 'healthy' ? 'pulse 1.6s infinite' : undefined }}
+              style={{ background: tone.text, animation: node.status !== 'healthy' ? 'node-pulse 1.6s infinite' : undefined }}
             />
             {node.status === 'healthy' ? 'live' : node.status}
           </span>
@@ -556,7 +561,7 @@ function Fragmented({ index, last, node }: { index: number; last: boolean; node:
         )}
       </div>
       {!last && (
-        <div className="hidden md:flex md:col-span-[0.75] items-center justify-center" style={{ gridColumn: 'span 1' }}>
+        <div className="hidden md:flex w-10 shrink-0 items-center justify-center">
           <svg viewBox="0 0 60 24" className="w-full h-6" preserveAspectRatio="none">
             <line
               x1="0"
@@ -628,7 +633,7 @@ export function ProvenanceStrip({
       </div>
       <span className="text-[var(--hairline)]">│</span>
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>5x</span>
+        <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>F</span>
         <span className="text-[var(--ink-muted)]">{source}</span>
       </div>
       <span className="text-[var(--hairline)]">│</span>

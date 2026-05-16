@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, formatCurrency, formatNumber } from '../api/queries';
 import type { PatientSearchResult } from '../types';
+import { AnimatedCounter, ProvenanceStrip } from '../components/Executive';
 
 export default function PatientsPage() {
   const navigate = useNavigate();
@@ -35,6 +36,20 @@ export default function PatientsPage() {
     });
     return copy;
   }, [results, sort]);
+
+  const cohortStats = useMemo(() => {
+    const n = results.length;
+    if (n === 0) return { n: 0, avgVisits: 0, totalCharges: 0, highBurdenPct: 0 };
+    const totalVisits = results.reduce((s, p) => s + (p.encounter_count ?? 0), 0);
+    const totalCharges = results.reduce((s, p) => s + (p.total_charges ?? 0), 0);
+    const highBurden = results.filter((p) => (p.active_chronic_count ?? 0) >= 3).length;
+    return {
+      n,
+      avgVisits: totalVisits / n,
+      totalCharges,
+      highBurdenPct: (highBurden / n) * 100,
+    };
+  }, [results]);
 
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +134,47 @@ export default function PatientsPage() {
         </div>
       </form>
 
+      {!loading && cohortStats.n > 0 && (
+        <div className="clinical-card px-5 py-3.5 mb-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm">
+          <div className="eyebrow shrink-0">Cohort</div>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.n}
+              format={(n) => formatNumber(Math.round(n))}
+              className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">patients matched</span>
+          </div>
+          <span className="text-[var(--hairline)]">│</span>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.avgVisits}
+              format={(n) => n.toFixed(1)}
+              className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">avg visits</span>
+          </div>
+          <span className="text-[var(--hairline)]">│</span>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.totalCharges}
+              format={(n) => formatCurrency(n)}
+              className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">lifetime charges</span>
+          </div>
+          <span className="text-[var(--hairline)]">│</span>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.highBurdenPct}
+              format={(n) => `${n.toFixed(1)}%`}
+              className="font-serif text-xl font-semibold tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">high-burden (≥3 chronic)</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-3">
         <div className="text-[10px] font-semibold text-[var(--ink-soft)] uppercase tracking-wider">Sort by</div>
         <div className="inline-flex gap-0.5 rounded-md border border-[var(--hairline)] bg-white p-0.5 text-xs">
@@ -196,6 +252,14 @@ export default function PatientsPage() {
           </table>
         </div>
       )}
+
+      <div className="mt-6">
+        <ProvenanceStrip
+          freshness="4 min ago"
+          source="Epic Clarity · dim_patients + fct_encounters"
+          rows={`${formatNumber(results.length)} rows · 2 marts`}
+        />
+      </div>
     </div>
   );
 }

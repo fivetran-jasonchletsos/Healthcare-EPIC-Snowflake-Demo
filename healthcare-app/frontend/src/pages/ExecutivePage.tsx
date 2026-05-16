@@ -52,8 +52,8 @@ export default function ExecutivePage() {
       value: '8.4%',
       delta: { value: '− 1.2 pts', trend: 'good' as const, vs: 'vs prior 90d' },
       spark: spark([11.8, 11.4, 11.1, 10.6, 10.2, 9.8, 9.4, 9.1, 8.9, 8.7, 8.6, 8.4]),
-      peer: { position: 38, median: 50, topQuartile: 22, invert: true },
-      benchmark: 'Top Q <5% · Median 9–12%',
+      peer: { position: 62, median: 50, topQuartile: 78, invert: true },
+      benchmark: 'Median 9–12% · Top Q <5%',
       dollarLever: 'Every 1 pt reduction ≈ $8–10M incremental net patient revenue on $1B base. Clinical denials up 12% YoY industry-wide.',
       badge: 'Top opportunity',
       badgeTone: 'caution' as const,
@@ -65,7 +65,7 @@ export default function ExecutivePage() {
       spark: spark([46.5, 46.0, 45.2, 44.6, 44.1, 43.6, 43.2, 42.9, 42.7, 42.4, 42.3, 42.1]),
       peer: { position: 64, median: 50, topQuartile: 78, invert: true },
       benchmark: 'Median 45 · Top Q <40',
-      dollarLever: 'Each −1 day on $1B net revenue = ~$2.7M cash freed. Bond covenant input — watched quarterly by treasury.',
+      dollarLever: 'Each −1 day on $1B net revenue = ~$2.7M cash freed. Treasury reviews weekly — feeds the liquidity forecast.',
     },
     {
       label: 'Premium / Contract Labor',
@@ -119,10 +119,10 @@ export default function ExecutivePage() {
     {
       label: 'HCAHPS · Summary Star',
       value: '4',
-      subValue: 'of 5',
-      delta: { value: '+ 1 star', trend: 'good' as const, vs: 'vs LY' },
-      spark: spark([3.0, 3.0, 3.1, 3.2, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.0]),
-      peer: { position: 75, median: 50, topQuartile: 90 },
+      subValue: 'of 5 · composite',
+      delta: { value: '+ 0.3', trend: 'good' as const, vs: 'vs LY composite' },
+      spark: spark([3.5, 3.5, 3.6, 3.6, 3.6, 3.7, 3.7, 3.8, 3.8, 3.9, 3.9, 4.0]),
+      peer: { position: 72, median: 50, topQuartile: 88 },
       benchmark: 'Median 3 · 5★ ≈ top 10%',
       dollarLever: '4★ vs 3★ on $300M Medicare IPPS ≈ +$1.5–3M in VBP redistribution. HCAHPS = ~25% of VBP score.',
     },
@@ -170,7 +170,7 @@ export default function ExecutivePage() {
       title: 'POS Self-Pay Collections · Pre-Service',
       impact: '$1.4M',
       impactSub: 'cash earlier + bad-debt avoidance',
-      evidence: 'POS collections at 21%; top-quartile peers >35%. 14-pt gap on $200M patient liability = $10M cash + $1.4M bad debt prevented.',
+      evidence: 'POS collections at 21%; top-quartile peers >35%. Closing a 7-pt gap on $200M patient liability accelerates ~$14M of cash and prevents ~$1.4M of bad-debt write-offs.',
       confidence: 83,
       tags: ['Revenue cycle', 'Self-pay', 'HDHP'],
     },
@@ -215,7 +215,7 @@ export default function ExecutivePage() {
             </div>
             <div className="flex flex-col items-end gap-2">
               <div className="font-mono text-[11px] text-[var(--ink-soft)] tabular">
-                FY26 · Q2 · Period ending Fri
+                FY26 · Q3 · Week ending May 15, 2026
               </div>
               <div className="rounded-md border border-[var(--hairline)] bg-[var(--paper-deep)] px-3 py-1.5 text-[11px] tabular text-[var(--ink-muted)] flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--clinical-green)] animate-pulse" />
@@ -265,12 +265,13 @@ export default function ExecutivePage() {
             {/* 11th tile — Snowflake compute spend story for the booth narrative */}
             <KpiTile
               label="Snowflake compute · YTD"
-              value="$0.84"
-              subValue="per patient · per month"
-              delta={{ value: '− 38%', trend: 'good', vs: 'vs legacy DW' }}
-              spark={spark([1.36, 1.30, 1.24, 1.18, 1.12, 1.05, 1.00, 0.95, 0.92, 0.89, 0.86, 0.84])}
-              benchmark="Time Travel, zero-copy clone"
-              dollarLever="Decommissioning the legacy data warehouse and shifting to Snowflake elastic compute = $1.6M/yr operating expense reduction."
+              value="$58.4K"
+              subValue="elastic · auto-suspend"
+              delta={{ value: '− 96%', trend: 'good', vs: 'vs legacy DW $1.6M' }}
+              spark={spark([78, 74, 72, 70, 68, 66, 64, 62, 61, 60, 59, 58])}
+              peer={{ position: 86, median: 50, topQuartile: 78 }}
+              benchmark="Industry $0.8–1.5M / yr"
+              dollarLever="Retiring the on-prem Oracle warehouse + Snowflake elastic compute = $1.6M/yr operating expense reduction."
               badge="Cloud finance"
               badgeTone="info"
             />
@@ -279,7 +280,8 @@ export default function ExecutivePage() {
               value={<AnimatedCounter to={4.2} format={(n) => `${n.toFixed(1)} min`} />}
               delta={{ value: '99.7% SLA', trend: 'good', vs: 'rolling 30d' }}
               spark={spark([7.2, 6.8, 6.4, 6.1, 5.8, 5.4, 5.1, 4.9, 4.6, 4.4, 4.3, 4.2])}
-              benchmark="Fivetran CDC · TELEPORT"
+              peer={{ position: 92, median: 50, topQuartile: 80 }}
+              benchmark="Batch ETL · 4–24 hr"
               dollarLever="Every 30 minutes of pipeline lag delays denial-write-off recovery and ED throughput dashboards. Sub-5-min replication is the operational floor for real-time RCM and capacity decisions."
               badge="Fivetran · live"
               badgeTone="info"

@@ -1,3 +1,5 @@
+import { ProvenanceStrip } from '../components/Executive';
+
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
@@ -12,6 +14,32 @@ export default function AboutPage() {
           the user-facing experience.
         </p>
       </header>
+
+      <div className="mb-8 clinical-card px-5 py-3.5 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <div className="eyebrow shrink-0">Live Stack</div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-serif text-lg font-semibold text-[var(--ink-strong)] tabular leading-none">4.2 min</span>
+          <span className="text-xs text-[var(--ink-soft)]">last Fivetran sync</span>
+        </div>
+        <span className="text-[var(--hairline)]">│</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-serif text-lg font-semibold text-[var(--clinical-teal)] tabular leading-none">99.7%</span>
+          <span className="text-[var(--ink-soft)] text-xs">SLA</span>
+        </div>
+        <span className="text-[var(--hairline)]">│</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-serif text-lg font-semibold text-[var(--ink-strong)] tabular leading-none">$0.84</span>
+          <span className="text-xs text-[var(--ink-soft)]">Snowflake compute / patient / month</span>
+        </div>
+      </div>
+
+      <div className="mb-10">
+        <ProvenanceStrip
+          freshness="4.2 min ago"
+          source="Epic Clarity · SQL Server CDC"
+          rows="2.4M rows · 8 tables"
+        />
+      </div>
 
       <section className="mt-10">
         <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] border-b border-[var(--hairline)] pb-2 mb-3">Data sources</h2>

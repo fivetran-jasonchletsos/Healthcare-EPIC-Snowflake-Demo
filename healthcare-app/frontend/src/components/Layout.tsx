@@ -291,7 +291,7 @@ export default function Layout() {
             </p>
             <div className="flex items-center gap-2 text-[11px]">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">
-                <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>5x</span>
+                <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>F</span>
                 <span className="font-semibold text-[var(--ink-strong)]">Fivetran</span>
               </span>
               <span className="text-[var(--ink-soft)]">+</span>

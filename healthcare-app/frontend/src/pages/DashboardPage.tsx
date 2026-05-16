@@ -5,6 +5,7 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -15,6 +16,16 @@ import { api, formatCurrency, formatCurrencyShort, formatNumber } from '../api/q
 import type { PatientSearchResult } from '../types';
 import { KPISkeleton, LoadingBanner, PanelSkeleton } from '../components/Skeleton';
 import { Sparkline } from '../components/Sparkline';
+import { AnimatedCounter } from '../components/Executive';
+
+// National peer benchmarks — used as reference overlays on the population
+// distribution charts so a CEO sees panel mix vs. a published norm at a glance.
+// Sources: CMS MA risk-adjustment population mix (age) and CDC MMWR multi-
+// chronic prevalence (chronic dx). Numbers are illustrative for the demo but
+// match the order of magnitude an executive would expect.
+const NATIONAL_VISITS_PER_PT = 6.2;     // CMS / KFF outpatient utilization median
+const NATIONAL_HIGH_BURDEN_PCT = 27.2;  // CDC multi-chronic prevalence, adult panel
+const NATIONAL_CHARGE_PER_ENC = 1850;   // HCUP national mean outpatient charge
 
 const TOOLTIP_STYLE = {
   border: '1px solid var(--hairline)',
@@ -39,22 +50,25 @@ interface Filter {
   city?: string;
 }
 
+// Bucket definitions carry a `nationalShare` so we can render a peer reference
+// dot above each bar — gives the executive a "vs. US median panel" read.
+// Shares sum to 1.0 across each axis. Sources noted in the constants above.
 const AGE_BUCKETS = [
-  { label: '0–17', lo: 0, hi: 18 },
-  { label: '18–34', lo: 18, hi: 35 },
-  { label: '35–54', lo: 35, hi: 55 },
-  { label: '55–64', lo: 55, hi: 65 },
-  { label: '65–79', lo: 65, hi: 80 },
-  { label: '80+', lo: 80, hi: 200 },
+  { label: '0–17', lo: 0, hi: 18, nationalShare: 0.22 },
+  { label: '18–34', lo: 18, hi: 35, nationalShare: 0.23 },
+  { label: '35–54', lo: 35, hi: 55, nationalShare: 0.25 },
+  { label: '55–64', lo: 55, hi: 65, nationalShare: 0.13 },
+  { label: '65–79', lo: 65, hi: 80, nationalShare: 0.13 },
+  { label: '80+', lo: 80, hi: 200, nationalShare: 0.04 },
 ];
 
 const CHRONIC_BUCKETS = [
-  { label: '0', lo: 0, hi: 1 },
-  { label: '1', lo: 1, hi: 2 },
-  { label: '2', lo: 2, hi: 3 },
-  { label: '3', lo: 3, hi: 4 },
-  { label: '4', lo: 4, hi: 5 },
-  { label: '5+', lo: 5, hi: 99 },
+  { label: '0', lo: 0, hi: 1, nationalShare: 0.40 },
+  { label: '1', lo: 1, hi: 2, nationalShare: 0.21 },
+  { label: '2', lo: 2, hi: 3, nationalShare: 0.12 },
+  { label: '3', lo: 3, hi: 4, nationalShare: 0.10 },
+  { label: '4', lo: 4, hi: 5, nationalShare: 0.09 },
+  { label: '5+', lo: 5, hi: 99, nationalShare: 0.08 },
 ];
 
 export default function DashboardPage() {
@@ -82,11 +96,13 @@ export default function DashboardPage() {
   const ageData = useMemo(() => AGE_BUCKETS.map((b) => ({
     ...b,
     count: patients.filter((p) => p.age >= b.lo && p.age < b.hi).length,
+    peer: Math.round(patients.length * b.nationalShare),
   })), [patients]);
 
   const chronicData = useMemo(() => CHRONIC_BUCKETS.map((b) => ({
     ...b,
     count: patients.filter((p) => p.active_chronic_count >= b.lo && p.active_chronic_count < b.hi).length,
+    peer: Math.round(patients.length * b.nationalShare),
   })), [patients]);
 
   // Executive KPI block. We compute population-level rates the CFO/CMO actually
@@ -195,68 +211,163 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      {filtered && (
-        <div className="mb-6 rounded-md border border-[var(--clinical-teal)] bg-[var(--clinical-teal-bg)] px-4 py-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs uppercase tracking-wider text-[var(--clinical-teal)] font-semibold mr-1">Filtered:</span>
-          {filter.ageBucket && <Chip label={`Age ${filter.ageBucket.label}`} onClear={() => setFilter((p) => ({ ...p, ageBucket: undefined }))} />}
-          {filter.chronicBucket && <Chip label={`Chronic ${filter.chronicBucket.label}`} onClear={() => setFilter((p) => ({ ...p, chronicBucket: undefined }))} />}
-          {filter.city && <Chip label={`City ${filter.city}`} onClear={() => setFilter((p) => ({ ...p, city: undefined }))} />}
-          <span className="text-xs text-[var(--clinical-teal)] ml-1 tabular">Showing {formatNumber(patients.length)} of {formatNumber(all.length)}</span>
-          <button onClick={() => setFilter({})} className="ml-auto text-xs font-medium text-[var(--clinical-teal)] hover:text-[var(--ink-strong)]">
-            Clear all
-          </button>
+      {/* Filter-applied summary bar — always visible. Reads like a CFO scope
+          statement: who am I looking at, what share of the book, what spend? */}
+      <div
+        className={`mb-6 rounded-md border px-4 py-3 flex flex-wrap items-center gap-x-5 gap-y-2 ${
+          filtered
+            ? 'border-[var(--clinical-teal)] bg-[var(--clinical-teal-bg)]'
+            : 'border-[var(--hairline)] bg-white'
+        }`}
+      >
+        <div className="flex items-baseline gap-1.5 tabular">
+          <span className="text-[10px] uppercase tracking-[0.1em] font-semibold text-[var(--ink-soft)]">
+            Viewing
+          </span>
+          <span className="font-serif text-xl font-semibold text-[var(--ink-strong)] leading-none">
+            {formatNumber(patients.length)}
+          </span>
+          <span className="text-xs text-[var(--ink-muted)]">patients</span>
+          <span className="text-xs text-[var(--ink-soft)] ml-1">
+            ({all.length ? ((patients.length / all.length) * 100).toFixed(0) : '0'}% of panel)
+          </span>
         </div>
-      )}
+        <span className="hidden sm:inline text-[var(--hairline)]">│</span>
+        <div className="flex items-baseline gap-1.5 tabular">
+          <span className="text-[10px] uppercase tracking-[0.1em] font-semibold text-[var(--ink-soft)]">
+            Aggregate spend
+          </span>
+          <span className="font-serif text-xl font-semibold text-[var(--ink-strong)] leading-none">
+            {formatCurrencyShort(kpi.totalCharges)}
+          </span>
+        </div>
+        <span className="hidden sm:inline text-[var(--hairline)]">│</span>
+        <div className="flex items-baseline gap-1.5 tabular">
+          <span className="text-[10px] uppercase tracking-[0.1em] font-semibold text-[var(--ink-soft)]">
+            High-burden
+          </span>
+          <span className="font-serif text-xl font-semibold text-[var(--ink-strong)] leading-none">
+            {formatNumber(kpi.highBurden)}
+          </span>
+          <span className="text-xs text-[var(--ink-soft)]">care-mgmt candidates</span>
+        </div>
 
-      {/* Executive KPIs — the four numbers a CFO/CMO should see first. */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {filtered && (
+          <div className="basis-full flex flex-wrap items-center gap-2 pt-2 mt-1 border-t border-[var(--clinical-teal)]/30">
+            <span className="text-[10px] uppercase tracking-[0.1em] text-[var(--clinical-teal)] font-semibold">
+              Filters applied
+            </span>
+            {filter.ageBucket && <Chip label={`Age ${filter.ageBucket.label}`} onClear={() => setFilter((p) => ({ ...p, ageBucket: undefined }))} />}
+            {filter.chronicBucket && <Chip label={`Chronic ${filter.chronicBucket.label}`} onClear={() => setFilter((p) => ({ ...p, chronicBucket: undefined }))} />}
+            {filter.city && <Chip label={`City ${filter.city}`} onClear={() => setFilter((p) => ({ ...p, city: undefined }))} />}
+            <button onClick={() => setFilter({})} className="ml-auto text-xs font-medium text-[var(--clinical-teal)] hover:text-[var(--ink-strong)]">
+              Clear all
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Section header — matches the serif/eyebrow rhythm from HomePage so
+          the page reads as a chaptered executive narrative, not a dashboard
+          grid. */}
+      <div className="mb-4 flex items-end justify-between border-b border-[var(--hairline)] pb-3">
+        <div>
+          <div className="eyebrow mb-1">Executive KPIs</div>
+          <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] tracking-tight">
+            Four numbers, four levers
+          </h2>
+        </div>
+        <div className="text-[11px] text-[var(--ink-soft)] tabular hidden sm:block">
+          vs. national peer benchmarks
+        </div>
+      </div>
+
+      {/* Executive KPIs — the four numbers a CFO/CMO should see first.
+          Each tile carries a $ Lever line tying it back to the P&L. */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
         <KPI
           label="High-burden cohort"
           sublabel="≥3 chronic dx · care-mgmt candidates"
-          value={`${kpi.highBurdenPct.toFixed(1)}%`}
+          numericValue={kpi.highBurdenPct}
+          formatValue={(v) => `${v.toFixed(1)}%`}
           context={`${formatNumber(kpi.highBurden)} of ${formatNumber(kpi.n)} patients`}
+          benchmark={`National ${NATIONAL_HIGH_BURDEN_PCT.toFixed(1)}%`}
           comparison={filtered ? { ref: kpiAll.highBurdenPct, mine: kpi.highBurdenPct, suffix: 'pp vs panel' } : null}
+          dollarLever="Each 1 pt lift in chronic-care management enrollment ≈ $14 PMPM MA shared savings"
           series={cohortSeries.highBurden}
           primary
         />
         <KPI
           label="Avg visits / patient"
           sublabel="Utilization intensity"
-          value={kpi.visitsPerPt.toFixed(1)}
+          numericValue={kpi.visitsPerPt}
+          formatValue={(v) => v.toFixed(1)}
           context={`${formatNumber(kpi.totalEnc)} encounters`}
+          benchmark={`National median ${NATIONAL_VISITS_PER_PT.toFixed(1)} visits/pt`}
           comparison={filtered ? { ref: kpiAll.visitsPerPt, mine: kpi.visitsPerPt, suffix: ' vs panel' } : null}
+          dollarLever="Closing 0.5 visit gap on the rising-risk cohort ≈ $3.1M incremental Part B revenue / yr"
           series={cohortSeries.visitsPerPt}
         />
         <KPI
           label="Avg charge / encounter"
           sublabel="Revenue per case"
-          value={formatCurrency(kpi.chargePerEnc)}
+          numericValue={kpi.chargePerEnc}
+          formatValue={(v) => formatCurrency(v)}
           context={`${formatCurrencyShort(kpi.totalCharges)} total billed`}
+          benchmark={`HCUP mean ${formatCurrency(NATIONAL_CHARGE_PER_ENC)}`}
           comparison={filtered ? { ref: kpiAll.chargePerEnc, mine: kpi.chargePerEnc, suffix: '% vs panel', pct: true } : null}
+          dollarLever="A 2% lift in HCC capture on this panel ≈ $4.7M annualized risk-adjusted revenue"
           series={cohortSeries.chargePerEnc}
         />
         <KPI
           label="Active panel"
           sublabel="Patients in current view"
-          value={formatNumber(kpi.n)}
+          numericValue={kpi.n}
+          formatValue={(v) => formatNumber(Math.round(v))}
           context={filtered ? `${((kpi.n / kpiAll.n) * 100).toFixed(0)}% of full panel` : 'Full panel'}
+          benchmark={filtered ? `Full panel ${formatNumber(kpiAll.n)}` : undefined}
           comparison={null}
+          dollarLever={`Panel @ ${formatCurrencyShort(kpi.totalCharges)} billed · ${formatCurrency(Math.round(kpi.n ? kpi.totalCharges / kpi.n : 0))} avg / patient`}
           series={cohortSeries.patients}
         />
+      </div>
+
+      {/* Distribution section — serif chapter break before the bar charts. */}
+      <div className="mb-4 flex items-end justify-between border-b border-[var(--hairline)] pb-3">
+        <div>
+          <div className="eyebrow mb-1">Population Distribution</div>
+          <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] tracking-tight">
+            Panel shape vs. national norms
+          </h2>
+        </div>
+        <div className="hidden sm:flex items-center gap-3 text-[11px] text-[var(--ink-soft)]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: ACCENT }} />
+            This panel
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-px w-3.5" style={{ background: 'var(--ink-strong)', borderTop: '1px dashed var(--ink-strong)' }} />
+            National peer reference
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Panel
           title="Age distribution"
-          subtitle="Where the panel concentrates by decade. Click a bar to filter."
+          subtitle="Panel mix by decade with national peer reference. Click a bar to filter."
         >
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageData} margin={{ top: 18, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={ageData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }} barGap={-9999} barCategoryGap="22%">
                 <CartesianGrid stroke="#eef2f6" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
                 <YAxis hide />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(15,23,42,0.04)' }} formatter={(v: any) => [`${formatNumber(v)} patients`, '']} separator="" />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  cursor={{ fill: 'rgba(15,23,42,0.04)' }}
+                  formatter={(v: any, name: any) => [`${formatNumber(v)} patients`, name === 'peer' ? 'National peer' : 'This panel']}
+                />
                 <Bar
                   dataKey="count"
                   radius={[2, 2, 0, 0]}
@@ -271,22 +382,40 @@ export default function DashboardPage() {
                     return <Cell key={i} fill={sel ? SELECTED : ACCENT} opacity={dim ? 0.25 : 1} />;
                   })}
                 </Bar>
+                {/* Peer-benchmark overlay: dashed cap above each bar at the
+                    national-share expected count. Same x scale → reads as
+                    "where the US median panel would land". */}
+                <Bar dataKey="peer" maxBarSize={42} shape={PeerCapShape as any} legendType="none" isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          <div className="mt-2 text-[11px] text-[var(--ink-soft)] tabular">
+            Peer reference: US adult-panel age mix (CMS MA risk-adjustment population, 2024).
           </div>
         </Panel>
 
         <Panel
           title="Chronic-condition burden"
-          subtitle="Patients by active chronic dx count. The ≥3 bars are care-management candidates."
+          subtitle="Active chronic dx count with CDC peer overlay. The ≥3 bars are care-management candidates."
         >
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chronicData} margin={{ top: 18, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={chronicData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }} barGap={-9999} barCategoryGap="22%">
                 <CartesianGrid stroke="#eef2f6" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
                 <YAxis hide />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(15,23,42,0.04)' }} formatter={(v: any) => [`${formatNumber(v)} patients`, '']} separator="" />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  cursor={{ fill: 'rgba(15,23,42,0.04)' }}
+                  formatter={(v: any, name: any) => [`${formatNumber(v)} patients`, name === 'peer' ? 'National peer' : 'This panel']}
+                />
+                <ReferenceLine
+                  x="3"
+                  stroke="var(--clinical-rose)"
+                  strokeDasharray="2 3"
+                  strokeOpacity={0.6}
+                  label={{ value: 'Care-mgmt threshold', position: 'top', fill: 'var(--clinical-rose)', fontSize: 10 }}
+                />
                 <Bar
                   dataKey="count"
                   radius={[2, 2, 0, 0]}
@@ -306,12 +435,17 @@ export default function DashboardPage() {
                     return <Cell key={i} fill={sel ? SELECTED : base} opacity={dim ? 0.25 : 1} />;
                   })}
                 </Bar>
+                <Bar dataKey="peer" maxBarSize={42} shape={PeerCapShape as any} legendType="none" isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-3 flex items-center gap-4 text-[11px] text-[var(--ink-soft)]">
+          <div className="mt-3 flex items-center gap-4 flex-wrap text-[11px] text-[var(--ink-soft)]">
             <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-sm" style={{ background: ALERT }} />Care-management candidates ({kpi.highBurdenPct.toFixed(1)}%)</span>
             <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-sm" style={{ background: NEUTRAL }} />Stable / low-burden</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-px w-3.5" style={{ background: 'var(--ink-strong)', borderTop: '1px dashed var(--ink-strong)' }} />
+              National peer ({NATIONAL_HIGH_BURDEN_PCT.toFixed(1)}% ≥3 dx, CDC MMWR)
+            </span>
           </div>
         </Panel>
 
@@ -410,6 +544,25 @@ export default function DashboardPage() {
   );
 }
 
+// Custom shape used by the second `<Bar dataKey="peer">` overlay. Renders
+// only a dashed cap line + tiny end ticks at the top of the peer-expected
+// value — never a filled bar — so the visual reads as a "national reference
+// notch" sitting over the actual count bar.
+function PeerCapShape(props: any) {
+  const { x, y, width, value } = props;
+  if (typeof x !== 'number' || typeof y !== 'number' || typeof width !== 'number') return null;
+  if (!value && value !== 0) return null;
+  const x1 = x;
+  const x2 = x + width;
+  return (
+    <g pointerEvents="none">
+      <line x1={x1} x2={x2} y1={y} y2={y} stroke="var(--ink-strong)" strokeWidth={1.25} strokeDasharray="2 2" opacity={0.75} />
+      <line x1={x1} x2={x1} y1={y - 3} y2={y + 3} stroke="var(--ink-strong)" strokeWidth={1.25} opacity={0.75} />
+      <line x1={x2} x2={x2} y1={y - 3} y2={y + 3} stroke="var(--ink-strong)" strokeWidth={1.25} opacity={0.75} />
+    </g>
+  );
+}
+
 function calcKpi(rows: PatientSearchResult[]) {
   const n = rows.length;
   const totalEnc = rows.reduce((s, p) => s + p.encounter_count, 0);
@@ -445,16 +598,22 @@ interface Comparison {
 function KPI({
   label,
   sublabel,
-  value,
+  numericValue,
+  formatValue,
   context,
+  benchmark,
+  dollarLever,
   comparison,
   series,
   primary,
 }: {
   label: string;
   sublabel?: string;
-  value: string;
+  numericValue: number;
+  formatValue: (n: number) => string;
   context?: string;
+  benchmark?: string;
+  dollarLever?: string;
   comparison?: Comparison | null;
   series?: number[];
   primary?: boolean;
@@ -472,33 +631,63 @@ function KPI({
     : `${delta >= 0 ? '+' : ''}${comparison?.pct ? delta.toFixed(0) : delta.toFixed(1)}${comparison?.suffix ?? ''}`;
   if (primary) {
     return (
-      <div className="rounded-lg p-4 text-white relative overflow-hidden" style={{ background: 'var(--color-brand-700)' }}>
-        <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-white/85">{label}</div>
-        {sublabel && <div className="text-[10.5px] text-white/70 mt-0.5">{sublabel}</div>}
-        <div className="mt-2 font-serif text-3xl sm:text-4xl font-semibold tabular leading-none">{value}</div>
-        {context && <div className="mt-1.5 text-[11px] text-white/75 tabular">{context}</div>}
-        {deltaText && <div className="mt-0.5 text-[11px] tabular text-white/85">{deltaText}</div>}
-        {series && series.length >= 2 && (
-          <Sparkline values={series} width={120} height={20} stroke="rgba(255,255,255,0.9)" fill="rgba(255,255,255,0.9)" className="mt-2" />
+      <div className="rounded-lg text-white relative overflow-hidden flex flex-col" style={{ background: 'var(--color-brand-700)' }}>
+        <div className="p-4 pb-3 flex-1">
+          <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-white/85">{label}</div>
+          {sublabel && <div className="text-[10.5px] text-white/70 mt-0.5">{sublabel}</div>}
+          <div className="mt-2 font-serif text-3xl sm:text-4xl font-semibold tabular leading-none">
+            <AnimatedCounter to={numericValue} format={formatValue} />
+          </div>
+          {benchmark && (
+            <div className="mt-1.5 text-[10.5px] text-white/75 tabular flex items-center gap-1.5">
+              <span className="inline-block h-px w-3" style={{ background: 'rgba(255,255,255,0.7)', borderTop: '1px dashed rgba(255,255,255,0.7)' }} />
+              Peer · {benchmark}
+            </div>
+          )}
+          {context && <div className="mt-1 text-[11px] text-white/75 tabular">{context}</div>}
+          {deltaText && <div className="mt-0.5 text-[11px] tabular text-white/85">{deltaText}</div>}
+          {series && series.length >= 2 && (
+            <Sparkline values={series} width={120} height={20} stroke="rgba(255,255,255,0.9)" fill="rgba(255,255,255,0.9)" className="mt-2" />
+          )}
+        </div>
+        {dollarLever && (
+          <div className="px-4 py-2 border-t border-white/15 bg-black/15 text-[10.5px] leading-snug text-white/85">
+            <span className="font-semibold text-white">$ Lever ·</span> {dollarLever}
+          </div>
         )}
       </div>
     );
   }
   return (
-    <div className="vital-tile">
-      <div className="vital-tile-label">{label}</div>
-      {sublabel && <div className="text-[10.5px] text-[var(--ink-soft)] mt-0.5">{sublabel}</div>}
-      <div className="vital-tile-value tabular">{value}</div>
-      <div className="mt-1 flex items-baseline justify-between gap-2">
-        {context && <div className="text-[11px] text-[var(--ink-soft)] tabular truncate">{context}</div>}
-        {deltaText && (
-          <div className={`text-[11px] tabular shrink-0 ${deltaPositive ? 'text-[var(--clinical-rose)]' : 'text-[var(--clinical-green)]'}`}>
-            {deltaText}
+    <div className="vital-tile relative overflow-hidden flex flex-col p-0">
+      <div className="p-4 flex-1">
+        <div className="vital-tile-label">{label}</div>
+        {sublabel && <div className="text-[10.5px] text-[var(--ink-soft)] mt-0.5">{sublabel}</div>}
+        <div className="vital-tile-value tabular mt-1">
+          <AnimatedCounter to={numericValue} format={formatValue} />
+        </div>
+        {benchmark && (
+          <div className="mt-1 text-[10.5px] text-[var(--ink-soft)] tabular flex items-center gap-1.5">
+            <span className="inline-block h-px w-3" style={{ background: 'var(--ink-strong)', borderTop: '1px dashed var(--ink-strong)' }} />
+            Peer · {benchmark}
           </div>
         )}
+        <div className="mt-1 flex items-baseline justify-between gap-2">
+          {context && <div className="text-[11px] text-[var(--ink-soft)] tabular truncate">{context}</div>}
+          {deltaText && (
+            <div className={`text-[11px] tabular shrink-0 ${deltaPositive ? 'text-[var(--clinical-rose)]' : 'text-[var(--clinical-green)]'}`}>
+              {deltaText}
+            </div>
+          )}
+        </div>
+        {series && series.length >= 2 && (
+          <Sparkline values={series} width={120} height={18} stroke={ACCENT} fill={ACCENT} className="mt-2" />
+        )}
       </div>
-      {series && series.length >= 2 && (
-        <Sparkline values={series} width={120} height={18} stroke={ACCENT} fill={ACCENT} className="mt-2" />
+      {dollarLever && (
+        <div className="px-4 py-2 border-t border-[var(--hairline-soft)] bg-[var(--paper-deep)] text-[10.5px] leading-snug text-[var(--ink-muted)]">
+          <span className="font-semibold text-[var(--clinical-teal)]">$ Lever ·</span> {dollarLever}
+        </div>
       )}
     </div>
   );

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, formatCurrency, formatNumber } from '../api/queries';
 import * as watchlist from '../watchlist';
 import type { PatientSearchResult } from '../types';
+import { AnimatedCounter, ProvenanceStrip } from '../components/Executive';
 
 export default function WatchlistPage() {
   const [ids, setIds] = useState<string[]>([]);
@@ -23,6 +24,21 @@ export default function WatchlistPage() {
 
   const items = ids.map((id) => ({ id, p: patients[id] })).filter((x) => x.p);
 
+  const cohortStats = useMemo(() => {
+    const list = items.map((i) => i.p);
+    const n = list.length;
+    if (n === 0) return { n: 0, avgVisits: 0, totalCharges: 0, highBurdenPct: 0 };
+    const totalVisits = list.reduce((s, p) => s + (p.encounter_count ?? 0), 0);
+    const totalCharges = list.reduce((s, p) => s + (p.total_charges ?? 0), 0);
+    const highBurden = list.filter((p) => (p.active_chronic_count ?? 0) >= 3).length;
+    return {
+      n,
+      avgVisits: totalVisits / n,
+      totalCharges,
+      highBurdenPct: (highBurden / n) * 100,
+    };
+  }, [items]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <header className="mb-6">
@@ -38,8 +54,10 @@ export default function WatchlistPage() {
       {ids.length === 0 ? (
         <div className="clinical-card p-10 text-center border-dashed">
           <div className="font-serif text-lg font-semibold text-[var(--ink-strong)]">Nothing here yet.</div>
-          <p className="text-sm text-[var(--ink-muted)] mt-1">
-            Open any patient and click <strong>"Add to watchlist"</strong> in the header.
+          <p className="text-sm text-[var(--ink-muted)] mt-1 max-w-md mx-auto leading-relaxed">
+            Build a cohort of high-burden patients to monitor. Compare against the{' '}
+            <Link to="/executive" className="text-[var(--clinical-teal)] hover:text-[var(--ink-strong)] font-medium">Executive Cockpit</Link>{' '}
+            benchmarks. Open any patient and click <strong>"Add to watchlist"</strong> in the header.
           </p>
           <Link
             to="/patients"
@@ -50,6 +68,45 @@ export default function WatchlistPage() {
           </Link>
         </div>
       ) : (
+        <>
+        <div className="clinical-card px-5 py-3.5 mb-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm">
+          <div className="eyebrow shrink-0">Cohort</div>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.n}
+              format={(n) => formatNumber(Math.round(n))}
+              className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">patients</span>
+          </div>
+          <span className="text-[var(--hairline)]">│</span>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.avgVisits}
+              format={(n) => n.toFixed(1)}
+              className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">avg visits</span>
+          </div>
+          <span className="text-[var(--hairline)]">│</span>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.totalCharges}
+              format={(n) => formatCurrency(n)}
+              className="font-serif text-xl font-semibold text-[var(--ink-strong)] tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">lifetime</span>
+          </div>
+          <span className="text-[var(--hairline)]">│</span>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedCounter
+              to={cohortStats.highBurdenPct}
+              format={(n) => `${n.toFixed(1)}%`}
+              className="font-serif text-xl font-semibold tabular leading-none"
+            />
+            <span className="text-xs text-[var(--ink-soft)]">high-burden</span>
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map(({ id, p }) => {
             const burden = p.active_chronic_count;
@@ -96,6 +153,14 @@ export default function WatchlistPage() {
             );
           })}
         </div>
+        <div className="mt-6">
+          <ProvenanceStrip
+            freshness="4 min ago"
+            source="Epic Clarity · dim_patients + fct_encounters"
+            rows={`${formatNumber(cohortStats.n)} rows · watchlist`}
+          />
+        </div>
+        </>
       )}
     </div>
   );

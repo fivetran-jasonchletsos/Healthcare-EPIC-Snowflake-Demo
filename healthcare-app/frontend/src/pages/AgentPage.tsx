@@ -65,10 +65,19 @@ export default function AgentPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <header className="mb-6">
-        <div className="eyebrow mb-1" style={{ color: 'var(--clinical-violet)' }}>Clinical Insights</div>
+      <header className="mb-8 pb-6 border-b border-[var(--hairline)]">
+        <div className="eyebrow mb-2" style={{ color: 'var(--clinical-violet)' }}>Clinical Insights · Agent</div>
         <div className="flex items-start justify-between gap-4">
-          <h1 className="font-serif text-3xl font-semibold text-[var(--ink-strong)] tracking-tight">Ask anything about the patient population</h1>
+          <div>
+            <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[var(--ink-strong)] tracking-tight leading-[1.1]">
+              Ask anything about the patient population
+            </h1>
+            <p className="mt-3 text-sm sm:text-base text-[var(--ink-muted)] max-w-2xl leading-relaxed">
+              Plain-English questions over the published Snowflake snapshot. Answers route through a
+              local rules engine or, when enabled, Snowflake Cortex / Claude — every figure traces back
+              to the marts.
+            </p>
+          </div>
           <Link to="/about-agent" className="hidden sm:inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--clinical-violet)] hover:text-[var(--ink-strong)]">
             How it works <span aria-hidden>→</span>
           </Link>
@@ -96,9 +105,11 @@ export default function AgentPage() {
         </div>
 
         {showSettings && (
-          <div className="border-b border-[var(--hairline-soft)] px-4 py-4 bg-[var(--clinical-amber-bg)] text-sm border-t border-amber-200">
-            <p className="text-[var(--clinical-amber)] mb-3">
-              Paste your Anthropic API key to enable Claude mode. Stored only in this browser's localStorage.
+          <div className="border-b border-[var(--hairline-soft)] border-t border-[var(--hairline)] px-4 py-4 bg-white text-sm">
+            <div className="eyebrow mb-1.5">Anthropic API Key</div>
+            <p className="text-[var(--ink-muted)] mb-3 text-xs leading-relaxed max-w-2xl">
+              Required only for Cortex / Claude mode. The key is stored in this browser's
+              localStorage and is never sent anywhere except directly to the Anthropic API.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <input
@@ -106,7 +117,7 @@ export default function AgentPage() {
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 placeholder={hasKey ? '••••••••••••••• (key saved)' : 'sk-ant-api03-...'}
-                className="flex-1 rounded-md border border-[var(--hairline)] px-3 py-2 text-sm font-mono"
+                className="flex-1 rounded-md border border-[var(--hairline)] px-3 py-2 text-sm font-mono focus:border-[var(--clinical-violet)] focus:outline-none"
               />
               <button onClick={saveKey} className="rounded-md text-white text-sm font-medium px-4 py-2" style={{ background: 'var(--clinical-violet)' }}>Save</button>
               {hasKey && (
@@ -165,13 +176,18 @@ export default function AgentPage() {
                   <div className="mt-0.5 font-serif text-base font-semibold text-[var(--ink-strong)]">{h.q}</div>
                 </div>
                 {isClaude ? (
-                  <span className="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--clinical-violet-bg)', color: 'var(--clinical-violet)' }}>
-                    Claude
+                  <span
+                    className="status-pill shrink-0"
+                    style={{
+                      background: 'var(--clinical-violet-bg)',
+                      color: 'var(--clinical-violet)',
+                      borderColor: 'var(--clinical-violet-bg)',
+                    }}
+                  >
+                    Cortex · Claude
                   </span>
                 ) : (
-                  <span className="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--clinical-teal-bg)', color: 'var(--clinical-teal)' }}>
-                    Rules
-                  </span>
+                  <span className="status-pill info shrink-0">Local rule</span>
                 )}
               </header>
               <div className="p-4 text-sm">

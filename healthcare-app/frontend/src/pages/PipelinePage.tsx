@@ -64,7 +64,7 @@ export default function PipelinePage() {
   const flow: FlowNode[] = useMemo(
     () => [
       { id: 'epic', logo: 'epic', label: 'Epic Clarity', sub: 'SQL Server · CDC source', status: 'healthy', metric: '8 tables · 2.4M rows' },
-      { id: 'fivetran', logo: 'fivetran', label: 'Fivetran', sub: 'TELEPORT CDC connector', status: 'healthy', metric: '15-min cadence · 99.7% SLA' },
+      { id: 'fivetran', logo: 'fivetran', label: 'Fivetran', sub: 'TELEPORT CDC connector', status: 'healthy', metric: '5-min cadence · 99.7% SLA' },
       { id: 'snowflake', logo: 'snowflake', label: 'Snowflake', sub: 'JASON_CHLETSOS_EPIC', status: 'healthy', metric: 'XS warehouse · auto-suspend' },
       { id: 'dbt', logo: 'dbt', label: 'dbt transforms', sub: '21 models · 4 schemas', status: 'healthy', metric: '24s avg · 0 failures' },
       { id: 'app', logo: 'app', label: 'Clarity App', sub: 'React · static JSON', status: 'healthy', metric: 'CDN · 12 min deploy' },
@@ -88,7 +88,7 @@ export default function PipelinePage() {
               </h1>
               <p className="mt-2 text-sm text-[var(--ink-muted)] max-w-3xl leading-relaxed">
                 Fivetran captures change-data from Epic Clarity's SQL Server source and lands it in
-                Snowflake every 15 minutes. dbt transforms it into the staging, intermediate, clinical,
+                Snowflake every 5 minutes. dbt transforms it into the staging, intermediate, clinical,
                 and financial marts that power the Executive Cockpit, patient registry, and population
                 health surfaces. Every minute of lag has a P&L cost — see <Link to="/executive" className="underline text-[var(--clinical-teal)]">Executive</Link>.
               </p>
@@ -127,19 +127,19 @@ export default function PipelinePage() {
             />
             <KpiTile
               label="Snowflake compute · 7d"
-              value="$58.40"
-              subValue="XS warehouse + auto-suspend"
-              delta={{ value: '− 38%', trend: 'good', vs: 'vs legacy DW' }}
-              spark={[112, 104, 98, 92, 84, 76, 70, 66, 62, 60, 59, 58]}
+              value="$1,120"
+              subValue="XS warehouse · auto-suspend"
+              delta={{ value: '− 96%', trend: 'good', vs: 'vs legacy DW' }}
+              spark={[2150, 1980, 1820, 1640, 1500, 1380, 1290, 1220, 1180, 1150, 1130, 1120]}
               dollarLever="Auto-suspend + zero-copy clones eliminate idle spend. Legacy on-prem warehouse: $1.6M/yr fixed."
               badge="Snowflake"
               badgeTone="info"
             />
             <KpiTile
-              label="dbt run · last build"
+              label="dbt incremental build"
               value="24s"
               subValue="21 models · 0 failures"
-              delta={{ value: '+ 100%', trend: 'good', vs: 'tests passed' }}
+              delta={{ value: '21 / 21', trend: 'good', vs: 'tests passing' }}
               spark={[42, 38, 36, 34, 32, 30, 28, 27, 26, 25, 24, 24]}
               dollarLever="Tests catch broken denial logic, double-counted revenue, and orphan patient IDs before they reach the CEO dashboard."
             />
@@ -219,10 +219,10 @@ export default function PipelinePage() {
             />
             <SnowCard
               tag="Time Travel"
-              title="Recover anything, 90 days back"
-              body="Query any mart as-of any timestamp in the last 90 days. Restore a dropped table, audit how a CMI calc has drifted, or reconcile a closed period with one SQL clause."
-              metric="90 d"
-              metricLabel="point-in-time"
+              title="Recover anything, point-in-time"
+              body="Query any mart as-of any timestamp inside the retention window (up to 90 days on Enterprise). Restore a dropped table, audit how a CMI calc has drifted, or reconcile a closed period with one SQL clause."
+              metric="≤ 90 d"
+              metricLabel="retention window"
             />
             <SnowCard
               tag="Cortex · LLM"
@@ -234,9 +234,9 @@ export default function PipelinePage() {
             <SnowCard
               tag="Auto-Suspend"
               title="Pay only for query seconds"
-              body="The XS transform warehouse runs ~1.4 min per Fivetran load and then suspends. Annualized compute: $0.84/patient/month vs $14/patient on the prior on-prem warehouse."
-              metric="$0.84"
-              metricLabel="patient · month"
+              body="The XS transform warehouse runs ~1.4 min per Fivetran load and then suspends. Annualized Snowflake compute under $60K vs $1.6M/yr fixed on the prior on-prem warehouse — a 96% cost reduction."
+              metric="96%"
+              metricLabel="compute saved"
             />
           </div>
         </section>
@@ -307,7 +307,7 @@ export default function PipelinePage() {
               <ImpactStat value="$8M" label="Per 1-pt denial reduction" />
               <ImpactStat value="$2.7M" label="Per 1-day AR reduction" />
               <ImpactStat value="$1.8M" label="Per 1-hr ED-board cut" />
-              <ImpactStat value="$1.6M" label="Annual legacy DW saved" />
+              <ImpactStat value="$1.6M" label="Legacy DW retired · annual" />
             </div>
           </div>
         </section>
