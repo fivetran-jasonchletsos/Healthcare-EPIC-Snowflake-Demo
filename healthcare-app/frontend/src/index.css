@@ -2,21 +2,26 @@
 @import 'leaflet/dist/leaflet.css';
 
 /*
- * Epic Clarity — clinical institution design system.
+ * Clarity Health Analytics — clinical institution design system.
  *
  * The visual language references academic medical centers (Mayo, Cleveland
  * Clinic, Mass General, Johns Hopkins): serif headers for authority, generous
  * whitespace, hairline dividers, restrained color, and clinical status hues.
+ *
+ * Typography: Source Serif 4 (headings) + IBM Plex Sans (body) + IBM Plex Mono
+ * (data). IBM Plex is the EHR/medical-device standard — the same family used
+ * on clinical and lab instrumentation.
  *
  * Brand (Fivetran / Snowflake) operates as an *accent* — the calm clinical
  * palette is consistent across both themes. Only the link/CTA color and the
  * institutional accent rail at the top of the page shift between themes.
  */
 
-/* Institutional serif for headers + a clean sans for body.
-   Source Serif 4 reads like a teaching hospital wordmark; Inter is the modern
-   EHR-app standard. */
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Institutional serif for headers + IBM Plex Sans for body (clinical-device aesthetic).
+   Source Serif 4 reads like a teaching-hospital wordmark; IBM Plex Sans is the
+   EHR/medical-device standard — the same family IBM uses on clinical and lab systems.
+   IBM Plex Mono replaces JetBrains for consistent IBM Plex DNA. */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root,
 :root[data-theme="fivetran"] {
@@ -92,16 +97,16 @@
   --color-brand-800: var(--color-brand-800);
   --color-brand-900: var(--color-brand-900);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 html, body {
   background-color: var(--paper);
   color: var(--ink);
-  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-feature-settings: "cv11", "ss01", "ss03";
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "ss01";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -224,3 +229,55 @@ h1 { color: var(--ink-strong); }
 
 /* Tabular numbers everywhere they appear in data tables / KPIs. */
 .tabular { font-variant-numeric: tabular-nums; }
+
+/*
+ * Page-load stagger — one orchestrated reveal per page.
+ * Apply .fade-in-up to section wrappers; add animation-delay inline for stagger.
+ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.35s ease both;
+}
+
+/* Hover lift — cards get a 1px Y-lift on hover. */
+.clinical-card-lift {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.clinical-card-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.07);
+  border-color: var(--clinical-teal);
+}
+
+/* Open-in-Fivetran CTA button */
+.fivetran-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: #0073FF;
+  color: #ffffff;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+.fivetran-cta:hover { opacity: 0.85; }
+
+/* Connector ID chip — mono, muted, used next to each connector row */
+.connector-id-chip {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.625rem;
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border: 1px solid var(--hairline);
+  border-radius: 0.25rem;
+  padding: 0.0625rem 0.375rem;
+  letter-spacing: 0.02em;
+}

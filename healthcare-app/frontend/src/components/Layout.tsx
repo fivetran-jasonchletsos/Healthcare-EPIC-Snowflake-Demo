@@ -22,7 +22,7 @@ const NAV_ITEMS: [string, string][] = [
 
 const DEMOS = [
   { key: 'tax-assessment', name: 'Allegheny County Tax', industry: 'Public sector · Property assessment', url: 'https://fivetran-jasonchletsos.github.io/tax-assessment-databricks-demo/', accent: '#dc2626' },
-  { key: 'healthcare',     name: 'Epic Clarity',         industry: 'Healthcare · Clinical analytics',     url: 'https://fivetran-jasonchletsos.github.io/Healthcare-EPIC-Snowflake-Demo/', accent: '#0d9488' },
+  { key: 'healthcare',     name: 'Clarity Health',        industry: 'Healthcare · Clinical analytics',     url: 'https://fivetran-jasonchletsos.github.io/Healthcare-EPIC-Snowflake-Demo/', accent: '#0d9488' },
   { key: 'finserv',        name: 'Meridian Capital',     industry: 'Financial Services · Wealth & banking', url: 'https://fivetran-jasonchletsos.github.io/FinServ-ODI-Demo/', accent: '#1d4ed8' },
   { key: 'insurance',     name: 'Atlas Risk',           industry: 'Insurance · Policies, claims, reinsurance', url: 'https://fivetran-jasonchletsos.github.io/Insurance-ODI-Demo/', accent: '#0369a1' },
   { key: 'media',          name: 'Lighthouse Media',     industry: 'Media · Audience intelligence',       url: 'https://fivetran-jasonchletsos.github.io/Media-ODI-Demo/', accent: '#7c3aed' },
@@ -117,7 +117,7 @@ export default function Layout() {
               </div>
               <div className="leading-tight min-w-0">
                 <div className="font-serif font-semibold text-lg sm:text-xl text-[var(--ink-strong)] tracking-tight truncate">
-                  Epic Clarity
+                  Clarity Health
                 </div>
                 <div className="text-[10px] sm:text-[11px] font-medium text-[var(--ink-soft)] uppercase tracking-[0.14em]">
                   Clinical Analytics Platform
@@ -278,16 +278,16 @@ export default function Layout() {
       <footer className="border-t border-[var(--hairline)] bg-white mt-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-xs sm:text-sm text-[var(--ink-muted)] grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <div className="font-serif font-semibold text-[var(--ink-strong)] mb-1.5">Epic Clarity · Analytics</div>
+            <div className="font-serif font-semibold text-[var(--ink-strong)] mb-1.5">Clarity Health · Analytics</div>
             <p className="leading-relaxed text-[var(--ink-soft)]">
-              A reference architecture for clinical analytics on Epic Clarity-shaped data, built on the modern
+              A reference architecture for clinical analytics on EHR-shaped data, built on the modern
               data stack. Synthetic data — not for clinical use.
             </p>
           </div>
           <div>
             <div className="eyebrow mb-2">Data Pipeline</div>
             <p className="leading-relaxed mb-3">
-              SQL Server CDC → Fivetran → Snowflake → dbt → static JSON snapshot
+              SQL Server CDC → Fivetran → Snowflake → dbt Labs → static JSON snapshot
             </p>
             <div className="flex items-center gap-2 text-[11px]">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">

@@ -613,7 +613,7 @@ export default function MapPage() {
         {/* Provenance */}
         <ProvenanceStrip
           freshness="4 min ago"
-          source="Epic Clarity · SQL Server CDC"
+          source="Clarity Health · SQL Server CDC"
           rows={`${formatNumber(totalPatients)} placed patients · 1 ZIP-rollup mart`}
         />
       </div>

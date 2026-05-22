@@ -210,7 +210,7 @@ export default function ExecutivePage() {
               </h1>
               <p className="mt-2 text-sm text-[var(--ink-muted)] max-w-3xl leading-relaxed">
                 The ten measures that drive operating margin, cost of capital, and reimbursement risk —
-                with peer percentiles and dollar-impact context. Built on Epic Clarity · Fivetran · Snowflake.
+                with peer percentiles and dollar-impact context. Built on Clarity Health EHR · Fivetran · Snowflake.
               </p>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -328,9 +328,10 @@ export default function ExecutivePage() {
         {/* Provenance — the Snowflake + Fivetran story underneath */}
         <ProvenanceStrip
           freshness="4.2 min ago"
-          source="Epic Clarity · SQL Server CDC · 8 tables"
-          rows="JASON_CHLETSOS_EPIC · 4 mart schemas · 21 dbt models"
+          source="Clarity Health · SQL Server CDC · 8 tables"
+          rows="JASON_CHLETSOS_EPIC · 4 mart schemas · 21 dbt Labs models"
           ctaTo={() => navigate('/pipeline')}
+          fivetranUrl="https://fivetran.com/dashboard/connectors/clarity_health_sqlserver_cdc"
         />
 
         {/* Method note — booth visitors will read this */}

@@ -19,16 +19,16 @@ export default function HomePage() {
   return (
     <>
       {/* Institutional hero — calm, serif, restrained */}
-      <section className="bg-white border-b border-[var(--hairline)]">
+      <section className="bg-white border-b border-[var(--hairline)] fade-in-up" style={{ animationDelay: '0ms' }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
             <div className="lg:col-span-7">
-              <div className="eyebrow mb-3">Epic Clarity · Analytics Platform</div>
+              <div className="eyebrow mb-3">Clarity Health · Analytics Platform</div>
               <h1 className="font-serif text-4xl sm:text-5xl font-semibold leading-[1.05] text-[var(--ink-strong)] tracking-tight">
                 Evidence-grade insight, <br className="hidden sm:block" />from chart to cohort.
               </h1>
               <p className="mt-5 text-base sm:text-lg text-[var(--ink-muted)] max-w-2xl leading-relaxed">
-                A reference clinical-analytics workspace built on Epic Clarity-shaped data. Patient records,
+                A reference clinical-analytics workspace built on EHR-shaped data. Patient records,
                 encounter histories, diagnoses, financials, and population-level signals — modeled, governed,
                 and presented for the people who deliver care.
               </p>
@@ -94,7 +94,7 @@ export default function HomePage() {
       </section>
 
       {/* Two clinical action tiles — restrained, paper-feel */}
-      <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8 fade-in-up" style={{ animationDelay: '80ms' }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <FindPatientTile onGo={(q) => navigate(q ? `/patients?q=${encodeURIComponent(q)}` : '/patients')} />
           <InsightAgentTile
@@ -136,16 +136,16 @@ export default function HomePage() {
             </h2>
             <p className="mt-2 text-sm sm:text-base text-[var(--ink-muted)] leading-relaxed">
               Clinical and financial measures shown across this platform are derived from governed,
-              version-controlled transformations against the Epic Clarity source database — no manual exports,
+              version-controlled transformations against the EHR source database — no manual exports,
               no spreadsheet hand-offs.
             </p>
           </div>
           <ol className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              { step: '01', name: 'Fivetran CDC', desc: 'Change-data-capture connector mirrors Epic Clarity tables from SQL Server in near real time.' },
-              { step: '02', name: 'Snowflake', desc: 'Lands raw CDC and hosts the staging / intermediate / mart schemas with role-based access.' },
-              { step: '03', name: 'dbt transforms', desc: 'Tested SQL produces clinical and financial marts — 21 models with not-null and uniqueness checks.' },
-              { step: '04', name: 'React + Recharts', desc: 'Static SPA reads daily JSON exports of the marts; no PHI ever touches the browser.' },
+              { step: '01', name: 'Fivetran CDC', desc: 'Change-data-capture connector mirrors EHR tables from SQL Server in near real time.' },
+              { step: '02', name: 'Snowflake', desc: 'Lands raw CDC (bronze) and hosts the staging / intermediate / mart schemas with role-based access.' },
+              { step: '03', name: 'dbt Labs transforms', desc: 'Bronze → Silver → Gold. Tested SQL produces clinical and financial marts — 21 models with not-null and uniqueness checks.' },
+              { step: '04', name: 'React + Recharts', desc: 'Static SPA reads daily JSON exports of the gold marts; no PHI ever touches the browser.' },
             ].map((s) => (
               <li key={s.name} className="relative rounded-lg border border-[var(--hairline)] bg-white p-5 hover:border-[var(--clinical-teal)] transition-colors">
                 <div className="text-[10px] font-mono font-semibold text-[var(--clinical-teal)] tracking-wider">{s.step}</div>
@@ -190,7 +190,7 @@ function PatientCard({ p, onClick }: { p: PatientSearchResult; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="text-left clinical-card hover:border-[var(--clinical-teal)] transition-colors group"
+      className="text-left clinical-card clinical-card-lift group"
     >
       <div className="px-5 pt-4 pb-3 border-b border-[var(--hairline-soft)] flex items-start justify-between gap-3">
         <div className="min-w-0">

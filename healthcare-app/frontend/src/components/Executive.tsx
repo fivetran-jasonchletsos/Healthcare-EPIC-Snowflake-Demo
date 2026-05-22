@@ -479,7 +479,7 @@ export function NarrativeCard({
 }
 
 // ─── Data-flow diagram (Pipeline page hero) ─────────────────────────────────
-// Animated SVG: Epic Clarity → Fivetran → Snowflake → dbt → Apps.
+// Animated SVG: Clarity Health EHR → Fivetran → Snowflake → dbt → Apps.
 // Each node has a status; the flow lines pulse.
 
 export interface FlowNode {
@@ -498,7 +498,7 @@ export function DataFlowDiagram({ nodes }: { nodes: FlowNode[] }) {
         <div>
           <div className="eyebrow mb-1">Live Data Flow</div>
           <div className="font-serif text-xl font-semibold text-[var(--ink-strong)]">
-            Epic Clarity → Snowflake, every 5 minutes
+            Clarity Health EHR → Snowflake, every 5 minutes
           </div>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-[var(--ink-soft)] tabular">
@@ -508,9 +508,27 @@ export function DataFlowDiagram({ nodes }: { nodes: FlowNode[] }) {
       </div>
 
       <div className="flex flex-col md:flex-row md:items-stretch gap-2">
-        {nodes.map((n, i) => (
-          <Fragmented key={n.id} index={i} last={i === nodes.length - 1} node={n} />
-        ))}
+        {nodes.map((n, i) => {
+          const next = nodes[i + 1];
+          // Label the two transformation edges (bronze→silver, silver→gold) with
+          // the dbt Labs wordmark — Fivetran + dbt Labs are now one company.
+          const edgeLabel =
+            next && (
+              (n.id === 'snowflake' && next.id === 'dbt') ||
+              (n.id === 'dbt' && next.id === 'app')
+            )
+              ? 'dbt labs'
+              : undefined;
+          return (
+            <Fragmented
+              key={n.id}
+              index={i}
+              last={i === nodes.length - 1}
+              node={n}
+              edgeLabel={edgeLabel}
+            />
+          );
+        })}
       </div>
 
       <style>{`
@@ -527,7 +545,17 @@ export function DataFlowDiagram({ nodes }: { nodes: FlowNode[] }) {
   );
 }
 
-function Fragmented({ index: _index, last, node }: { index: number; last: boolean; node: FlowNode }) {
+function Fragmented({
+  index: _index,
+  last,
+  node,
+  edgeLabel,
+}: {
+  index: number;
+  last: boolean;
+  node: FlowNode;
+  edgeLabel?: string;
+}) {
   const tone =
     node.status === 'healthy'
       ? { border: 'var(--clinical-green)', bg: 'var(--clinical-green-bg)', text: 'var(--clinical-green)' }
@@ -560,21 +588,47 @@ function Fragmented({ index: _index, last, node }: { index: number; last: boolea
         )}
       </div>
       {!last && (
-        <div className="hidden md:flex w-10 shrink-0 items-center justify-center">
+        <div
+          className={`hidden md:flex shrink-0 flex-col items-center justify-center ${
+            edgeLabel ? 'w-20' : 'w-10'
+          }`}
+        >
+          {edgeLabel && (
+            <div
+              className="mb-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 shadow-sm"
+              style={{ background: '#FF694A', border: '1px solid #FF694A' }}
+              title="Transformation powered by dbt Labs"
+            >
+              <span className="inline-flex h-3 w-3 items-center justify-center rounded-sm bg-white text-[8px] font-extrabold leading-none" style={{ color: '#FF694A' }}>
+                d
+              </span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white leading-none">
+                {edgeLabel}
+              </span>
+            </div>
+          )}
           <svg viewBox="0 0 60 24" className="w-full h-6" preserveAspectRatio="none">
             <line
               x1="0"
               y1="12"
               x2="60"
               y2="12"
-              stroke="var(--clinical-teal)"
-              strokeWidth="1.5"
+              stroke={edgeLabel ? '#FF694A' : 'var(--clinical-teal)'}
+              strokeWidth={edgeLabel ? '2' : '1.5'}
               strokeDasharray="3 4"
               className="flow-pulse"
-              opacity="0.7"
+              opacity={edgeLabel ? '0.95' : '0.7'}
             />
-            <polygon points="56,8 60,12 56,16" fill="var(--clinical-teal)" />
+            <polygon
+              points="56,8 60,12 56,16"
+              fill={edgeLabel ? '#FF694A' : 'var(--clinical-teal)'}
+            />
           </svg>
+          {edgeLabel && (
+            <div className="mt-0.5 text-[8px] font-mono uppercase tracking-wider text-[var(--ink-soft)] leading-none">
+              transform
+            </div>
+          )}
         </div>
       )}
     </>
@@ -614,14 +668,16 @@ function NodeIcon({ logo }: { logo?: FlowNode['logo'] }) {
 
 export function ProvenanceStrip({
   freshness = '4 min ago',
-  source = 'Epic Clarity · SQL Server CDC',
+  source = 'Clarity Health · SQL Server CDC',
   rows = '2.4M rows · 8 tables',
   ctaTo,
+  fivetranUrl,
 }: {
   freshness?: string;
   source?: string;
   rows?: string;
   ctaTo?: () => void;
+  fivetranUrl?: string;
 }) {
   return (
     <div className="rounded-md border border-[var(--hairline)] bg-white px-4 py-2.5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px]">
@@ -640,10 +696,23 @@ export function ProvenanceStrip({
         <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#29B5E8' }}>❄</span>
         <span className="text-[var(--ink-muted)]">{rows}</span>
       </div>
+      {fivetranUrl && (
+        <a
+          href={fivetranUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fivetran-cta"
+        >
+          <svg viewBox="0 0 14 14" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M2 7h10M7 2l5 5-5 5" />
+          </svg>
+          Open in Fivetran
+        </a>
+      )}
       {ctaTo && (
         <button
           onClick={ctaTo}
-          className="ml-auto font-semibold text-[var(--clinical-teal)] hover:text-[var(--ink-strong)]"
+          className={`font-semibold text-[var(--clinical-teal)] hover:text-[var(--ink-strong)]${fivetranUrl ? '' : ' ml-auto'}`}
         >
           See pipeline →
         </button>

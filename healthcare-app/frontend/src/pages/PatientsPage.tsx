@@ -76,8 +76,7 @@ export default function PatientsPage() {
             Patient lookup
           </h1>
           <p className="text-sm text-[var(--ink-muted)] mt-1 max-w-2xl">
-            Search the <code className="font-mono text-xs bg-[var(--paper-deep)] px-1.5 py-0.5 rounded border border-[var(--hairline)]">dim_patients</code> mart joined with{' '}
-            <code className="font-mono text-xs bg-[var(--paper-deep)] px-1.5 py-0.5 rounded border border-[var(--hairline)]">fct_encounters</code> for visit and chronic-condition counts.
+            Search the patient registry mart joined with the encounters mart for visit and chronic-condition counts.
           </p>
         </div>
         <div className="text-sm text-[var(--ink-soft)] tabular shrink-0">
@@ -256,7 +255,7 @@ export default function PatientsPage() {
       <div className="mt-6">
         <ProvenanceStrip
           freshness="4 min ago"
-          source="Epic Clarity · dim_patients + fct_encounters"
+          source="Clarity Health · Patient Registry mart"
           rows={`${formatNumber(results.length)} rows · 2 marts`}
         />
       </div>

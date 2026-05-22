@@ -22,7 +22,7 @@ const STEPS: Step[] = [
   {
     title: 'Search a million-patient panel in under a second',
     pitch:
-      'Find any patient by name, MRN, or city. Results stream from a Snowflake-governed Epic Clarity snapshot, refreshed by Fivetran SQL Server CDC.',
+      'Find any patient by name, MRN, or city. Results stream from a Snowflake-governed EHR snapshot, refreshed by Fivetran SQL Server CDC.',
     cta: { label: 'Open Patients', to: '/patients' },
     preview: () => (
       <div className="rounded-lg border border-slate-200 bg-white p-3">
@@ -60,7 +60,7 @@ const STEPS: Step[] = [
   {
     title: 'Pipeline observability you can show your CIO',
     pitch:
-      'Every layer — Fivetran SQL Server CDC, Snowflake destination, dbt transformations, and the static deploy — reports live status. Simulate a failure to walk through incident response.',
+      'Every layer — Fivetran SQL Server CDC, Snowflake destination, dbt Labs transformations, and the static deploy — reports live status. Simulate a failure to walk through incident response.',
     cta: { label: 'Open Pipeline', to: '/pipeline' },
     preview: () => (
       <div className="rounded-lg p-3" style={{ background: '#171717' }}>
@@ -80,7 +80,7 @@ const STEPS: Step[] = [
   {
     title: 'A unified longitudinal patient record',
     pitch:
-      'Open any patient to see encounters, diagnoses, medications, account ledger, and provider panel — joined live from eight Epic Clarity source tables into a single chart-style view.',
+      'Open any patient to see encounters, diagnoses, medications, account ledger, and provider panel — joined live from eight EHR source tables into a single chart-style view.',
     cta: { label: 'Browse patients', to: '/patients' },
     preview: () => (
       <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-2">
