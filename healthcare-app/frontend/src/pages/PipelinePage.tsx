@@ -12,11 +12,13 @@ import { Link } from 'react-router-dom';
 import { Sparkline } from '../components/Sparkline';
 import { DataFlowDiagram, KpiTile, AnimatedCounter, type FlowNode } from '../components/Executive';
 
-// Fivetran connector ID for the healthcare SQL Server CDC connector.
-// Deep-link pattern: https://fivetran.com/dashboard/connectors/{fivetran_id}
-const FIVETRAN_CONNECTOR_ID = 'clarity_health_sqlserver_cdc';
-const FIVETRAN_CONNECTOR_URL = `https://fivetran.com/dashboard/connectors/${FIVETRAN_CONNECTOR_ID}`;
-const FIVETRAN_DASHBOARD_URL = 'https://fivetran.com/dashboard';
+// Real Fivetran connector wired to fortitude_fawn (jason_chletsos_mdls_s3).
+// Schema: jason_chletsos_ehr_demo, service: sql_server, status: connected.
+// Deep-link pattern: https://fivetran.com/dashboard/connections/{id}/status
+const FIVETRAN_CONNECTOR_ID = 'six_thickened';
+const FIVETRAN_SCHEMA_NAME  = 'jason_chletsos_ehr_demo';
+const FIVETRAN_CONNECTOR_URL = `https://fivetran.com/dashboard/connections/${FIVETRAN_CONNECTOR_ID}/status`;
+const FIVETRAN_DASHBOARD_URL = 'https://fivetran.com/dashboard/connections';
 
 interface Connector {
   table: string;
@@ -30,14 +32,14 @@ interface Connector {
 }
 
 const CONNECTORS: Connector[] = [
-  { table: 'PATIENT',        schema: 'ehr_demo', rowsCdc: 412,   lagSec: 32, status: 'healthy', lastSyncMin: 4, throughput: [22, 18, 26, 31, 28, 24, 30, 34, 29, 27, 33, 38],               fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'PAT_ENC',        schema: 'ehr_demo', rowsCdc: 8214,  lagSec: 41, status: 'healthy', lastSyncMin: 4, throughput: [380, 420, 460, 510, 540, 560, 510, 480, 530, 560, 590, 610],   fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'PAT_ENC_DX',     schema: 'ehr_demo', rowsCdc: 14288, lagSec: 48, status: 'healthy', lastSyncMin: 4, throughput: [620, 680, 710, 760, 820, 880, 840, 800, 860, 920, 980, 1040],  fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'HSP_ACCOUNT',    schema: 'ehr_demo', rowsCdc: 6480,  lagSec: 39, status: 'healthy', lastSyncMin: 4, throughput: [240, 280, 310, 340, 360, 380, 360, 340, 380, 410, 440, 470],   fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'HSP_TRANSACTION', schema: 'ehr_demo', rowsCdc: 22146, lagSec: 52, status: 'healthy', lastSyncMin: 4, throughput: [840, 920, 1010, 1080, 1140, 1200, 1180, 1160, 1220, 1280, 1340, 1410], fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'MEDICATIONS',    schema: 'ehr_demo', rowsCdc: 3024,  lagSec: 36, status: 'healthy', lastSyncMin: 4, throughput: [110, 130, 150, 170, 180, 190, 200, 210, 220, 230, 240, 252],   fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'PROVIDERS',      schema: 'ehr_demo', rowsCdc: 24,    lagSec: 18, status: 'healthy', lastSyncMin: 4, throughput: [1, 2, 1, 0, 3, 1, 2, 1, 2, 1, 0, 2],                           fivetranId: 'clarity_health_sqlserver_cdc' },
-  { table: 'DEPARTMENTS',    schema: 'ehr_demo', rowsCdc: 6,     lagSec: 14, status: 'healthy', lastSyncMin: 4, throughput: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],                           fivetranId: 'clarity_health_sqlserver_cdc' },
+  { table: 'PATIENT',        schema: 'ehr_demo', rowsCdc: 412,   lagSec: 32, status: 'healthy', lastSyncMin: 4, throughput: [22, 18, 26, 31, 28, 24, 30, 34, 29, 27, 33, 38],               fivetranId: 'six_thickened' },
+  { table: 'PAT_ENC',        schema: 'ehr_demo', rowsCdc: 8214,  lagSec: 41, status: 'healthy', lastSyncMin: 4, throughput: [380, 420, 460, 510, 540, 560, 510, 480, 530, 560, 590, 610],   fivetranId: 'six_thickened' },
+  { table: 'PAT_ENC_DX',     schema: 'ehr_demo', rowsCdc: 14288, lagSec: 48, status: 'healthy', lastSyncMin: 4, throughput: [620, 680, 710, 760, 820, 880, 840, 800, 860, 920, 980, 1040],  fivetranId: 'six_thickened' },
+  { table: 'HSP_ACCOUNT',    schema: 'ehr_demo', rowsCdc: 6480,  lagSec: 39, status: 'healthy', lastSyncMin: 4, throughput: [240, 280, 310, 340, 360, 380, 360, 340, 380, 410, 440, 470],   fivetranId: 'six_thickened' },
+  { table: 'HSP_TRANSACTION', schema: 'ehr_demo', rowsCdc: 22146, lagSec: 52, status: 'healthy', lastSyncMin: 4, throughput: [840, 920, 1010, 1080, 1140, 1200, 1180, 1160, 1220, 1280, 1340, 1410], fivetranId: 'six_thickened' },
+  { table: 'MEDICATIONS',    schema: 'ehr_demo', rowsCdc: 3024,  lagSec: 36, status: 'healthy', lastSyncMin: 4, throughput: [110, 130, 150, 170, 180, 190, 200, 210, 220, 230, 240, 252],   fivetranId: 'six_thickened' },
+  { table: 'PROVIDERS',      schema: 'ehr_demo', rowsCdc: 24,    lagSec: 18, status: 'healthy', lastSyncMin: 4, throughput: [1, 2, 1, 0, 3, 1, 2, 1, 2, 1, 0, 2],                           fivetranId: 'six_thickened' },
+  { table: 'DEPARTMENTS',    schema: 'ehr_demo', rowsCdc: 6,     lagSec: 14, status: 'healthy', lastSyncMin: 4, throughput: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],                           fivetranId: 'six_thickened' },
 ];
 
 const DBT_MODELS = [
@@ -163,7 +165,7 @@ export default function PipelinePage() {
                 8 EHR source tables · CDC streaming
               </div>
               <div className="mt-1 flex items-center gap-2 text-[11px] text-[var(--ink-soft)]">
-                <span className="connector-id-chip">{FIVETRAN_CONNECTOR_ID}</span>
+                <span className="connector-id-chip" title={`Fivetran connection ID: ${FIVETRAN_CONNECTOR_ID}`}>{FIVETRAN_SCHEMA_NAME}</span>
                 <a
                   href={FIVETRAN_CONNECTOR_URL}
                   target="_blank"
@@ -209,7 +211,15 @@ export default function PipelinePage() {
                       <div className="text-[10px] text-[var(--ink-soft)] tracking-wider uppercase">{c.schema}</div>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className="connector-id-chip">{c.fivetranId}</span>
+                      <a
+                        href={`https://fivetran.com/dashboard/connections/${c.fivetranId}/status`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="connector-id-chip hover:underline"
+                        title={`Open Fivetran connection ${c.fivetranId}`}
+                      >
+                        {FIVETRAN_SCHEMA_NAME}
+                      </a>
                     </td>
                     <td className="px-3 py-2.5 text-right font-mono">{c.rowsCdc.toLocaleString()}</td>
                     <td className="px-3 py-2.5">
