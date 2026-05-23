@@ -623,14 +623,14 @@ export default function WizardLivePage() {
               <span className="eyebrow" style={{ fontSize: 11 }}>{scenario.request_id} · {scenario.company}</span>
             </div>
             <Link
-              to="/pipeline"
+              to="/outcome"
               className="inline-flex items-center gap-2 rounded-sm font-semibold transition-colors"
               style={{
                 background: 'var(--clinical-teal)', color: '#fff',
                 padding: '10px 18px', fontSize: 13,
               }}
             >
-              Back to Pipeline
+              See the outcome
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>

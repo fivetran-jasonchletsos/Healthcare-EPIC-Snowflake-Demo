@@ -15,6 +15,8 @@ import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import OdiDbtWizardPage from './pages/OdiDbtWizardPage';
 import WizardLivePage from './pages/WizardLivePage';
+import ClarityScenarioPage from './pages/ClarityScenarioPage';
+import ClarityOutcomePage from './pages/ClarityOutcomePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +43,8 @@ export default function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/dbt-wizard" element={<OdiDbtWizardPage />} />
             <Route path="/wizard-live" element={<WizardLivePage />} />
+            <Route path="/scenario" element={<ClarityScenarioPage />} />
+            <Route path="/outcome" element={<ClarityOutcomePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

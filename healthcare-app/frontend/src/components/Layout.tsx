@@ -11,14 +11,15 @@ const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'ar
 
 const NAV_ITEMS: [string, string][] = [
   ['/', 'Home'],
+  ['/scenario', 'Scenario'],
+  ['/wizard-live', 'Live'],
+  ['/outcome', 'Outcome'],
   ['/executive', 'Executive'],
   ['/patients', 'Patients'],
   ['/dashboard', 'Population Health'],
-  ['/map', 'Geographic'],
   ['/agent', 'Clinical Insights'],
   ['/pipeline', 'Pipeline'],
   ['/dbt-wizard', 'Wizard'],
-  ['/wizard-live', 'Live'],
   ['/about', 'About'],
 ];
 

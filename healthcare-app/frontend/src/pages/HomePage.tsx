@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api, formatCurrency, formatNumber } from '../api/queries';
 import type { SummaryStats, PatientSearchResult } from '../types';
 
@@ -18,15 +18,112 @@ export default function HomePage() {
 
   return (
     <>
+      {/* dbt-wizard hero — leads the 3-minute Snowflake Summit demo */}
+      <section
+        className="bg-white border-b border-[var(--hairline)] fade-in-up"
+        style={{ animationDelay: '0ms' }}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <span
+                className="status-pill healthy inline-flex items-center gap-1.5"
+                style={{ fontSize: 12, padding: '4px 10px', fontWeight: 700 }}
+              >
+                <span className="h-2 w-2 rounded-full bg-[var(--clinical-teal)] animate-pulse" />
+                dbt-wizard · live build
+              </span>
+              <span className="eyebrow">BLD-2026-05-23-0007</span>
+            </div>
+
+            <h1 className="font-serif text-5xl sm:text-6xl font-semibold leading-[1.0] text-[var(--ink-strong)] tracking-tight">
+              Ask a question.{' '}
+              <span className="text-[var(--clinical-teal)]">Watch the model get built.</span>{' '}
+              See the answer.
+            </h1>
+            <p className="mt-5 text-lg text-[var(--ink-muted)] max-w-2xl leading-relaxed">
+              The CMO asks why sepsis bundle-compliance dipped for the cardiology service line.
+              No gold table exists. The Quality Committee meets in 14 hours.
+              Manual build: 3 to 5 days. dbt-wizard: 87 seconds.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                to="/scenario"
+                className="inline-flex items-center gap-2 rounded-md text-white font-semibold px-6 py-3 shadow-sm hover:opacity-95 transition-opacity"
+                style={{ background: 'var(--clinical-teal)' }}
+              >
+                Start the demo
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <Link
+                to="/wizard-live"
+                className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-3 hover:bg-[var(--paper-deep)] transition-colors"
+              >
+                Jump to live build
+              </Link>
+              <Link
+                to="/outcome"
+                className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-3 hover:bg-[var(--paper-deep)] transition-colors"
+              >
+                See the outcome
+              </Link>
+            </div>
+          </div>
+
+          {/* 4-tile flow summary */}
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {DEMO_FLOW.map(tile => (
+              <div
+                key={tile.step}
+                className="rounded-lg border border-[var(--hairline)] bg-[var(--paper-deep)] p-4"
+                style={{ borderLeft: `4px solid ${tile.color}` }}
+              >
+                <div className="font-mono text-[10px] uppercase tracking-wider mb-1" style={{ color: tile.color }}>
+                  {tile.step}
+                </div>
+                <div className="font-serif font-semibold text-[var(--ink-strong)] text-base mb-1">
+                  {tile.title}
+                </div>
+                <p className="text-xs text-[var(--ink-muted)] leading-relaxed">{tile.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Six-step build explanation */}
+      <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 lg:px-8">
+        <div className="eyebrow mb-2">The six-step build</div>
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-6 text-[var(--ink-strong)]">
+          Discover. Understand. Inspect. Author. Test. Materialize.
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-14">
+          {FLOW.map((step, i) => (
+            <div key={step.title} className="rounded-lg border border-[var(--hairline)] bg-white p-4 relative" style={{ borderLeft: `3px solid ${step.color}` }}>
+              <div className="font-mono text-xs mb-2" style={{ color: step.color }}>
+                {String(i + 1).padStart(2, '0')} · {step.tag}
+              </div>
+              <div className="font-serif text-base font-semibold mb-2 text-[var(--ink-strong)]">{step.title}</div>
+              <p className="text-xs leading-relaxed text-[var(--ink-muted)]">{step.body}</p>
+              <div className="mt-3 font-mono text-[10px] text-[var(--ink-soft)]">{step.who}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Existing clinical dashboard content below the fold */}
       {/* Institutional hero — calm, serif, restrained */}
-      <section className="bg-white border-b border-[var(--hairline)] fade-in-up" style={{ animationDelay: '0ms' }}>
+      <section className="bg-white border-t border-b border-[var(--hairline)] fade-in-up" style={{ animationDelay: '0ms' }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
             <div className="lg:col-span-7">
-              <div className="eyebrow mb-3">Clarity Health · Analytics Platform</div>
-              <h1 className="font-serif text-4xl sm:text-5xl font-semibold leading-[1.05] text-[var(--ink-strong)] tracking-tight">
-                Evidence-grade insight, <br className="hidden sm:block" />from chart to cohort.
-              </h1>
+              <div className="eyebrow mb-3">Clarity Health · Clinical Dashboard</div>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold leading-[1.05] text-[var(--ink-strong)] tracking-tight">
+                Evidence-grade insight, from chart to cohort.
+              </h2>
               <p className="mt-5 text-base sm:text-lg text-[var(--ink-muted)] max-w-2xl leading-relaxed">
                 A reference clinical-analytics workspace built on EHR-shaped data. Patient records,
                 encounter histories, diagnoses, financials, and population-level signals — modeled, governed,
@@ -172,6 +269,22 @@ export default function HomePage() {
     </>
   );
 }
+
+const DEMO_FLOW = [
+  { step: '01 · Scenario', title: 'The CMO asks', body: 'Sepsis bundle-compliance dip in Cardiology. No gold model. Quality Committee in 14 hours.', color: 'var(--clinical-amber)' },
+  { step: '02 · Live Build', title: 'Four agents build', body: 'Explorer, Summary, Worker, Verification author the model in 87 seconds on screen.', color: 'var(--clinical-teal)' },
+  { step: '03 · Outcome', title: 'Root cause found', body: 'Lactate redraw auto-fire suppressed at shift change. 11 of 14 fallouts share the signature.', color: 'var(--clinical-green)' },
+  { step: '04 · Impact', title: '14 hours early', body: 'Committee gets the answer before they meet. NHSN submission goes out clean.', color: 'var(--clinical-violet)' },
+];
+
+const FLOW = [
+  { tag: 'DISCOVERY',       title: 'Find the signals',   body: 'Explorer runs status and search. Returns gold.fct_encounter, fct_vital, fct_order, dim_patient.', who: 'Explorer · status, search', color: 'var(--clinical-teal)' },
+  { tag: 'SCHEMA',          title: 'Confirm the grain',  body: 'Summary runs describe and lineage. Names the gap and the new grain the gold table has to land on.', who: 'Summary · describe, lineage', color: 'var(--clinical-violet)' },
+  { tag: 'INSPECTION',      title: 'Validate the slice', body: 'Worker runs dbt_show on a 7-day slice. Confirms the compliance signal aggregates cleanly.', who: 'Worker · warehouse, dbt_show', color: '#be185d' },
+  { tag: 'MODEL CREATION',  title: 'Author the SQL',     body: 'Worker writes fct_sepsis_bundle_by_service_line_daily.sql — header, CTEs, joins, and final SELECT.', who: 'Worker · file edits, model generation', color: '#be185d' },
+  { tag: 'TEST AUTHORING',  title: 'Lock the contract',  body: 'Verification writes YAML — schema contract, ownership, 6 column tests, 1 combination test.', who: 'Verification · describe, dbt_show', color: 'var(--clinical-green)' },
+  { tag: 'MATERIALIZATION', title: 'Land on Iceberg',    body: 'Worker materializes the table. Verification confirms lineage updated and downstream consumers see it.', who: 'Worker + Verification', color: 'var(--clinical-green)' },
+];
 
 function Vital({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
