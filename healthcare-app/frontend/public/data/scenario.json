@@ -1,0 +1,41 @@
+{
+  "company": "Clarity Health",
+  "request_id": "BLD-2026-05-23-0007",
+  "requested_by": "Dr. Priya Nair, VP Quality & Patient Safety",
+  "requested_at": "2026-05-23T07:58:00-05:00",
+  "timezone_label": "Friday 07:58 CST",
+  "question": "Why did sepsis bundle-compliance dip for the cardiology service line last Tuesday?",
+  "metric_label": "Sepsis bundle compliance by service line, daily",
+  "metric_code": "gold.fct_sepsis_bundle_by_service_line_daily",
+  "target_schema": "gold",
+  "target_model": "fct_sepsis_bundle_by_service_line_daily",
+  "target_grain": "one row per (service_line, encounter_date)",
+  "upstream_models": [
+    {
+      "model": "stg_clarity__pat_enc",
+      "layer": "staging",
+      "grain": "encounter_id",
+      "description": "Patient encounters landed by Fivetran from Clarity Health SQL Server. Includes encounter_date, department_id, and admission_type."
+    },
+    {
+      "model": "stg_clarity__vitals",
+      "layer": "staging",
+      "grain": "encounter_id",
+      "description": "Vital signs and sepsis screening flags from Clarity Health. Includes sepsis_alert_flag, lactate_drawn, and blood_culture_drawn indicators."
+    },
+    {
+      "model": "stg_clarity__orders",
+      "layer": "staging",
+      "grain": "order_id",
+      "description": "Clinical orders from the EHR. Includes antibiotic_administered, order_timestamp, and encounter linkage. Used to verify bundle elements completed within required windows."
+    },
+    {
+      "model": "dim_departments",
+      "layer": "marts/dim",
+      "grain": "department_id",
+      "description": "Department master with service_line classification (Cardiology, Pulmonology, Medicine, ICU, etc.) from Clarity Health configuration tables."
+    }
+  ],
+  "manual_time_days": "3 to 5 days",
+  "build_room_seconds": 87
+}

@@ -17,7 +17,7 @@ export default function AboutAgentPage() {
             <p className="mt-5 text-base sm:text-lg text-[var(--ink-muted)] max-w-2xl leading-relaxed">
               The agent translates plain-English questions into deterministic queries against the same
               Snowflake-derived snapshot the rest of the platform reads. Two execution paths — a local
-              rules engine and a Snowflake Cortex / Claude path — return tables, charts, and short
+              rules engine — return tables, charts, and short
               narrative summaries.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -49,7 +49,7 @@ export default function AboutAgentPage() {
             </h2>
             <p className="mt-2 text-sm sm:text-base text-[var(--ink-muted)] leading-relaxed">
               Every request follows the same four-stage path. The router decides between a deterministic
-              local rule and a Cortex-mediated reasoning call; both terminate in the same shape — a
+              local rule path; both terminate in the same shape — a
               table, a chart, and a short summary.
             </p>
           </div>
@@ -67,8 +67,8 @@ export default function AboutAgentPage() {
               },
               {
                 step: '03',
-                name: 'Local rule · or Cortex',
-                desc: 'Recognized intents run as deterministic in-browser aggregations. Open-ended questions route to Snowflake Cortex / Claude.',
+                name: 'Local rule',
+                desc: 'Recognized intents run as deterministic in-browser aggregations against the dbt-governed gold layer.',
               },
               {
                 step: '04',
@@ -96,7 +96,7 @@ export default function AboutAgentPage() {
         </div>
       </section>
 
-      {/* Two-mode explainer — local rules vs Cortex/Claude */}
+      {/* Two-mode explainer — local rules vs dbt-wizard */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="max-w-2xl mb-10">
           <div className="eyebrow mb-2">Execution Paths</div>
@@ -104,8 +104,9 @@ export default function AboutAgentPage() {
             Two routes, one shape of answer.
           </h2>
           <p className="mt-2 text-sm sm:text-base text-[var(--ink-muted)] leading-relaxed">
-            The same question can be served by a local deterministic rule or by a Cortex / Claude
-            reasoning call. The contract — table, chart, summary — does not change.
+            The same question can be served by a local deterministic rule against the dbt-governed gold
+            layer. The contract — table, chart, summary — does not change. When a required gold model
+            does not yet exist, dbt-wizard authors it before the answer is returned.
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -122,8 +123,8 @@ export default function AboutAgentPage() {
             <div className="p-5 text-sm text-[var(--ink-muted)] leading-relaxed space-y-3">
               <p>
                 Recognized intents — chronic-condition cohorts, charge ranking, ZIP filters, age bands,
-                MRN and name lookups — resolve against a daily JSON export of the marts. No backend
-                call, no API key, fully reproducible.
+                MRN and name lookups — resolve against a daily JSON export of the dbt-wizard-authored
+                gold marts. No backend call, no API key, fully reproducible.
               </p>
               <p>
                 Suited for routine clinical and operational questions where the aggregation is known
@@ -135,9 +136,9 @@ export default function AboutAgentPage() {
           <div className="clinical-card overflow-hidden">
             <div className="clinical-card-header flex items-start justify-between gap-3">
               <div>
-                <div className="eyebrow" style={{ color: 'var(--clinical-violet)' }}>Cortex · Claude</div>
+                <div className="eyebrow" style={{ color: 'var(--clinical-violet)' }}>dbt-wizard</div>
                 <h3 className="mt-1 font-serif text-xl font-semibold text-[var(--ink-strong)]">
-                  Reasoned answers over the same marts
+                  Build-time AI over the governed lake
                 </h3>
               </div>
               <span
@@ -148,17 +149,18 @@ export default function AboutAgentPage() {
                   borderColor: 'var(--clinical-violet-bg)',
                 }}
               >
-                Cortex · Claude
+                dbt-wizard
               </span>
             </div>
             <div className="p-5 text-sm text-[var(--ink-muted)] leading-relaxed space-y-3">
               <p>
-                Open-ended or multi-step questions route to Snowflake Cortex / Claude with the same
-                snapshot as grounding. The model produces narrative reasoning alongside the table.
+                When no gold model covers the required grain, dbt-wizard's four sub-agents — Explorer,
+                Summary, Worker, and Verification — author the missing model into the dbt project,
+                tested and lineage-tracked, before returning a result.
               </p>
               <p>
-                Requires an API key, stored only in the local browser. The contract on the way back is
-                identical — every figure still traces to the marts.
+                The output is a production dbt model that every downstream consumer — Snowflake views,
+                clinical dashboards, population health surfaces — can read on its next pass.
               </p>
             </div>
           </div>

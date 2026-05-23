@@ -458,7 +458,7 @@ export function NarrativeCard({
     >
       <div className="absolute right-4 top-4 text-[10px] font-mono uppercase tracking-wider text-[var(--clinical-teal)] flex items-center gap-1.5">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--clinical-teal)] animate-pulse" />
-        Cortex narrative · auto
+        dbt-wizard narrative · auto
       </div>
       <div className="eyebrow mb-2">{eyebrow}</div>
       <div className="font-serif text-lg sm:text-xl leading-snug text-[var(--ink-strong)] max-w-3xl">

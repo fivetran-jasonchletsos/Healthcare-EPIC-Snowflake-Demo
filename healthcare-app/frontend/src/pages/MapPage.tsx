@@ -302,7 +302,7 @@ export default function MapPage() {
 
         {/* Narrative card */}
         <NarrativeCard
-          eyebrow="Cortex · auto-summary"
+          eyebrow="dbt-wizard · auto-summary"
           story={
             <>
               <span className="font-mono tabular text-[var(--clinical-teal)]">

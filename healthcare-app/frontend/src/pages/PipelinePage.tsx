@@ -3,7 +3,7 @@
 // Replaces the earlier 4-card failure-toggle demo with a Mission-Control style
 // observability surface: animated data-flow diagram, KPI strip, connector
 // health table with sparklines, dbt model grid, and Snowflake-native callouts
-// (Time Travel, zero-copy clones, Cortex). Every minute of pipeline lag is
+// (Time Travel, zero-copy clones, dbt-wizard). Every minute of pipeline lag is
 // framed as denied-claim risk and ED throughput drag — ties the data
 // infrastructure to the CEO P&L on the Executive page.
 
@@ -251,11 +251,11 @@ export default function PipelinePage() {
               metricLabel="retention window"
             />
             <SnowCard
-              tag="Cortex · LLM"
-              title="Cohort questions in plain English"
-              body="Clinical Insights routes natural-language questions to Cortex when the rule engine can't match. Snowflake-native — no data leaves the account boundary."
-              metric="in-account"
-              metricLabel="model inference"
+              tag="dbt-wizard"
+              title="Missing gold models authored on demand"
+              body="When a clinical question has no gold model to answer it, dbt-wizard's four sub-agents author, test, and materialize one in under two minutes — against the same Snowflake account."
+              metric="under 2 min"
+              metricLabel="model authoring"
             />
             <SnowCard
               tag="Auto-Suspend"
@@ -373,7 +373,7 @@ export default function PipelinePage() {
               </h2>
               <p className="text-sm text-[var(--ink-muted)] mt-1">
                 Tests defined in dbt Labs run on every build, against the same Snowflake tables every
-                clinical dashboard and Cortex agent reads. Failures block promotion to the next layer —
+                clinical dashboard and dbt-wizard-authored gold mart reads. Failures block promotion to the next layer —
                 bad data never reaches denial-prevention workflows or ED capacity boards.
               </p>
             </div>
@@ -423,12 +423,12 @@ export default function PipelinePage() {
           <header className="p-5 border-b border-[var(--hairline-soft)]">
             <div className="eyebrow" style={{ color: '#FF694A' }}>Lineage · dbt Labs</div>
             <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
-              EHR source to Cortex agent. Audited at every hop.
+              EHR source to gold mart. Audited at every hop.
             </h2>
             <p className="text-sm text-[var(--ink-muted)] mt-1">
               Column-level lineage from EHR source tables through every dbt transformation into
-              every downstream consumer — Snowflake views, Cortex AI agents, clinical dashboards.
-              PHI markers on every edge that touches patient identifiers.
+              every downstream consumer — Snowflake views, dbt-wizard-authored gold tables, clinical
+              dashboards. PHI markers on every edge that touches patient identifiers.
             </p>
           </header>
           <div className="p-5 overflow-x-auto">
@@ -486,7 +486,7 @@ export default function PipelinePage() {
 
               {[
                 { y: 26,  label: 'Snowflake (BI)' },
-                { y: 78,  label: 'Cortex AI Agent' },
+                { y: 78,  label: 'dbt-wizard Gold Table' },
                 { y: 130, label: 'Clarity App' },
                 { y: 182, label: 'CMS denial report' },
               ].map((c, i) => (

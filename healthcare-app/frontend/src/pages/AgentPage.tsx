@@ -74,8 +74,7 @@ export default function AgentPage() {
             </h1>
             <p className="mt-3 text-sm sm:text-base text-[var(--ink-muted)] max-w-2xl leading-relaxed">
               Plain-English questions over the published Snowflake snapshot. Answers route through a
-              local rules engine or, when enabled, Snowflake Cortex / Claude — every figure traces back
-              to the marts.
+              local rules engine — every figure traces back to the dbt-governed gold marts.
             </p>
           </div>
           <Link to="/about-agent" className="hidden sm:inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--clinical-violet)] hover:text-[var(--ink-strong)]">
@@ -108,7 +107,7 @@ export default function AgentPage() {
           <div className="border-b border-[var(--hairline-soft)] border-t border-[var(--hairline)] px-4 py-4 bg-white text-sm">
             <div className="eyebrow mb-1.5">Anthropic API Key</div>
             <p className="text-[var(--ink-muted)] mb-3 text-xs leading-relaxed max-w-2xl">
-              Required only for Cortex / Claude mode. The key is stored in this browser's
+              Required only for Claude mode. The key is stored in this browser's
               localStorage and is never sent anywhere except directly to the Anthropic API.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -184,7 +183,7 @@ export default function AgentPage() {
                       borderColor: 'var(--clinical-violet-bg)',
                     }}
                   >
-                    Cortex · Claude
+                    Claude
                   </span>
                 ) : (
                   <span className="status-pill info shrink-0">Local rule</span>
