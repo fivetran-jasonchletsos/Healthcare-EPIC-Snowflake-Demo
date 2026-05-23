@@ -17,6 +17,8 @@ const NAV_ITEMS: [string, string][] = [
   ['/map', 'Geographic'],
   ['/agent', 'Clinical Insights'],
   ['/pipeline', 'Pipeline'],
+  ['/dbt-wizard', 'Wizard'],
+  ['/wizard-live', 'Live'],
   ['/about', 'About'],
 ];
 
@@ -145,7 +147,7 @@ export default function Layout() {
                   to={to}
                   end={to === '/'}
                   className={({ isActive }) =>
-                    `relative px-3 py-2 font-medium transition-colors ${
+                    `relative px-3 py-2 font-medium transition-colors whitespace-nowrap ${
                       isActive
                         ? 'text-[var(--ink-strong)]'
                         : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'

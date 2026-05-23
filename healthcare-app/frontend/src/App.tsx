@@ -13,6 +13,8 @@ import MapPage from './pages/MapPage';
 import WatchlistPage from './pages/WatchlistPage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
+import OdiDbtWizardPage from './pages/OdiDbtWizardPage';
+import WizardLivePage from './pages/WizardLivePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +39,8 @@ export default function App() {
             <Route path="/map" element={<MapPage />} />
             <Route path="/watchlist" element={<WatchlistPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/dbt-wizard" element={<OdiDbtWizardPage />} />
+            <Route path="/wizard-live" element={<WizardLivePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
