@@ -11,6 +11,22 @@
 // can render in the recording even if connectors are paused.
 
 import { useState } from 'react';
+import { AliveMedallion, type SourceNode, type EngineNode } from '../components/AliveMedallion';
+
+const CLARITY_SOURCES: SourceNode[] = [
+  { id: 'sql',    label: 'SQL Server',  sub: 'Clarity EHR · CDC (8 tables)',     logo: 'sqlserver' },
+  { id: 'oracle', label: 'Oracle',      sub: 'Payor Mart · LogMiner CDC',        logo: 'oracle' },
+  { id: 'hl7',    label: 'HL7 v2',      sub: 'ADT events · MLLP listener',        logo: 'hl7' },
+  { id: 'cms',    label: 'CMS NPPES',   sub: 'NPI registry · weekly',             logo: 'cms' },
+];
+
+const CLARITY_ENGINES: EngineNode[] = [
+  { name: 'Snowflake', active: true,  logo: 'snowflake' },
+  { name: 'Athena',                   logo: 'athena' },
+  { name: 'DuckDB',                   logo: 'duckdb' },
+  { name: 'Trino',                    logo: 'trino' },
+  { name: 'Spark',                    logo: 'spark' },
+];
 
 // ─── Types (local) ──────────────────────────────────────────────────────────
 
@@ -150,7 +166,6 @@ function formatBytes(b: number): string {
 
 export default function ArchitecturePage() {
   const [activeEngine, setActiveEngine] = useState<QueryEngine>(ENGINES[0]);
-  const [hoveredLayer, setHoveredLayer] = useState<'bronze' | 'silver' | 'gold' | null>(null);
 
   const byLayer = (l: 'bronze' | 'silver' | 'gold') => TABLES.filter((t) => t.database === l);
   const layerStats = (l: 'bronze' | 'silver' | 'gold') => {
@@ -180,10 +195,13 @@ export default function ArchitecturePage() {
           From Clarity EHR + four open sources to one governed gold layer
         </h2>
 
-        <ArchitectureDiagram
-          onLayerHover={setHoveredLayer}
-          hoveredLayer={hoveredLayer}
-          layerStats={layerStats}
+        <AliveMedallion
+          sources={CLARITY_SOURCES}
+          bronze={{ ...layerStats('bronze'), trend: [180, 195, 210, 222, 240, 255, 270] }}
+          silver={{ ...layerStats('silver'), trend: [120, 130, 142, 155, 168, 180, 192] }}
+          gold={{   ...layerStats('gold'),   trend: [80, 88, 95, 104, 112, 124, 138] }}
+          engines={CLARITY_ENGINES}
+          accent="#0d9488"
         />
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-[var(--ink-muted)]">
@@ -436,146 +454,6 @@ function LayerDetail({ layer, stats, desc }: { layer: 'bronze' | 'silver' | 'gol
         {formatNumber(stats.rows)} rows · {formatBytes(stats.bytes)}
       </div>
       <div className="text-[11px] text-[var(--ink-muted)] mt-1 leading-snug">{desc}</div>
-    </div>
-  );
-}
-
-// =============================================================================
-// SVG ODI architecture diagram
-// =============================================================================
-
-function ArchitectureDiagram({
-  hoveredLayer, onLayerHover, layerStats,
-}: {
-  hoveredLayer: 'bronze' | 'silver' | 'gold' | null;
-  onLayerHover: (l: 'bronze' | 'silver' | 'gold' | null) => void;
-  layerStats: (l: 'bronze' | 'silver' | 'gold') => { tables: number; rows: number; bytes: number };
-}) {
-  return (
-    <div className="overflow-x-auto">
-      <svg viewBox="0 0 960 360" className="w-full" style={{ minWidth: 760 }}>
-        <defs>
-          <linearGradient id="bronzeGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#fed7aa" />
-            <stop offset="100%" stopColor="#b45309" />
-          </linearGradient>
-          <linearGradient id="silverGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#f8fafc" />
-            <stop offset="100%" stopColor="#6b7280" />
-          </linearGradient>
-          <linearGradient id="goldGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#faf3e1" />
-            <stop offset="100%" stopColor="#b8975c" />
-          </linearGradient>
-          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0 0 L10 5 L0 10 z" fill="#6b7280" />
-          </marker>
-        </defs>
-
-        {/* Sources — Clarity-flavoured */}
-        {[
-          { y: 20,  label: 'SQL Server',  sub: 'Clarity EHR · CDC (8 tables)' },
-          { y: 100, label: 'Oracle',      sub: 'Payor Mart · LogMiner CDC' },
-          { y: 180, label: 'HL7 v2 feed', sub: 'ADT events · MLLP listener' },
-          { y: 260, label: 'CMS NPPES',   sub: 'NPI registry · weekly' },
-        ].map((s, i) => (
-          <g key={i} transform={`translate(20, ${s.y})`}>
-            <rect width="160" height="68" rx="4" fill="#ffffff" stroke="#d9d3c4" strokeWidth="1" />
-            <text x="12" y="20" fill="#826b3f" fontSize="10" fontWeight="700" letterSpacing="1.4">SOURCE</text>
-            <text x="12" y="40" fill="#0b1220" fontSize="14" fontWeight="700">{s.label}</text>
-            <text x="12" y="56" fill="#4b5563" fontSize="10">{s.sub}</text>
-          </g>
-        ))}
-
-        {/* Fivetran connectors band */}
-        <g transform="translate(210, 30)">
-          <rect width="100" height="296" rx="4" fill="#0b2545" />
-          <text x="50" y="150" fill="#d4af75" fontSize="11" fontWeight="800" letterSpacing="1.6" textAnchor="middle" transform="rotate(-90 50 150)">
-            FIVETRAN CDC
-          </text>
-        </g>
-
-        {/* Arrows source → fivetran */}
-        {[54, 134, 214, 294].map((y) => (
-          <line key={y} x1="180" y1={y} x2="210" y2={y} stroke="#6b7280" strokeWidth="1.5" markerEnd="url(#arrow)" />
-        ))}
-
-        {/* Layers */}
-        {(['bronze', 'silver', 'gold'] as const).map((layer, idx) => {
-          const x = 340 + idx * 170;
-          const s = layerStats(layer);
-          const isHover = hoveredLayer === layer;
-          const grad = `url(#${layer}Grad)`;
-          return (
-            <g key={layer} transform={`translate(${x}, 30)`}
-               onMouseEnter={() => onLayerHover(layer)}
-               onMouseLeave={() => onLayerHover(null)}
-               style={{ cursor: 'pointer' }}>
-              <rect width="150" height="296" rx="4" fill={grad}
-                    stroke={isHover ? '#0b2545' : '#d9d3c4'}
-                    strokeWidth={isHover ? 2 : 1} />
-              <text x="75" y="36" textAnchor="middle" fill="#0b1220" fontSize="14" fontWeight="800" letterSpacing="1.6">
-                {layer.toUpperCase()}
-              </text>
-              <text x="75" y="58" textAnchor="middle" fill="#0b1220" fontSize="10" opacity="0.7">
-                {layer === 'bronze' ? 'raw landings' : layer === 'silver' ? 'conformed' : 'business-ready'}
-              </text>
-              <text x="75" y="138" textAnchor="middle" fill="#0b1220" fontSize="32" fontWeight="800">
-                {s.tables}
-              </text>
-              <text x="75" y="156" textAnchor="middle" fill="#0b1220" fontSize="10" opacity="0.7" letterSpacing="1">
-                TABLES
-              </text>
-              <text x="75" y="206" textAnchor="middle" fill="#0b1220" fontSize="11" fontWeight="700">
-                {formatNumber(s.rows)} rows
-              </text>
-              <text x="75" y="222" textAnchor="middle" fill="#0b1220" fontSize="10" opacity="0.75">
-                {formatBytes(s.bytes)}
-              </text>
-              <text x="75" y="270" textAnchor="middle" fill="#0b1220" fontSize="9" letterSpacing="1" fontWeight="700" opacity="0.6">
-                ICEBERG · GLUE
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Arrows between layers */}
-        <line x1="310" y1="178" x2="340" y2="178" stroke="#6b7280" strokeWidth="1.5" markerEnd="url(#arrow)" />
-        <line x1="490" y1="178" x2="510" y2="178" stroke="#FF694A" strokeWidth="1.8" markerEnd="url(#arrow)" />
-        <line x1="660" y1="178" x2="680" y2="178" stroke="#FF694A" strokeWidth="1.8" markerEnd="url(#arrow)" />
-
-        <g transform="translate(495, 169)">
-          <rect x="-2" y="-12" width="48" height="14" rx="3" fill="#FF694A" stroke="#FF694A" />
-          <text x="22" y="-1" textAnchor="middle" fontSize="9" fontWeight="800" fill="#ffffff" letterSpacing="0.3">dbt labs</text>
-        </g>
-        <g transform="translate(665, 169)">
-          <rect x="-2" y="-12" width="48" height="14" rx="3" fill="#FF694A" stroke="#FF694A" />
-          <text x="22" y="-1" textAnchor="middle" fontSize="9" fontWeight="800" fill="#ffffff" letterSpacing="0.3">dbt labs</text>
-        </g>
-
-        {/* Engines fan out from gold */}
-        <g transform="translate(830, 30)">
-          {(['Snowflake', 'Athena', 'DuckDB', 'Trino', 'Spark'] as const).map((e, i) => {
-            const y = 14 + i * 56;
-            const color = ENGINE_COLORS[e];
-            const active = e === 'Snowflake';
-            return (
-              <g key={e}>
-                <rect x="0" y={y} width="110" height="40" rx="4" fill="#ffffff" stroke={color} strokeWidth={active ? 2 : 1.5} />
-                <text x="55" y={y + 19} textAnchor="middle" fill="#0b1220" fontSize="13" fontWeight="700">{e}</text>
-                <text x="55" y={y + 32} textAnchor="middle" fill={active ? color : '#6b7280'} fontSize="9" letterSpacing="1" fontWeight={active ? 700 : 400}>
-                  {active ? '● ACTIVE' : 'AVAILABLE'}
-                </text>
-              </g>
-            );
-          })}
-        </g>
-
-        {/* Arrows from gold to engines */}
-        {[34, 90, 146, 202, 258].map((dy) => (
-          <line key={dy} x1="800" y1="178" x2="830" y2={dy + 20} stroke="#b8975c" strokeWidth="1.2" markerEnd="url(#arrow)" />
-        ))}
-      </svg>
     </div>
   );
 }
