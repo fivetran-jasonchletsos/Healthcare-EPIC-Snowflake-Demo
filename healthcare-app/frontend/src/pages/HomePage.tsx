@@ -97,14 +97,8 @@ export default function HomePage() {
             </div>
 
             {/* ━━━━━━━━ RIGHT: dbt WIZARD ━━━━━━━━ */}
-            <div
-              className="flex flex-col rounded-lg border bg-white overflow-hidden"
-              style={{ borderColor: 'var(--clinical-teal)' }}
-            >
-              <div
-                className="px-6 pt-6 pb-2 border-b flex items-center gap-3"
-                style={{ borderColor: 'var(--hairline-soft)' }}
-              >
+            <div className="flex flex-col rounded-lg border border-[var(--hairline)] bg-white overflow-hidden">
+              <div className="px-6 pt-6 pb-2 border-b border-[var(--hairline-soft)] flex items-center gap-3">
                 <span
                   className="status-pill healthy inline-flex items-center gap-1.5"
                   style={{ fontSize: 11, padding: '3px 9px', fontWeight: 700 }}
