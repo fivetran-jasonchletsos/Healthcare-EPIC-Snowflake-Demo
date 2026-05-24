@@ -14,10 +14,10 @@ import { useState, useEffect } from 'react';
 import { AliveMedallion, type SourceNode, type EngineNode } from '../components/AliveMedallion';
 
 const CLARITY_SOURCES: SourceNode[] = [
-  { id: 'sql',    label: 'SQL Server', sub: 'Clarity EHR · CDC (8 tables)', logo: 'sqlserver', freshness: '47s ago',   lagP99: '4 min', status: 'healthy' },
-  { id: 'oracle', label: 'Oracle',     sub: 'Payor Mart · LogMiner CDC',     logo: 'oracle',    freshness: '2 min ago', lagP99: '6 min', status: 'healthy' },
-  { id: 'hl7',    label: 'HL7 v2',     sub: 'ADT events · MLLP listener',     logo: 'hl7',       freshness: 'live',      lagP99: '12 s',  status: 'healthy', streaming: true },
-  { id: 'cms',    label: 'CMS NPPES',  sub: 'NPI registry · weekly',          logo: 'cms',       freshness: '3 d ago',   lagP99: '—',     status: 'healthy' },
+  { id: 'sql',    label: 'Epic Clarity EHR',  sub: 'SQL Server log-CDC',   logo: 'sqlserver', freshness: '47s lag',  status: 'healthy' },
+  { id: 'oracle', label: 'Payor Claims Mart', sub: 'Oracle LogMiner',       logo: 'oracle',    freshness: '2 min lag', status: 'healthy' },
+  { id: 'hl7',    label: 'HL7 ADT Feed',      sub: 'MLLP event stream',     logo: 'hl7',       freshness: 'live',      status: 'healthy', streaming: true },
+  { id: 'cms',    label: 'CMS NPPES',         sub: 'Weekly NPI registry',   logo: 'cms',       freshness: '3d lag',   status: 'healthy' },
 ];
 
 const CLARITY_ENGINES: EngineNode[] = [
