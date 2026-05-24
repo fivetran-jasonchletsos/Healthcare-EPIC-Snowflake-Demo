@@ -226,6 +226,9 @@ export default function ArchitecturePage() {
       {/* ── HIPAA data contracts / governance ────────────────────────────── */}
       <DataContractsPanel />
 
+      {/* ── Interactive lineage — click any gold model, see its upstreams ── */}
+      <LineagePanel />
+
       {/* ── Multi-engine showcase ────────────────────────────────────────── */}
       <section className="clinical-card overflow-hidden mb-8" style={cardStyle}>
         <header className="clinical-card-header" style={cardHeaderStyle}>
@@ -739,6 +742,210 @@ function BeforeAfterPanel() {
           <div><div className="text-[var(--ink-soft)] text-xs">Avg end-to-end latency</div><div className="font-serif text-2xl font-semibold" style={{ color: '#0d9488' }}>6 min</div></div>
           <div><div className="text-[var(--ink-soft)] text-xs">Daily run-rate</div><div className="font-serif text-2xl font-semibold" style={{ color: '#0d9488' }}>$4.99</div></div>
           <div><div className="text-[var(--ink-soft)] text-xs">Schema change</div><div className="font-serif text-lg font-semibold" style={{ color: '#0d9488' }}>milliseconds</div></div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
+// LineagePanel — pick any gold model, see its upstream silver + bronze.
+// dbt's killer feature, surfaced as an interactive trace.
+// =============================================================================
+type LineageEdge = { from: string; to: string; tests?: string[] };
+
+const LINEAGE_MAP: Record<string, { silver: string[]; bronze: string[]; edges: LineageEdge[]; story: string }> = {
+  'gold.fct_chronic_cohorts': {
+    silver: ['silver.int_chronic_conditions', 'silver.int_patient_encounter_spine', 'silver.int_encounter_diagnoses'],
+    bronze: ['bronze.clarity__patient', 'bronze.clarity__pat_enc', 'bronze.clarity__pat_enc_dx'],
+    story:  'Cohort definitions join encounter history to ICD-10 diagnoses. Used by population-health reports and the chronic-care registry.',
+    edges: [
+      { from: 'bronze.clarity__patient',      to: 'silver.int_patient_encounter_spine', tests: ['unique patient_id'] },
+      { from: 'bronze.clarity__pat_enc',      to: 'silver.int_patient_encounter_spine', tests: ['not-null encounter_id'] },
+      { from: 'bronze.clarity__pat_enc_dx',   to: 'silver.int_encounter_diagnoses' },
+      { from: 'silver.int_encounter_diagnoses', to: 'silver.int_chronic_conditions' },
+      { from: 'silver.int_chronic_conditions',  to: 'gold.fct_chronic_cohorts' },
+      { from: 'silver.int_patient_encounter_spine', to: 'gold.fct_chronic_cohorts' },
+    ],
+  },
+  'gold.fct_encounters': {
+    silver: ['silver.int_patient_encounter_spine'],
+    bronze: ['bronze.clarity__patient', 'bronze.clarity__pat_enc', 'bronze.hl7__adt_events'],
+    story:  'Encounter facts including ED visits, inpatient stays, and HL7 ADT-derived real-time admit/discharge events.',
+    edges: [
+      { from: 'bronze.clarity__patient',  to: 'silver.int_patient_encounter_spine' },
+      { from: 'bronze.clarity__pat_enc',  to: 'silver.int_patient_encounter_spine' },
+      { from: 'bronze.hl7__adt_events',   to: 'silver.int_patient_encounter_spine', tests: ['streaming · 12 s p99'] },
+      { from: 'silver.int_patient_encounter_spine', to: 'gold.fct_encounters' },
+    ],
+  },
+  'gold.fct_payor_denied_claims': {
+    silver: ['silver.int_claims_reconciled', 'silver.int_financials'],
+    bronze: ['bronze.payor__claims', 'bronze.clarity__hsp_transaction'],
+    story:  'Payor denial signal joined to internal financial transactions. Drives the revenue-cycle dashboard.',
+    edges: [
+      { from: 'bronze.payor__claims',           to: 'silver.int_claims_reconciled' },
+      { from: 'bronze.clarity__hsp_transaction', to: 'silver.int_financials' },
+      { from: 'silver.int_claims_reconciled',   to: 'gold.fct_payor_denied_claims' },
+      { from: 'silver.int_financials',           to: 'gold.fct_payor_denied_claims' },
+    ],
+  },
+  'gold.dim_patients': {
+    silver: ['silver.int_patient_encounter_spine'],
+    bronze: ['bronze.clarity__patient'],
+    story:  'Master patient dimension. PII-tagged, masked on read by role.',
+    edges: [
+      { from: 'bronze.clarity__patient', to: 'silver.int_patient_encounter_spine' },
+      { from: 'silver.int_patient_encounter_spine', to: 'gold.dim_patients' },
+    ],
+  },
+};
+
+function LineagePanel() {
+  const goldOptions = Object.keys(LINEAGE_MAP);
+  const [selected, setSelected] = useState<string>(goldOptions[0]);
+  const lin = LINEAGE_MAP[selected];
+
+  // Bronze on the left (x=20), Silver middle (x=320), Gold right (x=620).
+  // Heights are dynamic per how many tables per layer.
+  const BX = 20, MX = 320, RX = 620;
+  const COL_W = 280;
+  const ROW_H = 38, ROW_GAP = 8;
+  const maxRows = Math.max(lin.bronze.length, lin.silver.length, 1);
+  const HEIGHT = Math.max(maxRows * (ROW_H + ROW_GAP) + 40, 240);
+
+  const bronzeY = (i: number) => 30 + i * (ROW_H + ROW_GAP);
+  const silverY = (i: number) => 30 + i * (ROW_H + ROW_GAP);
+  const goldY = (HEIGHT - ROW_H) / 2;
+
+  const nodeOf = (name: string): { x: number; y: number; w: number; h: number } | null => {
+    const bi = lin.bronze.indexOf(name);
+    if (bi >= 0) return { x: BX, y: bronzeY(bi), w: COL_W, h: ROW_H };
+    const si = lin.silver.indexOf(name);
+    if (si >= 0) return { x: MX, y: silverY(si), w: COL_W, h: ROW_H };
+    if (name === selected) return { x: RX, y: goldY, w: COL_W, h: ROW_H };
+    return null;
+  };
+
+  return (
+    <section className="mb-8 clinical-card overflow-hidden" style={cardStyle}>
+      <header className="clinical-card-header" style={cardHeaderStyle}>
+        <div className="flex items-baseline justify-between gap-4 flex-wrap">
+          <div>
+            <div className="eyebrow" style={{ color: '#FF694A' }}>dbt · Column-level lineage</div>
+            <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
+              Pick any gold model. See exactly where its bytes come from.
+            </h2>
+            <p className="text-sm text-[var(--ink-muted)] mt-1 max-w-3xl">
+              dbt emits lineage as a side-effect of build. Every join, every transformation, every test
+              is documented automatically. Click a gold model below to trace upstream &mdash; bronze
+              landings to silver intermediates to the gold mart.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shrink-0" style={{ background: '#FF694A' }}>
+            dbt Labs
+          </div>
+        </div>
+      </header>
+
+      {/* Gold model picker */}
+      <div className="px-5 pt-4 flex flex-wrap gap-2">
+        {goldOptions.map((g) => (
+          <button
+            key={g}
+            onClick={() => setSelected(g)}
+            className="px-3 py-2 rounded-sm text-[11.5px] font-mono border transition-all"
+            style={
+              selected === g
+                ? { background: '#b8975c', borderColor: '#b8975c', color: '#fff' }
+                : { background: '#fff', borderColor: 'var(--hairline)', color: 'var(--ink-muted)' }
+            }
+          >
+            {g}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-5">
+        <p className="text-sm text-[var(--ink)] mb-4 italic">{lin.story}</p>
+
+        <div className="overflow-x-auto">
+          <svg viewBox={`0 0 ${RX + COL_W + 20} ${HEIGHT}`} className="w-full" style={{ minWidth: 880, maxHeight: 360 }}>
+            <defs>
+              <marker id="lin-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#FF694A" />
+              </marker>
+            </defs>
+
+            {/* Column eyebrows */}
+            <text x={BX}        y={18} fontSize="10" fontWeight="700" fill="#826b3f" letterSpacing="1.6">BRONZE · raw</text>
+            <text x={MX}        y={18} fontSize="10" fontWeight="700" fill="#374151" letterSpacing="1.6">SILVER · conformed</text>
+            <text x={RX}        y={18} fontSize="10" fontWeight="700" fill="#7a5e2d" letterSpacing="1.6">GOLD · selected</text>
+
+            {/* Edges first so cards sit on top */}
+            {lin.edges.map((e, i) => {
+              const a = nodeOf(e.from);
+              const b = nodeOf(e.to);
+              if (!a || !b) return null;
+              const x1 = a.x + a.w, y1 = a.y + a.h / 2;
+              const x2 = b.x,         y2 = b.y + b.h / 2;
+              const mid = (x1 + x2) / 2;
+              const d = `M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}`;
+              return (
+                <g key={i}>
+                  <path d={d} fill="none" stroke="#FF694A" strokeWidth="1.6" strokeLinecap="round" markerEnd="url(#lin-arrow)" opacity="0.75" />
+                  {/* Particle traveling along the curve */}
+                  <circle r="2.5" fill="#FF694A">
+                    <animateMotion dur={`${2.0 + i * 0.18}s`} repeatCount="indefinite" path={d} />
+                    <animate attributeName="opacity" values="0;1;1;0" dur={`${2.0 + i * 0.18}s`} repeatCount="indefinite" />
+                  </circle>
+                  {e.tests && (
+                    <g transform={`translate(${mid - 38}, ${(y1 + y2) / 2 - 8})`}>
+                      <rect width="76" height="14" rx="3" fill="#FF694A" />
+                      <text x="38" y="10" textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#fff" letterSpacing="0.4">
+                        {e.tests[0]}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Bronze nodes */}
+            {lin.bronze.map((t, i) => (
+              <g key={t} transform={`translate(${BX}, ${bronzeY(i)})`}>
+                <rect width={COL_W} height={ROW_H} rx="4" fill="#fef3c7" stroke="#b45309" strokeWidth="1" />
+                <text x="12" y="14" fontSize="9" fontWeight="800" fill="#826b3f" letterSpacing="1.4">BRONZE</text>
+                <text x="12" y="28" fontSize="11" fontWeight="700" fill="#0b1220" fontFamily="ui-monospace, monospace">{t}</text>
+              </g>
+            ))}
+
+            {/* Silver nodes */}
+            {lin.silver.map((t, i) => (
+              <g key={t} transform={`translate(${MX}, ${silverY(i)})`}>
+                <rect width={COL_W} height={ROW_H} rx="4" fill="#f3f4f6" stroke="#6b7280" strokeWidth="1" />
+                <text x="12" y="14" fontSize="9" fontWeight="800" fill="#374151" letterSpacing="1.4">SILVER</text>
+                <text x="12" y="28" fontSize="11" fontWeight="700" fill="#0b1220" fontFamily="ui-monospace, monospace">{t}</text>
+              </g>
+            ))}
+
+            {/* Gold node (selected) */}
+            <g transform={`translate(${RX}, ${goldY})`}>
+              <rect width={COL_W} height={ROW_H} rx="4" fill="#faf3e1" stroke="#b8975c" strokeWidth="2" filter="url(#alive-glow)" />
+              <text x="12" y="14" fontSize="9" fontWeight="800" fill="#7a5e2d" letterSpacing="1.4">GOLD</text>
+              <text x="12" y="28" fontSize="11" fontWeight="700" fill="#0b1220" fontFamily="ui-monospace, monospace">{selected}</text>
+            </g>
+          </svg>
+        </div>
+
+        <div className="mt-4 flex items-center gap-4 text-[11px] text-[var(--ink-soft)] flex-wrap">
+          <span className="inline-flex items-center gap-1.5"><span className="inline-block w-3 h-0.5" style={{ background: '#FF694A' }} /> dbt transformation (auto-emitted)</span>
+          <span>•</span>
+          <span><strong className="text-[var(--ink-strong)]">{lin.edges.length}</strong> column-level edges traced</span>
+          <span>•</span>
+          <span><strong className="text-[var(--ink-strong)]">{lin.bronze.length + lin.silver.length + 1}</strong> dbt models in the lineage graph</span>
+          <span>•</span>
+          <span>Lineage runs at every build · zero manual upkeep</span>
         </div>
       </div>
     </section>
