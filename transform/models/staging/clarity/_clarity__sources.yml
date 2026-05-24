@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: clarity
-    description: Epic Clarity source data synced from EC2 SQL Server via Fivetran
+    description: Epic Clarity source data synced via Fivetran's Epic Clarity connector
     schema: jason_chletsos_ehr_demo
     tables:
       - name: patient

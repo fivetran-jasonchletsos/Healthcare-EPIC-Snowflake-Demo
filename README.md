@@ -1,25 +1,27 @@
 # Healthcare EPIC Snowflake Demo
 
-End-to-end Epic Clarity → Snowflake → dbt → React demo showcasing the modern
-data stack on a healthcare data model. Forked from `Healthcare-Epic-MDLS-DuckDB`
-with the MDLS/Iceberg/DuckDB tier replaced by Snowflake.
+End-to-end Epic Clarity → Fivetran → Iceberg (MDLS) → Snowflake / Athena / Trino → dbt
+→ React demo showcasing the modern open-lake data stack on a healthcare data model.
 
 ```
    ┌─────────────────────────────────────────────────────────┐
-   │  Epic Clarity (SQL Server on AWS EC2)                   │
+   │  Epic Clarity (Clarity reporting DB on AWS EC2)         │
    │  patient, pat_enc, pat_enc_dx, hsp_account, …           │
    └──────────────────────────┬──────────────────────────────┘
-                              │  Fivetran CDC connector
+                              │  Fivetran Epic Clarity connector (CDC)
                               ▼
    ┌─────────────────────────────────────────────────────────┐
-   │  Snowflake — raw landing                                │
-   │  database: JASON_CHLETSOS_EPIC                          │
-   │  schema:   JASON_CHLETSOS_EHR_DEMO                      │
+   │  Iceberg (MDLS) — Managed Data Lake on S3               │
+   │  open Apache Iceberg · ACID · one copy of the bytes     │
+   │  schema: JASON_CHLETSOS_EHR_DEMO                        │
    └──────────────────────────┬──────────────────────────────┘
-                              │  dbt run (Snowflake adapter)
+                              │  Snowflake · Athena · Trino
+                              │  (external Iceberg reads — no copies)
                               ▼
    ┌─────────────────────────────────────────────────────────┐
-   │  Snowflake — gold layer                                 │
+   │  Fivetran Transformations triggers dbt Labs             │
+   │  (fires when Epic Clarity sync finishes)                │
+   │  bronze → silver → gold · 21 tested models              │
    │  schemas: STAGING / INTERMEDIATE / CLINICAL / FINANCIAL │
    │  marts:   dim_patients, dim_providers, fct_encounters,  │
    │           fct_diagnoses, fct_account_summary, …         │
@@ -37,7 +39,7 @@ with the MDLS/Iceberg/DuckDB tier replaced by Snowflake.
 
 | Path | Purpose |
 | --- | --- |
-| `infra/` | Terraform for the SQL Server EC2 + Fivetran connector |
+| `infra/` | Terraform for the Clarity reporting DB EC2 + Fivetran Epic Clarity connector |
 | `scripts/` | Source data generators + sync triggers + snapshot builder |
 | `transform/` | dbt project — Snowflake adapter |
 | `healthcare-app/frontend/` | React SPA (mirrors fivetran-sheetz-demo) |
@@ -46,19 +48,23 @@ with the MDLS/Iceberg/DuckDB tier replaced by Snowflake.
 
 ## Pipeline
 
-1. Source: SQL Server on EC2 holds an Epic Clarity-shaped schema
+1. Source: Epic Clarity reporting database on EC2 holds the EHR schema
    (`patient`, `pat_enc`, `pat_enc_dx`, `hsp_account`, …).
-2. Fivetran connector (SQL Server CDC) lands changes into Snowflake under
-   `JASON_CHLETSOS_EPIC.JASON_CHLETSOS_EHR_DEMO`.
-3. dbt builds the staging → intermediate → marts layers under
+2. Fivetran's Epic Clarity connector lands every change into Iceberg (MDLS)
+   on S3 in open Apache Iceberg format. Schema: `JASON_CHLETSOS_EHR_DEMO`.
+3. Snowflake, Athena, and Trino all read the same Iceberg bytes through
+   external table catalogs — no duplication, no extracts. Snowflake is the
+   primary engine in this demo (`JASON_CHLETSOS_EPIC`).
+4. Fivetran Transformations triggers the dbt job the moment the Epic Clarity
+   sync finishes. dbt builds staging → intermediate → marts under
    `JASON_CHLETSOS_EPIC.{STAGING, INTERMEDIATE, CLINICAL, FINANCIAL}`.
-4. `scripts/build_snapshot.py` queries the marts and writes the JSON the
+5. `scripts/build_snapshot.py` queries the marts and writes the JSON the
    React frontend serves at runtime.
 
 ## Local development
 
 ```bash
-# Provision SQL Server + load demo data
+# Provision Epic Clarity reporting DB + load demo data
 cd infra && terraform apply
 cd ../scripts && python load_to_sqlserver.py
 

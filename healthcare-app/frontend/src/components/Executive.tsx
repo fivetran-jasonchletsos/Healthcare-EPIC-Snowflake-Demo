@@ -668,7 +668,7 @@ function NodeIcon({ logo }: { logo?: FlowNode['logo'] }) {
 
 export function ProvenanceStrip({
   freshness = '4 min ago',
-  source = 'Clarity Health · SQL Server CDC',
+  source = 'Clarity Health · Epic Clarity CDC',
   rows = '2.4M rows · 8 tables',
   ctaTo,
   fivetranUrl,

@@ -50,11 +50,11 @@ type Stage = {
 };
 
 const PIPELINE_STAGES: Stage[] = [
-  { key: 'src',  layer: 'Sources',        vendor: 'Clarity Health EHR',  stat: 'SQL Server · 8 CDC tables',    color: C.inkDim,  icon: 'E' },
-  { key: 'ft',   layer: 'Ingestion',      vendor: 'Fivetran',             stat: '750+ connectors · Iceberg',    color: C.fivetran, icon: 'F' },
-  { key: 'ice',  layer: 'Open Lake',      vendor: 'Iceberg on S3',        stat: 'ACID · open · multi-engine',   color: C.iceberg,  icon: 'I' },
-  { key: 'dbt',  layer: 'Build-time AI',  vendor: 'dbt Labs + dbt-wizard',stat: '4 sub-agents · 90s/model',    color: C.dbt,      icon: 'W' },
-  { key: 'snow', layer: 'Compute',        vendor: 'Snowflake',            stat: 'External Iceberg · XS WH',    color: C.snow,     icon: 'S' },
+  { key: 'src',  layer: 'Sources',        vendor: 'Clarity Health EHR',  stat: 'Epic Clarity · 8 CDC tables',    color: C.inkDim,  icon: 'E' },
+  { key: 'ft',   layer: 'Ingestion',      vendor: 'Fivetran',             stat: 'Epic Clarity connector · Iceberg lands',    color: C.fivetran, icon: 'F' },
+  { key: 'ice',  layer: 'Open Lake',      vendor: 'Iceberg (MDLS) on S3', stat: 'ACID · open · multi-engine',   color: C.iceberg,  icon: 'I' },
+  { key: 'snow', layer: 'Compute',        vendor: 'Snowflake / Athena / Trino', stat: 'External Iceberg reads', color: C.snow,    icon: 'S' },
+  { key: 'dbt',  layer: 'Build-time AI',  vendor: 'dbt Labs + dbt-wizard',stat: 'Fivetran-triggered · 4 sub-agents · 90s/model',    color: C.dbt,      icon: 'W' },
 ];
 
 export function WizardPipelineFlow() {

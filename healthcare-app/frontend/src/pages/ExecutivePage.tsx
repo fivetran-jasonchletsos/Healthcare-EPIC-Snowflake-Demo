@@ -328,10 +328,10 @@ export default function ExecutivePage() {
         {/* Provenance — the Snowflake + Fivetran story underneath */}
         <ProvenanceStrip
           freshness="4.2 min ago"
-          source="Clarity Health · SQL Server CDC · 8 tables"
+          source="Clarity Health · Epic Clarity CDC · 8 tables"
           rows="JASON_CHLETSOS_EPIC · 4 mart schemas · 21 dbt Labs models"
           ctaTo={() => navigate('/pipeline')}
-          fivetranUrl="https://fivetran.com/dashboard/connectors/clarity_health_sqlserver_cdc"
+          fivetranUrl="https://fivetran.com/dashboard/connectors/clarity_health_epic_clarity"
         />
 
         {/* Method note — booth visitors will read this */}

@@ -171,35 +171,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Six-step build explanation */}
-      <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 lg:px-8">
-        <div className="eyebrow mb-2">The six-step build</div>
-        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-6 text-[var(--ink-strong)]">
-          Discover. Understand. Inspect. Author. Test. Materialize.
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-14">
-          {FLOW.map((step, i) => (
-            <div key={step.title} className="rounded-lg border border-[var(--hairline)] bg-white p-4 relative" style={{ borderLeft: `3px solid ${step.color}` }}>
-              <div className="font-mono text-xs mb-2" style={{ color: step.color }}>
-                {String(i + 1).padStart(2, '0')} · {step.tag}
-              </div>
-              <div className="font-serif text-base font-semibold mb-2 text-[var(--ink-strong)]">{step.title}</div>
-              <p className="text-xs leading-relaxed text-[var(--ink-muted)]">{step.body}</p>
-              <div className="mt-3 font-mono text-[10px] text-[var(--ink-soft)]">{step.who}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Left: action tiles (Find + Ask, stacked) · Right: six-step build as 2×3 */}
+      <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 lg:px-8 fade-in-up" style={{ animationDelay: '80ms' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+          {/* LEFT: stacked action tiles */}
+          <div className="flex flex-col gap-5">
+            <FindPatientTile onGo={(q) => navigate(q ? `/patients?q=${encodeURIComponent(q)}` : '/patients')} />
+            <InsightAgentTile
+              onAsk={(q) => navigate(`/agent?q=${encodeURIComponent(q)}`)}
+              onOpen={() => navigate('/agent')}
+              onAbout={() => navigate('/about-agent')}
+            />
+          </div>
 
-      {/* Two clinical action tiles — restrained, paper-feel */}
-      <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8 fade-in-up" style={{ animationDelay: '80ms' }}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <FindPatientTile onGo={(q) => navigate(q ? `/patients?q=${encodeURIComponent(q)}` : '/patients')} />
-          <InsightAgentTile
-            onAsk={(q) => navigate(`/agent?q=${encodeURIComponent(q)}`)}
-            onOpen={() => navigate('/agent')}
-            onAbout={() => navigate('/about-agent')}
-          />
+          {/* RIGHT: six-step build, 2 rows × 3 cols */}
+          <div>
+            <div className="eyebrow mb-2">The six-step build</div>
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-6 text-[var(--ink-strong)]">
+              Discover. Understand. Inspect. Author. Test. Materialize.
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {FLOW.map((step, i) => (
+                <div key={step.title} className="rounded-lg border border-[var(--hairline)] bg-white p-4 relative" style={{ borderLeft: `3px solid ${step.color}` }}>
+                  <div className="font-mono text-xs mb-2" style={{ color: step.color }}>
+                    {String(i + 1).padStart(2, '0')} · {step.tag}
+                  </div>
+                  <div className="font-serif text-base font-semibold mb-2 text-[var(--ink-strong)]">{step.title}</div>
+                  <p className="text-xs leading-relaxed text-[var(--ink-muted)]">{step.body}</p>
+                  <div className="mt-3 font-mono text-[10px] text-[var(--ink-soft)]">{step.who}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -238,12 +241,13 @@ export default function HomePage() {
               no spreadsheet hand-offs.
             </p>
           </div>
-          <ol className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <ol className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
-              { step: '01', name: 'Fivetran CDC', desc: 'Change-data-capture connector mirrors EHR tables from SQL Server in near real time.' },
-              { step: '02', name: 'Snowflake', desc: 'Lands raw CDC (bronze) and hosts the staging / intermediate / mart schemas with role-based access.' },
-              { step: '03', name: 'dbt Labs transforms', desc: 'Bronze → Silver → Gold. Tested SQL produces clinical and financial marts — 21 models with not-null and uniqueness checks.' },
-              { step: '04', name: 'React + Recharts', desc: 'Static SPA reads daily JSON exports of the gold marts; no PHI ever touches the browser.' },
+              { step: '01', name: 'Fivetran CDC', desc: 'Epic Clarity connector mirrors EHR tables from the Clarity reporting database in near real time.' },
+              { step: '02', name: 'Iceberg (MDLS)', desc: 'Fivetran lands every CDC row into the Managed Data Lake on S3 in open Apache Iceberg format — one copy, one source of truth.' },
+              { step: '03', name: 'Snowflake / Athena / Trino', desc: 'All three engines read the same Iceberg bytes — pick the right compute per workload, no data duplication, no extracts.' },
+              { step: '04', name: 'dbt Labs transforms', desc: 'Fivetran Transformations triggers the dbt job the moment Epic Clarity finishes syncing. Bronze → Silver → Gold, 21 tested models.' },
+              { step: '05', name: 'React + Recharts', desc: 'Static SPA reads daily JSON exports of the gold marts; no PHI ever touches the browser.' },
             ].map((s) => (
               <li key={s.name} className="relative rounded-lg border border-[var(--hairline)] bg-white p-5 hover:border-[var(--clinical-teal)] transition-colors">
                 <div className="text-[10px] font-mono font-semibold text-[var(--clinical-teal)] tracking-wider">{s.step}</div>

@@ -23,7 +23,7 @@ const PILLARS: Pillar[] = [
     accent: '#0073EA',
     tag: 'connectors',
     what: '750+ managed connectors plus a custom Connector SDK for the long tail. Lands every source into Managed Data Lake Service as Apache Iceberg, in customer-owned S3.',
-    inBuild: 'Clarity Health EHR runs on SQL Server. Fivetran\'s TELEPORT CDC connector replicates eight source tables — PATIENT, PAT_ENC, PAT_ENC_DX, HSP_ACCOUNT, HSP_TRANSACTION, MEDICATIONS, PROVIDERS, DEPARTMENTS — on a continuous five-minute cadence into the shared lake, in the same open format, on the same schedule.',
+    inBuild: 'Clarity Health EHR runs on Epic Clarity. Fivetran\'s Epic Clarity connector replicates eight source tables — PATIENT, PAT_ENC, PAT_ENC_DX, HSP_ACCOUNT, HSP_TRANSACTION, MEDICATIONS, PROVIDERS, DEPARTMENTS — on a continuous five-minute cadence into the shared lake, in the same open format, on the same schedule.',
   },
   {
     layer: 'Open Lake',

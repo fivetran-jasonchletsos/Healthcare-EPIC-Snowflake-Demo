@@ -2,7 +2,7 @@
 //
 // Ported from Verity Insurance's ArchitecturePage to give Clarity the
 // same medallion / multi-engine surface (Snowflake Summit 2026 recording
-// set, 9am). Healthcare-flavoured: Clarity EHR (SQL Server) + payor
+// set, 9am). Healthcare-flavoured: Clarity EHR (Epic Clarity) + payor
 // claims (Oracle) + HL7 v2 feed + CMS public datasets. Snowflake is
 // the primary engine; Athena/DuckDB/Trino/Spark stay listed as the
 // same open-lake reads.
@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import { AliveMedallion, type SourceNode, type EngineNode } from '../components/AliveMedallion';
 
 const CLARITY_SOURCES: SourceNode[] = [
-  { id: 'sql',    label: 'Epic Clarity EHR',  sub: 'SQL Server log-CDC',   logo: 'sqlserver', freshness: '47s lag',  status: 'healthy' },
+  { id: 'sql',    label: 'Epic Clarity EHR',  sub: 'Epic Clarity CDC source',   logo: 'epic_clarity', freshness: '47s lag',  status: 'healthy' },
   { id: 'oracle', label: 'Payor Claims Mart', sub: 'Oracle LogMiner',       logo: 'oracle',    freshness: '2 min lag', status: 'healthy' },
   { id: 'hl7',    label: 'HL7 ADT Feed',      sub: 'MLLP event stream',     logo: 'hl7',       freshness: 'live',      status: 'healthy', streaming: true },
   { id: 'cms',    label: 'CMS NPPES',         sub: 'Weekly NPI registry',   logo: 'cms',       freshness: '3d lag',   status: 'healthy' },
@@ -49,12 +49,12 @@ interface QueryEngine {
 }
 
 const TABLES: IcebergTable[] = [
-  { database: 'bronze', table: 'bronze.clarity__patient',          source_system: 'sql_server · Clarity EHR', rows: 412_820,   bytes: 318_440_000,   schema_columns: 142, partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
-  { database: 'bronze', table: 'bronze.clarity__pat_enc',          source_system: 'sql_server · Clarity EHR', rows: 4_182_220, bytes: 2_140_000_000, schema_columns: 187, partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
-  { database: 'bronze', table: 'bronze.clarity__pat_enc_dx',       source_system: 'sql_server · Clarity EHR', rows: 12_414_380,bytes: 4_820_000_000, schema_columns: 24,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
-  { database: 'bronze', table: 'bronze.clarity__hsp_account',      source_system: 'sql_server · Clarity EHR', rows: 1_842_200, bytes: 1_120_000_000, schema_columns: 92,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
-  { database: 'bronze', table: 'bronze.clarity__hsp_transaction',  source_system: 'sql_server · Clarity EHR', rows: 18_142_200,bytes: 5_410_000_000, schema_columns: 71,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
-  { database: 'bronze', table: 'bronze.clarity__medications',      source_system: 'sql_server · Clarity EHR', rows: 864_200,   bytes: 462_000_000,   schema_columns: 38,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
+  { database: 'bronze', table: 'bronze.clarity__patient',          source_system: 'epic_clarity · Clarity EHR', rows: 412_820,   bytes: 318_440_000,   schema_columns: 142, partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
+  { database: 'bronze', table: 'bronze.clarity__pat_enc',          source_system: 'epic_clarity · Clarity EHR', rows: 4_182_220, bytes: 2_140_000_000, schema_columns: 187, partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
+  { database: 'bronze', table: 'bronze.clarity__pat_enc_dx',       source_system: 'epic_clarity · Clarity EHR', rows: 12_414_380,bytes: 4_820_000_000, schema_columns: 24,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
+  { database: 'bronze', table: 'bronze.clarity__hsp_account',      source_system: 'epic_clarity · Clarity EHR', rows: 1_842_200, bytes: 1_120_000_000, schema_columns: 92,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
+  { database: 'bronze', table: 'bronze.clarity__hsp_transaction',  source_system: 'epic_clarity · Clarity EHR', rows: 18_142_200,bytes: 5_410_000_000, schema_columns: 71,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
+  { database: 'bronze', table: 'bronze.clarity__medications',      source_system: 'epic_clarity · Clarity EHR', rows: 864_200,   bytes: 462_000_000,   schema_columns: 38,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:14:00Z' },
   { database: 'bronze', table: 'bronze.payor__claims',             source_system: 'oracle · Payor Mart',      rows: 2_864_000, bytes: 1_810_000_000, schema_columns: 64,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:11:00Z' },
   { database: 'bronze', table: 'bronze.hl7__adt_events',           source_system: 'http · HL7 v2 feed',       rows: 384_000,   bytes: 142_000_000,   schema_columns: 28,  partitions: ['ingest_date'],            last_updated_at: '2026-05-24T07:12:00Z' },
   { database: 'bronze', table: 'bronze.cms__npi_registry',         source_system: 'http · CMS NPPES',         rows: 12_460,    bytes: 18_400_000,    schema_columns: 32,  partitions: [],                          last_updated_at: '2026-05-23T03:00:00Z' },
@@ -194,9 +194,14 @@ export default function ArchitecturePage() {
       {/* ── Data Flow diagram ─────────────────────────────────────────────── */}
       <section className="clinical-card p-6 sm:p-8 mb-8" style={cardStyle}>
         <div className="eyebrow mb-1">Data Flow</div>
-        <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] mb-6">
-          From Clarity EHR + four open sources to one governed gold layer
+        <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] mb-2">
+          Fivetran → Iceberg (MDLS) → Snowflake · Athena · Trino → dbt
         </h2>
+        <p className="text-sm text-[var(--ink-muted)] mb-6 leading-relaxed max-w-3xl">
+          Every source lands in open Apache Iceberg format on S3 — the Managed Data Lake. All query
+          engines read the same bytes, no copies. Fivetran Transformations triggers the dbt job the
+          moment the Epic Clarity sync finishes.
+        </p>
 
         <AliveMedallion
           sources={CLARITY_SOURCES}
@@ -472,7 +477,7 @@ function ThroughputHero() {
           <div className="mt-2 text-xs text-[var(--ink-muted)]">across 4 sources · 22 Iceberg tables · CDC + streaming</div>
         </div>
       </div>
-      <Kpi label="CDC freshness · p50" value="47s" sub="SQL Server source" />
+      <Kpi label="CDC freshness · p50" value="47s" sub="Epic Clarity source" />
       <Kpi label="Bronze → Gold lag · p99" value="6 min" sub="Within 10-min SLO" />
       <Kpi label="Connector uptime · 90d" value="99.97%" sub={
         <Sparklike values={trend} />

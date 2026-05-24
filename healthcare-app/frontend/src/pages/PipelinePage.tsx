@@ -13,7 +13,7 @@ import { Sparkline } from '../components/Sparkline';
 import { DataFlowDiagram, KpiTile, AnimatedCounter, type FlowNode } from '../components/Executive';
 
 // Real Fivetran connector wired to fortitude_fawn (jason_chletsos_mdls_s3).
-// Schema: jason_chletsos_ehr_demo, service: sql_server, status: connected.
+// Schema: jason_chletsos_ehr_demo, service: epic_clarity, status: connected.
 // Deep-link pattern: https://fivetran.com/dashboard/connections/{id}/status
 const FIVETRAN_CONNECTOR_ID = 'six_thickened';
 const FIVETRAN_SCHEMA_NAME  = 'jason_chletsos_ehr_demo';
@@ -72,10 +72,11 @@ export default function PipelinePage() {
 
   const flow: FlowNode[] = useMemo(
     () => [
-      { id: 'epic', logo: 'epic', label: 'Clarity Health EHR', sub: 'SQL Server · CDC source', status: 'healthy', metric: '8 tables · 2.4M rows' },
-      { id: 'fivetran', logo: 'fivetran', label: 'Fivetran', sub: 'TELEPORT CDC connector', status: 'healthy', metric: '5-min cadence · 99.7% SLA' },
-      { id: 'snowflake', logo: 'snowflake', label: 'Snowflake', sub: 'JASON_CHLETSOS_EPIC', status: 'healthy', metric: 'XS warehouse · auto-suspend' },
-      { id: 'dbt', logo: 'dbt', label: 'dbt Labs transforms', sub: 'Bronze → Silver → Gold · 21 models', status: 'healthy', metric: '24s avg · 0 failures' },
+      { id: 'epic', logo: 'epic', label: 'Clarity Health EHR', sub: 'Epic Clarity · CDC source', status: 'healthy', metric: '8 tables · 2.4M rows' },
+      { id: 'fivetran', logo: 'fivetran', label: 'Fivetran', sub: 'Epic Clarity connector', status: 'healthy', metric: '5-min cadence · 99.7% SLA' },
+      { id: 'iceberg', logo: 'iceberg', label: 'Iceberg (MDLS)', sub: 'Managed Data Lake Service · S3', status: 'healthy', metric: 'ACID · open · multi-engine' },
+      { id: 'snowflake', logo: 'snowflake', label: 'Snowflake / Athena / Trino', sub: 'External Iceberg reads', status: 'healthy', metric: 'XS warehouse · auto-suspend' },
+      { id: 'dbt', logo: 'dbt', label: 'dbt Labs transforms', sub: 'Triggered by Fivetran · Bronze → Silver → Gold · 21 models', status: 'healthy', metric: '24s avg · 0 failures' },
       { id: 'app', logo: 'app', label: 'Clarity App', sub: 'React · static JSON', status: 'healthy', metric: 'CDN · 12 min deploy' },
     ],
     [],
@@ -93,15 +94,36 @@ export default function PipelinePage() {
             <div>
               <div className="eyebrow mb-2">Pipeline · Observability</div>
               <h1 className="font-serif text-3xl sm:text-4xl font-semibold leading-tight text-[var(--ink-strong)] tracking-tight">
-                EHR → Snowflake, end-to-end
+                EHR → Iceberg → multi-engine, end-to-end
               </h1>
               <p className="mt-2 text-sm text-[var(--ink-muted)] max-w-3xl leading-relaxed">
-                Fivetran captures change-data from the SQL Server EHR source and lands it in
-                Snowflake every 5 minutes. dbt Labs transforms it through bronze (staging), silver
-                (intermediate), and gold (clinical + financial marts) layers that power the Executive
-                Cockpit, patient registry, and population
-                health surfaces. Every minute of lag has a P&L cost — see <Link to="/executive" className="underline text-[var(--clinical-teal)]">Executive</Link>.
+                Fivetran's Epic Clarity connector captures change-data from the EHR source and lands it in
+                Iceberg (MDLS) every 5 minutes. Snowflake, Athena, and Trino all read the same bytes —
+                no copies. Fivetran Transformations then trigger dbt Labs the moment the Epic Clarity
+                sync finishes, building bronze (staging), silver (intermediate), and gold (clinical +
+                financial marts) layers that power the Executive Cockpit, patient registry, and
+                population health surfaces. Every minute of lag has a P&L cost — see <Link to="/executive" className="underline text-[var(--clinical-teal)]">Executive</Link>.
               </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+                <a
+                  href="https://cloud.getdbt.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2.5 py-1 font-semibold text-[var(--ink-strong)] hover:border-[var(--clinical-teal)] transition-colors"
+                >
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#FF694A' }}>d</span>
+                  Open in dbt Cloud
+                </a>
+                <a
+                  href="https://fivetran.com/dashboard/transformations"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2.5 py-1 font-semibold text-[var(--ink-strong)] hover:border-[var(--clinical-teal)] transition-colors"
+                >
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>F</span>
+                  View Fivetran Transformations trigger
+                </a>
+              </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-mono tabular text-[var(--ink-soft)]">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--clinical-green)] animate-pulse" />
