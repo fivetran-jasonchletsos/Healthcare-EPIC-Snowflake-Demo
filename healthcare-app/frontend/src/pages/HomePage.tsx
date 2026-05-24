@@ -18,78 +18,161 @@ export default function HomePage() {
 
   return (
     <>
-      {/* dbt-wizard hero — leads the 3-minute Snowflake Summit demo */}
-      <section
-        className="bg-white border-b border-[var(--hairline)] fade-in-up"
-        style={{ animationDelay: '0ms' }}
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <span
-                className="status-pill healthy inline-flex items-center gap-1.5"
-                style={{ fontSize: 12, padding: '4px 10px', fontWeight: 700 }}
-              >
-                <span className="h-2 w-2 rounded-full bg-[var(--clinical-teal)] animate-pulse" />
-                dbt-wizard · live build
-              </span>
-              <span className="eyebrow">BLD-2026-05-23-0007</span>
-            </div>
+      {/* SPLIT-SCREEN HERO — two parallel tracks, side by side.
+          Left: Evidence Grade (the dashboard you'd hand a CMO today)
+          Right: dbt Wizard (the AI build you'd hand them tomorrow) */}
+      <section className="bg-white border-b border-[var(--hairline)] fade-in-up" style={{ animationDelay: '0ms' }}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
 
-            <h1 className="font-serif text-5xl sm:text-6xl font-semibold leading-[1.0] text-[var(--ink-strong)] tracking-tight">
-              Ask a question.{' '}
-              <span className="text-[var(--clinical-teal)]">Watch the model get built.</span>{' '}
-              See the answer.
-            </h1>
-            <p className="mt-5 text-lg text-[var(--ink-muted)] max-w-2xl leading-relaxed">
-              The CMO asks why sepsis bundle-compliance dipped for the cardiology service line.
-              No gold table exists. The Quality Committee meets in 14 hours.
-              Manual build: 3 to 5 days. dbt-wizard: 87 seconds.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/scenario"
-                className="inline-flex items-center gap-2 rounded-md text-white font-semibold px-6 py-3 shadow-sm hover:opacity-95 transition-opacity"
-                style={{ background: 'var(--clinical-teal)' }}
-              >
-                Start the demo
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M13 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <Link
-                to="/wizard-live"
-                className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-3 hover:bg-[var(--paper-deep)] transition-colors"
-              >
-                Jump to live build
-              </Link>
-              <Link
-                to="/outcome"
-                className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-3 hover:bg-[var(--paper-deep)] transition-colors"
-              >
-                See the outcome
-              </Link>
-            </div>
-          </div>
-
-          {/* 4-tile flow summary */}
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {DEMO_FLOW.map(tile => (
-              <div
-                key={tile.step}
-                className="rounded-lg border border-[var(--hairline)] bg-[var(--paper-deep)] p-4"
-                style={{ borderLeft: `4px solid ${tile.color}` }}
-              >
-                <div className="font-mono text-[10px] uppercase tracking-wider mb-1" style={{ color: tile.color }}>
-                  {tile.step}
-                </div>
-                <div className="font-serif font-semibold text-[var(--ink-strong)] text-base mb-1">
-                  {tile.title}
-                </div>
-                <p className="text-xs text-[var(--ink-muted)] leading-relaxed">{tile.body}</p>
+            {/* ━━━━━━━━ LEFT: EVIDENCE GRADE ━━━━━━━━ */}
+            <div className="flex flex-col rounded-lg border border-[var(--hairline)] bg-white overflow-hidden">
+              <div className="px-6 pt-6 pb-2 border-b border-[var(--hairline-soft)] flex items-center gap-3">
+                <span
+                  className="status-pill healthy inline-flex items-center gap-1.5"
+                  style={{ fontSize: 11, padding: '3px 9px', fontWeight: 700 }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--clinical-green)] animate-pulse" />
+                  Clinical Dashboard · live
+                </span>
+                <span className="eyebrow" style={{ color: 'var(--color-brand-700)' }}>Track A</span>
               </div>
-            ))}
+
+              <div className="px-6 pt-5 pb-6 flex-1 flex flex-col">
+                <div className="eyebrow mb-2">Clarity Health</div>
+                <h2 className="font-serif text-3xl sm:text-4xl font-semibold leading-[1.05] text-[var(--ink-strong)] tracking-tight">
+                  Evidence-grade insight,<br className="hidden sm:block" /> from chart to cohort.
+                </h2>
+                <p className="mt-4 text-[15px] text-[var(--ink-muted)] leading-relaxed">
+                  A reference clinical-analytics workspace built on EHR-shaped data.
+                  Patient records, encounter histories, diagnoses, financials, and
+                  population-level signals — modeled, governed, and presented for the
+                  people who deliver care.
+                </p>
+
+                {/* Population snapshot — compact KPI strip */}
+                <div className="mt-6 rounded-md border border-[var(--hairline)] bg-[var(--paper-deep)] overflow-hidden">
+                  <div className="px-4 py-2 border-b border-[var(--hairline-soft)] flex items-center justify-between bg-white">
+                    <div className="eyebrow">Population Snapshot</div>
+                    <div className="text-[10px] font-medium text-[var(--ink-soft)] uppercase tracking-wider">Snowflake marts</div>
+                  </div>
+                  <div className="grid grid-cols-2 divide-x divide-y divide-[var(--hairline-soft)] tabular bg-white">
+                    <Vital label="Active panel" value={stats ? formatNumber(stats.total_patients) : '—'} hint="Patients with current data" />
+                    <Vital
+                      label="Avg visits / patient"
+                      value={stats ? (stats.total_encounters / stats.total_patients).toFixed(1) : '—'}
+                      hint={stats ? `${formatNumber(stats.total_encounters)} encounters` : 'Utilization intensity'}
+                    />
+                    <Vital label="Avg charge / encounter" value={stats ? formatCurrency(stats.avg_encounter_cost) : '—'} hint="Revenue per case" />
+                    <Vital
+                      label="Chronic dx coverage"
+                      value={stats ? `${((stats.active_chronic_count / stats.total_patients) * 100).toFixed(0)}%` : '—'}
+                      hint={stats ? `${formatNumber(stats.active_chronic_count)} patients · ≥1 chronic dx` : ''}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-6 flex flex-wrap gap-2.5">
+                  <button
+                    onClick={() => navigate('/executive')}
+                    className="inline-flex items-center gap-2 rounded-md text-white font-semibold px-5 py-2.5 shadow-sm hover:opacity-95 transition-opacity"
+                    style={{ background: 'var(--color-brand-700)' }}
+                  >
+                    Executive Cockpit <span aria-hidden>→</span>
+                  </button>
+                  <button
+                    onClick={() => navigate('/patients')}
+                    className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-4 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
+                  >
+                    Patient registry
+                  </button>
+                  <button
+                    onClick={() => navigate('/agent')}
+                    className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-4 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
+                  >
+                    Clinical Insights
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ━━━━━━━━ RIGHT: dbt WIZARD ━━━━━━━━ */}
+            <div
+              className="flex flex-col rounded-lg border bg-white overflow-hidden"
+              style={{ borderColor: 'var(--clinical-teal)' }}
+            >
+              <div
+                className="px-6 pt-6 pb-2 border-b flex items-center gap-3"
+                style={{ borderColor: 'var(--hairline-soft)' }}
+              >
+                <span
+                  className="status-pill healthy inline-flex items-center gap-1.5"
+                  style={{ fontSize: 11, padding: '3px 9px', fontWeight: 700 }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--clinical-teal)] animate-pulse" />
+                  dbt Wizard · live build
+                </span>
+                <span className="eyebrow" style={{ color: 'var(--clinical-teal)' }}>Track B</span>
+                <span className="eyebrow ml-auto">BLD-2026-05-23-0007</span>
+              </div>
+
+              <div className="px-6 pt-5 pb-6 flex-1 flex flex-col">
+                <div className="eyebrow mb-2" style={{ color: 'var(--clinical-teal)' }}>Agentic data engineering</div>
+                <h2 className="font-serif text-3xl sm:text-4xl font-semibold leading-[1.05] text-[var(--ink-strong)] tracking-tight">
+                  Ask a question.{' '}
+                  <span style={{ color: 'var(--clinical-teal)' }}>Watch the model get built.</span>
+                </h2>
+                <p className="mt-4 text-[15px] text-[var(--ink-muted)] leading-relaxed">
+                  The CMO asks why sepsis bundle-compliance dipped for cardiology.
+                  No gold table exists. The Quality Committee meets in 14 hours.
+                  Manual build: 3 to 5 days. dbt Wizard: <strong className="text-[var(--ink-strong)]">87 seconds</strong>.
+                </p>
+
+                {/* 4-step demo flow — compact */}
+                <div className="mt-6 grid grid-cols-2 gap-2.5">
+                  {DEMO_FLOW.map((tile) => (
+                    <div
+                      key={tile.step}
+                      className="rounded-md border border-[var(--hairline)] bg-[var(--paper-deep)] p-3"
+                      style={{ borderLeft: `3px solid ${tile.color}` }}
+                    >
+                      <div className="font-mono text-[9.5px] uppercase tracking-wider mb-1" style={{ color: tile.color }}>
+                        {tile.step}
+                      </div>
+                      <div className="font-serif font-semibold text-[var(--ink-strong)] text-[13px] mb-1 leading-tight">
+                        {tile.title}
+                      </div>
+                      <p className="text-[11px] text-[var(--ink-muted)] leading-snug">{tile.body}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-6 flex flex-wrap gap-2.5">
+                  <Link
+                    to="/scenario"
+                    className="inline-flex items-center gap-2 rounded-md text-white font-semibold px-5 py-2.5 shadow-sm hover:opacity-95 transition-opacity"
+                    style={{ background: 'var(--clinical-teal)' }}
+                  >
+                    Start the demo
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <path d="M5 12h14M13 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  <Link
+                    to="/wizard-live"
+                    className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-4 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
+                  >
+                    Jump to live build
+                  </Link>
+                  <Link
+                    to="/outcome"
+                    className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-4 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
+                  >
+                    See the outcome
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -111,82 +194,6 @@ export default function HomePage() {
               <div className="mt-3 font-mono text-[10px] text-[var(--ink-soft)]">{step.who}</div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Existing clinical dashboard content below the fold */}
-      {/* Institutional hero — calm, serif, restrained */}
-      <section className="bg-white border-t border-b border-[var(--hairline)] fade-in-up" style={{ animationDelay: '0ms' }}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
-            <div className="lg:col-span-7">
-              <div className="eyebrow mb-3">Clarity Health · Clinical Dashboard</div>
-              <h2 className="font-serif text-3xl sm:text-4xl font-semibold leading-[1.05] text-[var(--ink-strong)] tracking-tight">
-                Evidence-grade insight, from chart to cohort.
-              </h2>
-              <p className="mt-5 text-base sm:text-lg text-[var(--ink-muted)] max-w-2xl leading-relaxed">
-                A reference clinical-analytics workspace built on EHR-shaped data. Patient records,
-                encounter histories, diagnoses, financials, and population-level signals — modeled, governed,
-                and presented for the people who deliver care.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <button
-                  onClick={() => navigate('/executive')}
-                  className="inline-flex items-center gap-2 rounded-md text-white font-semibold px-5 py-2.5 shadow-sm hover:opacity-95 transition-opacity"
-                  style={{ background: 'var(--color-brand-700)' }}
-                >
-                  Open Executive Cockpit <span aria-hidden>→</span>
-                </button>
-                <button
-                  onClick={() => navigate('/patients')}
-                  className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
-                >
-                  Patient registry <span aria-hidden>→</span>
-                </button>
-                <button
-                  onClick={() => navigate('/agent')}
-                  className="inline-flex items-center gap-2 rounded-md bg-white border border-[var(--hairline)] text-[var(--ink-strong)] font-semibold px-5 py-2.5 hover:bg-[var(--paper-deep)] transition-colors"
-                >
-                  Ask Clinical Insights <span aria-hidden>→</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Vital-signs panel — KPIs styled like a clinical readout */}
-            <div className="lg:col-span-5">
-              <div className="rounded-lg border border-[var(--hairline)] bg-white shadow-sm overflow-hidden">
-                <div className="px-5 py-3 border-b border-[var(--hairline-soft)] flex items-center justify-between bg-gradient-to-b from-white to-[var(--paper-deep)]">
-                  <div className="eyebrow">Population Snapshot</div>
-                  <div className="text-[10px] font-medium text-[var(--ink-soft)] uppercase tracking-wider">
-                    Source · Snowflake marts
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 divide-x divide-y divide-[var(--hairline-soft)] tabular">
-                  <Vital label="Active panel" value={stats ? formatNumber(stats.total_patients) : '—'} hint="Patients with current data" />
-                  <Vital
-                    label="Avg visits / patient"
-                    value={stats ? (stats.total_encounters / stats.total_patients).toFixed(1) : '—'}
-                    hint={stats ? `${formatNumber(stats.total_encounters)} encounters` : 'Utilization intensity'}
-                  />
-                  <Vital label="Avg charge / encounter" value={stats ? formatCurrency(stats.avg_encounter_cost) : '—'} hint="Revenue per case" />
-                  <Vital
-                    label="Chronic dx coverage"
-                    value={stats ? `${((stats.active_chronic_count / stats.total_patients) * 100).toFixed(0)}%` : '—'}
-                    hint={stats ? `${formatNumber(stats.active_chronic_count)} patients · ≥1 chronic dx` : ''}
-                  />
-                </div>
-                <div className="px-5 py-3 border-t border-[var(--hairline-soft)] flex items-center justify-between text-[11px] text-[var(--ink-soft)] bg-[var(--paper-deep)]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--clinical-green)] animate-pulse" />
-                    Pipeline operational
-                  </span>
-                  <button onClick={() => navigate('/pipeline')} className="font-medium hover:text-[var(--ink-strong)]">
-                    Inspect layers →
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
