@@ -15,7 +15,7 @@ import { AliveMedallion, type SourceNode, type EngineNode } from '../components/
 
 const CLARITY_SOURCES: SourceNode[] = [
   { id: 'sql',    label: 'Epic Clarity EHR',  sub: 'Epic Clarity CDC source',   logo: 'epic_clarity', freshness: '47s lag',  status: 'healthy' },
-  { id: 'oracle', label: 'Payor Claims Mart', sub: 'Oracle LogMiner',       logo: 'oracle',    freshness: '2 min lag', status: 'healthy' },
+  { id: 'oracle', label: 'Payor Claims Mart', sub: 'Oracle Binary Log Reader', logo: 'oracle',  freshness: '2 min lag', status: 'healthy' },
   { id: 'hl7',    label: 'HL7 ADT Feed',      sub: 'MLLP event stream',     logo: 'hl7',       freshness: 'live',      status: 'healthy', streaming: true },
   { id: 'cms',    label: 'CMS NPPES',         sub: 'Weekly NPI registry',   logo: 'cms',       freshness: '3d lag',   status: 'healthy' },
 ];
