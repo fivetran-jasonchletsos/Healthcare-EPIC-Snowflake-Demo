@@ -72,26 +72,33 @@ export function AliveMedallion({
     return () => clearInterval(id);
   }, [engines.length]);
 
-  // Layout constants (SVG coordinate space)
-  const W = 1040, H = 380;
-  const SOURCE_X = 24, SOURCE_W = 184, SOURCE_H = 80, SOURCE_GAP = 14;
+  // Layout constants (SVG coordinate space) — Databricks-style three-grouped layout:
+  //   [ Sources box ] → [ Lakehouse / Data Warehouse box ] → [ Consumers box ]
+  // Top label band reserved at y=0–40; content begins at y≈60.
+  const W = 1100, H = 440;
+  const LABEL_BAND = 36;                         // top row reserved for group titles
+  const CONTENT_TOP = LABEL_BAND + 22;
+  const SOURCE_X = 36, SOURCE_W = 192, SOURCE_H = 80, SOURCE_GAP = 14;
   const sourceTotalH = sources.length * SOURCE_H + (sources.length - 1) * SOURCE_GAP;
-  const SOURCE_Y0 = (H - sourceTotalH) / 2;
+  const SOURCE_Y0 = CONTENT_TOP + ((H - CONTENT_TOP - 28) - sourceTotalH) / 2;
 
-  // Source cards are now 80 tall (was 60) to fit freshness pill + status row
-  const FT_X = 236, FT_W = 100;
+  const FT_X = 258, FT_W = 96;
   const FT_H = sourceTotalH + 24;
   const FT_Y = SOURCE_Y0 - 12;
   const FT_CY = FT_Y + FT_H / 2;
 
   const LAYER_W = 168, LAYER_H = sourceTotalH + 24, LAYER_GAP = 22;
-  const BRONZE_X = 368, SILVER_X = BRONZE_X + LAYER_W + LAYER_GAP, GOLD_X = SILVER_X + LAYER_W + LAYER_GAP;
+  const BRONZE_X = 386, SILVER_X = BRONZE_X + LAYER_W + LAYER_GAP, GOLD_X = SILVER_X + LAYER_W + LAYER_GAP;
   const LAYER_Y = FT_Y;
   const LAYER_CY = LAYER_Y + LAYER_H / 2;
 
-  const ENGINE_X = GOLD_X + LAYER_W + 56, ENGINE_W = 132, ENGINE_H = 52, ENGINE_GAP = 14;
+  const ENGINE_X = GOLD_X + LAYER_W + 80, ENGINE_W = 130, ENGINE_H = 52, ENGINE_GAP = 14;
   const engineTotalH = engines.length * ENGINE_H + (engines.length - 1) * ENGINE_GAP;
-  const ENGINE_Y0 = (H - engineTotalH) / 2;
+  const ENGINE_Y0 = CONTENT_TOP + ((H - CONTENT_TOP - 28) - engineTotalH) / 2;
+
+  // Container-box constants reserved for the next-pass HTML/SVG outer frame.
+  // Intentionally left untouched here; the v2 redesign moves the outer chrome
+  // to HTML cards (better typography + responsive than nested SVG rects).
 
   return (
     <div className="relative">
@@ -303,9 +310,9 @@ export function AliveMedallion({
         </g>
 
         {/* ── Layers (medallion boxes) ──────────────────────────────────── */}
-        <Layer x={BRONZE_X} y={LAYER_Y} w={LAYER_W} h={LAYER_H} grad="alive-bronze" label="BRONZE" sub="raw landings"     stat={bronze} accent="#b45309" />
-        <Layer x={SILVER_X} y={LAYER_Y} w={LAYER_W} h={LAYER_H} grad="alive-silver" label="SILVER" sub="conformed"        stat={silver} accent="#6b7280" />
-        <Layer x={GOLD_X}   y={LAYER_Y} w={LAYER_W} h={LAYER_H} grad="alive-gold"   label="GOLD"   sub="business-ready"   stat={gold}   accent="#b8975c" />
+        <Layer x={BRONZE_X} y={LAYER_Y} w={LAYER_W} h={LAYER_H} palette="bronze" label="BRONZE" sub="raw landings"     stat={bronze} accent="#b45309" />
+        <Layer x={SILVER_X} y={LAYER_Y} w={LAYER_W} h={LAYER_H} palette="silver" label="SILVER" sub="conformed"        stat={silver} accent="#6b7280" />
+        <Layer x={GOLD_X}   y={LAYER_Y} w={LAYER_W} h={LAYER_H} palette="gold"   label="GOLD"   sub="business-ready"   stat={gold}   accent="#b8975c" />
 
         {/* ── dbt-labs transformation badges — rendered AFTER layers so they sit on top ── */}
         <DbtBadge cx={BRONZE_X + LAYER_W + LAYER_GAP / 2} cy={LAYER_CY - 14} />
@@ -350,30 +357,66 @@ export function AliveMedallion({
 // ─── Subcomponents ──────────────────────────────────────────────────────────
 
 function Layer({
-  x, y, w, h, grad, label, sub, stat, accent,
+  x, y, w, h, label, sub, stat, accent, palette,
 }: {
   x: number; y: number; w: number; h: number;
-  grad: string; label: string; sub: string;
+  grad?: string; label: string; sub: string;
   stat: LayerStat; accent: string;
+  palette: 'bronze' | 'silver' | 'gold';
 }) {
+  // 3D stacked-disk database cylinder per tier — matches the reference brief.
+  const TONES = {
+    bronze: { top: '#c97a3a', mid: '#a55a26', dark: '#7a3d10', stroke: '#5e2e0a' },
+    silver: { top: '#d4d8de', mid: '#a0a6ae', dark: '#777d86', stroke: '#5b6068' },
+    gold:   { top: '#ffe082', mid: '#f6c849', dark: '#c79b1f', stroke: '#946f0c' },
+  }[palette];
+
+  const cx = w / 2;
+  const rx = Math.min(w * 0.42, 64);
+  const ry = 16;
+  const topY = 70;
+  const bottomY = h - 70;
+  const bodyH = bottomY - topY;
+  const stripeY1 = topY + bodyH / 3;
+  const stripeY2 = topY + (bodyH / 3) * 2;
+
+  const sidePath = [
+    `M ${cx - rx} ${topY}`,
+    `L ${cx - rx} ${bottomY}`,
+    `A ${rx} ${ry} 0 0 0 ${cx + rx} ${bottomY}`,
+    `L ${cx + rx} ${topY}`,
+    'Z',
+  ].join(' ');
+
   return (
     <g transform={`translate(${x}, ${y})`} style={{ cursor: 'pointer' }}>
-      <rect width={w} height={h} rx="5" fill={`url(#${grad})`} stroke="#d9d3c4" strokeWidth="1" />
-      <text x={w / 2} y="32" textAnchor="middle" fontSize="14" fontWeight="800" fill="#0b1220" letterSpacing="2">{label}</text>
-      <text x={w / 2} y="50" textAnchor="middle" fontSize="10" fill="#0b1220" opacity="0.75">{sub}</text>
-      <text x={w / 2} y={h / 2 + 4} textAnchor="middle" fontSize="32" fontWeight="800" fill="#0b1220">{stat.tables}</text>
-      <text x={w / 2} y={h / 2 + 22} textAnchor="middle" fontSize="9.5" fill="#0b1220" opacity="0.6" letterSpacing="1.2">TABLES</text>
-      <text x={w / 2} y={h - 50} textAnchor="middle" fontSize="11" fontWeight="700" fill="#0b1220">
-        {formatNum(stat.rows)} rows
-      </text>
-      <text x={w / 2} y={h - 36} textAnchor="middle" fontSize="9.5" fill="#0b1220" opacity="0.7">
-        {formatBytes(stat.bytes)}
-      </text>
-      <text x={w / 2} y={h - 14} textAnchor="middle" fontSize="9" fontWeight="700" fill="#0b1220" opacity="0.45" letterSpacing="1.6">
-        ICEBERG · GLUE
-      </text>
-      {/* Live pulse top-right */}
-      <circle cx={w - 12} cy="12" r="3" fill={accent} filter="url(#alive-glow)">
+      <text x={cx} y={28} textAnchor="middle" fontSize="14" fontWeight="800" fill="#0b1220" letterSpacing="2.2">{label}</text>
+      <text x={cx} y={46} textAnchor="middle" fontSize="10" fill="#4b5563" opacity="0.9">{sub}</text>
+
+      <defs>
+        <linearGradient id={`cyl-${palette}-body`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%"  stopColor={TONES.dark} />
+          <stop offset="35%" stopColor={TONES.mid} />
+          <stop offset="60%" stopColor={TONES.top} />
+          <stop offset="100%" stopColor={TONES.dark} />
+        </linearGradient>
+      </defs>
+      <path d={sidePath} fill={`url(#cyl-${palette}-body)`} stroke={TONES.stroke} strokeWidth="1.2" />
+
+      <ellipse cx={cx} cy={stripeY1} rx={rx} ry={ry} fill="none" stroke={TONES.stroke} strokeWidth="0.9" opacity="0.55" />
+      <ellipse cx={cx} cy={stripeY2} rx={rx} ry={ry} fill="none" stroke={TONES.stroke} strokeWidth="0.9" opacity="0.55" />
+
+      <ellipse cx={cx} cy={topY} rx={rx} ry={ry} fill={TONES.top} stroke={TONES.stroke} strokeWidth="1.2" />
+      <ellipse cx={cx - rx * 0.3} cy={topY - ry * 0.2} rx={rx * 0.45} ry={ry * 0.35} fill="#ffffff" opacity="0.35" />
+
+      <text x={cx} y={topY + bodyH / 2 + 4} textAnchor="middle" fontSize="36" fontWeight="800" fill="#0b1220" opacity="0.9">{stat.tables}</text>
+      <text x={cx} y={topY + bodyH / 2 + 22} textAnchor="middle" fontSize="9.5" fontWeight="700" fill="#0b1220" opacity="0.55" letterSpacing="1.6">TABLES</text>
+
+      <text x={cx} y={bottomY + 32} textAnchor="middle" fontSize="11.5" fontWeight="700" fill="#0b1220">{formatNum(stat.rows)} rows</text>
+      <text x={cx} y={bottomY + 46} textAnchor="middle" fontSize="10" fill="#4b5563">{formatBytes(stat.bytes)}</text>
+      <text x={cx} y={bottomY + 60} textAnchor="middle" fontSize="9" fontWeight="700" fill="#0b1220" opacity="0.5" letterSpacing="1.6">ICEBERG · GLUE</text>
+
+      <circle cx={cx + rx + 6} cy={topY} r="3" fill={accent} filter="url(#alive-glow)">
         <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite" />
       </circle>
     </g>
