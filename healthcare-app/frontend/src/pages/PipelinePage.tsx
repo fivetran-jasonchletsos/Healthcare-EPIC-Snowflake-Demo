@@ -124,13 +124,13 @@ export default function PipelinePage() {
                   Fivetran Transformations
                 </a>
                 <a
-                  href="https://github.com/fivetran-jasonchletsos/Healthcare-EPIC-Snowflake-Demo/actions/workflows/dbt_run.yml"
+                  href="https://github.com/fivetran-jasonchletsos/Healthcare-EPIC-Snowflake-Demo"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2.5 py-1 font-semibold text-[var(--ink-strong)] hover:border-[var(--clinical-teal)] transition-colors"
                 >
                   <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#FF694A' }}>d</span>
-                  dbt run history
+                  Open dbt project (GitHub)
                 </a>
               </div>
             </div>
