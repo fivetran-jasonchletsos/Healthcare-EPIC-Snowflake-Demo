@@ -27,7 +27,7 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - run: pip install "dbt-core==1.7.4" "dbt-snowflake==1.7.1"
+      - run: pip install "dbt-core==1.7.4" "dbt-snowflake==1.7.1" "protobuf<5"
 
       - working-directory: transform
         run: dbt deps --profiles-dir .
