@@ -406,26 +406,6 @@ function DbtBadge({ cx, cy }: { cx: number; cy: number }) {
   );
 }
 
-function SparklinePath({
-  values, width, height, color, opacity = 1,
-}: {
-  values: number[]; width: number; height: number; color: string; opacity?: number;
-}) {
-  if (values.length < 2) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const rng = max - min || 1;
-  const stepX = width / (values.length - 1);
-  const pts = values.map((v, i) => `${(i * stepX).toFixed(1)},${(height - ((v - min) / rng) * height).toFixed(1)}`);
-  return (
-    <polyline
-      points={pts.join(' ')} fill="none" stroke={color}
-      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"
-      opacity={opacity}
-    />
-  );
-}
-
 // ─── Vendor logo marks (inline SVG, vendor-true silhouettes) ────────────────
 
 function VendorMark({ kind, size = 20 }: { kind: VendorLogo; size?: number }) {
