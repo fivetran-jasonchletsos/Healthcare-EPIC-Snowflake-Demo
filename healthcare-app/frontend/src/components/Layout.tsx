@@ -1,7 +1,6 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { api, getSnapshotTime, subscribeSource, type DataSource } from '../api/queries';
-import { getTheme, setTheme, subscribeTheme, type Theme } from '../theme';
 import * as watchlist from '../watchlist';
 import PacSync from './PacSync';
 import HelpTour from './HelpTour';
@@ -159,7 +158,6 @@ export default function Layout() {
   const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [theme, setThemeState] = useState<Theme>(getTheme());
   const [watchCount, setWatchCount] = useState(0);
   const [spaceSyncOpen, setSpaceSyncOpen] = useState(false);
   const [demoSwitcherOpen, setDemoSwitcherOpen] = useState(false);
@@ -171,9 +169,8 @@ export default function Layout() {
   useEffect(() => {
     const unsub = subscribeSource(setSource);
     api.getSummary().finally(() => setSnapshotAt(getSnapshotTime())).catch(() => {});
-    const tsub = subscribeTheme(setThemeState);
     const wsub = watchlist.subscribe((ids) => setWatchCount(ids.length));
-    return () => { unsub(); tsub(); wsub(); };
+    return () => { unsub(); wsub(); };
   }, []);
 
   // Konami code listener — unlocks the SpaceSync easter egg.
@@ -280,7 +277,6 @@ export default function Layout() {
                   </span>
                 )}
               </button>
-              <ThemeToggle theme={theme} onChange={setTheme} />
               <DemoSwitcher
                 source={source}
                 snapshotAt={snapshotAt}
@@ -508,27 +504,6 @@ function DemoSwitcher({
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (t: Theme) => void }) {
-  return (
-    <div className="hidden md:inline-flex items-center rounded-md border border-[var(--hairline)] bg-white p-0.5 text-[11px] font-medium">
-      {(['fivetran', 'snowflake'] as Theme[]).map((t) => (
-        <button
-          key={t}
-          onClick={() => onChange(t)}
-          className={`px-2.5 py-1 rounded transition-colors ${
-            theme === t
-              ? 'bg-[var(--paper-deep)] text-[var(--ink-strong)]'
-              : 'text-[var(--ink-soft)] hover:text-[var(--ink)]'
-          }`}
-          title={`${t === 'fivetran' ? 'Fivetran' : 'Snowflake'} accent`}
-        >
-          {t === 'fivetran' ? 'Fivetran' : 'Snowflake'}
-        </button>
-      ))}
     </div>
   );
 }
