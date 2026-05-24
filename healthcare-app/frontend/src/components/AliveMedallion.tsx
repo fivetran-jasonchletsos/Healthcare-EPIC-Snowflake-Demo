@@ -17,11 +17,17 @@ import { useEffect, useState, type CSSProperties } from 'react';
 
 // ─── Public types ───────────────────────────────────────────────────────────
 
+export type NodeStatus = 'healthy' | 'caution' | 'alert';
+
 export interface SourceNode {
   id: string;
   label: string;     // "SQL Server"
   sub: string;       // "Clarity EHR · CDC (8 tables)"
   logo?: VendorLogo; // optional vendor mark to put in the corner
+  freshness?: string;          // "47s ago"
+  status?: NodeStatus;         // drives the live-dot colour
+  streaming?: boolean;         // true → particles travel faster, STREAM badge
+  lagP99?: string;             // "4 min"
 }
 
 export interface LayerStat {
@@ -68,17 +74,18 @@ export function AliveMedallion({
 
   // Layout constants (SVG coordinate space)
   const W = 1040, H = 380;
-  const SOURCE_X = 24, SOURCE_W = 168, SOURCE_H = 60, SOURCE_GAP = 18;
+  const SOURCE_X = 24, SOURCE_W = 184, SOURCE_H = 80, SOURCE_GAP = 14;
   const sourceTotalH = sources.length * SOURCE_H + (sources.length - 1) * SOURCE_GAP;
   const SOURCE_Y0 = (H - sourceTotalH) / 2;
 
-  const FT_X = 220, FT_W = 96;
+  // Source cards are now 80 tall (was 60) to fit freshness pill + status row
+  const FT_X = 236, FT_W = 100;
   const FT_H = sourceTotalH + 24;
   const FT_Y = SOURCE_Y0 - 12;
   const FT_CY = FT_Y + FT_H / 2;
 
   const LAYER_W = 168, LAYER_H = sourceTotalH + 24, LAYER_GAP = 22;
-  const BRONZE_X = 348, SILVER_X = BRONZE_X + LAYER_W + LAYER_GAP, GOLD_X = SILVER_X + LAYER_W + LAYER_GAP;
+  const BRONZE_X = 368, SILVER_X = BRONZE_X + LAYER_W + LAYER_GAP, GOLD_X = SILVER_X + LAYER_W + LAYER_GAP;
   const LAYER_Y = FT_Y;
   const LAYER_CY = LAYER_Y + LAYER_H / 2;
 
@@ -139,8 +146,10 @@ export function AliveMedallion({
         </defs>
 
         {/* ── Edges (drawn first so cards sit on top) ─────────────────── */}
-        {sources.map((_, i) => {
+        {sources.map((s, i) => {
           const y = SOURCE_Y0 + i * (SOURCE_H + SOURCE_GAP) + SOURCE_H / 2;
+          // Streaming sources move particles 2x faster than CDC (visible cue)
+          const dur = s.streaming ? (1.1 + i * 0.07) : (2.2 + i * 0.18);
           return (
             <g key={`edge-src-${i}`} color="#6b7280">
               <line
@@ -150,15 +159,23 @@ export function AliveMedallion({
                 markerEnd="url(#alive-arrow)"
               />
               {/* Particle flowing source → fivetran */}
-              <circle r="2.5" fill={accent} opacity="0.85">
+              <circle r={s.streaming ? 3 : 2.5} fill={accent} opacity="0.85">
                 <animate
                   attributeName="cx"
                   values={`${SOURCE_X + SOURCE_W};${FT_X - 4}`}
-                  dur={`${2.2 + i * 0.18}s`} repeatCount="indefinite"
+                  dur={`${dur}s`} repeatCount="indefinite"
                 />
-                <animate attributeName="cy" values={`${y};${y}`} dur="2.2s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0;0.9;0.9;0" dur={`${2.2 + i * 0.18}s`} repeatCount="indefinite" />
+                <animate attributeName="cy" values={`${y};${y}`} dur={`${dur}s`} repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;0.9;0.9;0" dur={`${dur}s`} repeatCount="indefinite" />
               </circle>
+              {/* Second particle on streaming sources for "fire-hose" feel */}
+              {s.streaming && (
+                <circle r="2.6" fill={accent} opacity="0">
+                  <animate attributeName="cx" values={`${SOURCE_X + SOURCE_W};${FT_X - 4}`} dur={`${dur}s`} begin={`${dur / 2}s`} repeatCount="indefinite" />
+                  <animate attributeName="cy" values={`${y};${y}`} dur={`${dur}s`} begin={`${dur / 2}s`} repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0;0.9;0.9;0" dur={`${dur}s`} begin={`${dur / 2}s`} repeatCount="indefinite" />
+                </circle>
+              )}
             </g>
           );
         })}
@@ -222,24 +239,49 @@ export function AliveMedallion({
         {/* ── Source cards ──────────────────────────────────────────────── */}
         {sources.map((s, i) => {
           const y = SOURCE_Y0 + i * (SOURCE_H + SOURCE_GAP);
+          const statusColor = s.status === 'alert' ? '#dc2626' : s.status === 'caution' ? '#d97706' : '#16a34a';
           return (
             <g key={s.id} transform={`translate(${SOURCE_X}, ${y})`}>
               <rect width={SOURCE_W} height={SOURCE_H} rx="5" fill="#ffffff" stroke="#d9d3c4" strokeWidth="1" />
               <rect width={SOURCE_W} height={SOURCE_H} rx="5" fill="url(#alive-edge-warm)" opacity="0.06" />
+              {/* Row 1 — eyebrow + STREAM badge if applicable */}
               <text x="14" y="18" fontSize="9" fontWeight="700" fill="#826b3f" letterSpacing="1.6">SOURCE</text>
+              {s.streaming && (
+                <g transform={`translate(${SOURCE_W - 92}, 8)`}>
+                  <rect width="50" height="13" rx="2" fill="#0d9488" />
+                  <text x="25" y="10" textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#fff" letterSpacing="0.6">STREAM</text>
+                </g>
+              )}
+              {/* Row 2 — label */}
               <text x="14" y="36" fontSize="13.5" fontWeight="700" fill="#0b1220">{s.label}</text>
-              <text x="14" y="52" fontSize="10" fill="#4b5563">{s.sub}</text>
+              {/* Row 3 — sub */}
+              <text x="14" y="50" fontSize="10" fill="#4b5563">{s.sub}</text>
+              {/* Row 4 — freshness + lag (tabular numbers) */}
+              {(s.freshness || s.lagP99) && (
+                <g>
+                  {s.freshness && (
+                    <>
+                      <circle cx="18" cy="64" r="2.4" fill={statusColor}>
+                        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" repeatCount="indefinite" />
+                      </circle>
+                      <text x="26" y="68" fontSize="10" fill="#0b1220" fontWeight="600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {s.freshness}
+                      </text>
+                    </>
+                  )}
+                  {s.lagP99 && (
+                    <text x={SOURCE_W - 14} y="68" textAnchor="end" fontSize="9" fill="#6b7280" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      p99 {s.lagP99}
+                    </text>
+                  )}
+                </g>
+              )}
+              {/* Vendor logo */}
               {s.logo && (
-                <g transform={`translate(${SOURCE_W - 28}, 10)`}>
+                <g transform={`translate(${SOURCE_W - 30}, 10)`}>
                   <VendorMark kind={s.logo} size={20} />
                 </g>
               )}
-              {/* Live dot */}
-              <g transform={`translate(${SOURCE_W - 10}, ${SOURCE_H - 10})`}>
-                <circle r="3" fill={accent} filter="url(#alive-glow)">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" begin={`${i * 0.2}s`} />
-                </circle>
-              </g>
             </g>
           );
         })}
