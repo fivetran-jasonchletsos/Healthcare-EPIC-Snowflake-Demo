@@ -192,7 +192,7 @@ export function AliveMedallion({
           <Particle x1={FT_X + FT_W} y1={FT_CY} x2={BRONZE_X} y2={LAYER_CY} color={accent} dur={1.4} delay={0.5} />
         </g>
 
-        {/* Bronze → Silver */}
+        {/* Bronze → Silver — arrow + particle (badge rendered last, after layers) */}
         <g color="#FF694A">
           <line
             x1={BRONZE_X + LAYER_W} y1={LAYER_CY}
@@ -200,11 +200,10 @@ export function AliveMedallion({
             stroke="#FF694A" strokeWidth="2"
             markerEnd="url(#alive-arrow)"
           />
-          <DbtBadge cx={BRONZE_X + LAYER_W + LAYER_GAP / 2} cy={LAYER_CY - 12} />
           <Particle x1={BRONZE_X + LAYER_W} y1={LAYER_CY} x2={SILVER_X} y2={LAYER_CY} color="#FF694A" dur={1.0} />
         </g>
 
-        {/* Silver → Gold */}
+        {/* Silver → Gold — arrow + particle (badge rendered last, after layers) */}
         <g color="#FF694A">
           <line
             x1={SILVER_X + LAYER_W} y1={LAYER_CY}
@@ -212,7 +211,6 @@ export function AliveMedallion({
             stroke="#FF694A" strokeWidth="2"
             markerEnd="url(#alive-arrow)"
           />
-          <DbtBadge cx={SILVER_X + LAYER_W + LAYER_GAP / 2} cy={LAYER_CY - 12} />
           <Particle x1={SILVER_X + LAYER_W} y1={LAYER_CY} x2={GOLD_X} y2={LAYER_CY} color="#FF694A" dur={1.0} />
         </g>
 
@@ -309,6 +307,10 @@ export function AliveMedallion({
         <Layer x={SILVER_X} y={LAYER_Y} w={LAYER_W} h={LAYER_H} grad="alive-silver" label="SILVER" sub="conformed"        stat={silver} accent="#6b7280" />
         <Layer x={GOLD_X}   y={LAYER_Y} w={LAYER_W} h={LAYER_H} grad="alive-gold"   label="GOLD"   sub="business-ready"   stat={gold}   accent="#b8975c" />
 
+        {/* ── dbt-labs transformation badges — rendered AFTER layers so they sit on top ── */}
+        <DbtBadge cx={BRONZE_X + LAYER_W + LAYER_GAP / 2} cy={LAYER_CY - 14} />
+        <DbtBadge cx={SILVER_X + LAYER_W + LAYER_GAP / 2} cy={LAYER_CY - 14} />
+
         {/* ── Engine column ────────────────────────────────────────────── */}
         {engines.map((e, i) => {
           const y = ENGINE_Y0 + i * (ENGINE_H + ENGINE_GAP);
@@ -367,12 +369,7 @@ function Layer({
       <text x={w / 2} y={h - 36} textAnchor="middle" fontSize="9.5" fill="#0b1220" opacity="0.7">
         {formatBytes(stat.bytes)}
       </text>
-      {stat.trend && stat.trend.length > 1 && (
-        <g transform={`translate(${w / 2 - 32}, ${h - 30})`}>
-          <SparklinePath values={stat.trend} width={64} height={14} color="#0b1220" opacity={0.55} />
-        </g>
-      )}
-      <text x={w / 2} y={h - 12} textAnchor="middle" fontSize="9" fontWeight="700" fill="#0b1220" opacity="0.45" letterSpacing="1.6">
+      <text x={w / 2} y={h - 14} textAnchor="middle" fontSize="9" fontWeight="700" fill="#0b1220" opacity="0.45" letterSpacing="1.6">
         ICEBERG · GLUE
       </text>
       {/* Live pulse top-right */}
