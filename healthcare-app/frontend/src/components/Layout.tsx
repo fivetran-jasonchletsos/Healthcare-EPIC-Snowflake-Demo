@@ -9,20 +9,32 @@ import HelpTour from './HelpTour';
 // Konami code: ↑ ↑ ↓ ↓ ← → ← → B A — unlocks the SpaceSync easter egg.
 const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
 
+// Canonical 3-group nav order, shared across Clarity / Verity / Altavest:
+//   1. Narrative (Home → Scenario → Live → Outcome)
+//   2. Persona pages (industry-specific)
+//   3. ODI plumbing (Architecture → Pipeline → Wizard → About)
+// A vertical divider renders before /architecture so the two groups read
+// as separate clusters without crowding the bar.
 const NAV_ITEMS: [string, string][] = [
+  // — narrative —
   ['/', 'Home'],
   ['/scenario', 'Scenario'],
   ['/wizard-live', 'Live'],
   ['/outcome', 'Outcome'],
+  // — persona —
   ['/executive', 'Executive'],
   ['/patients', 'Patients'],
   ['/dashboard', 'Population Health'],
   ['/agent', 'Clinical Insights'],
+  // — ODI plumbing —
   ['/architecture', 'ODI Architecture'],
   ['/pipeline', 'Pipeline'],
   ['/dbt-wizard', 'Wizard'],
   ['/about', 'About'],
 ];
+
+// Items whose appearance triggers a vertical divider before them.
+const NAV_DIVIDER_BEFORE = new Set(['/architecture']);
 
 const DEMOS = [
   { key: 'tax-assessment', name: 'Allegheny County Tax', industry: 'Public sector · Property assessment', url: 'https://fivetran-jasonchletsos.github.io/tax-assessment-databricks-demo/', accent: '#dc2626' },
@@ -144,27 +156,31 @@ export default function Layout() {
 
             <nav className="hidden lg:flex items-center gap-0.5 text-sm">
               {NAV_ITEMS.map(([to, label]) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={to === '/'}
-                  className={({ isActive }) =>
-                    `relative px-3 py-2 font-medium transition-colors whitespace-nowrap ${
-                      isActive
-                        ? 'text-[var(--ink-strong)]'
-                        : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {label}
-                      {isActive && (
-                        <span className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full" style={{ background: 'var(--color-brand-600)' }} />
-                      )}
-                    </>
+                <span key={to} className="contents">
+                  {NAV_DIVIDER_BEFORE.has(to) && (
+                    <span aria-hidden className="mx-2 h-5 w-px self-center" style={{ background: 'var(--hairline)' }} />
                   )}
-                </NavLink>
+                  <NavLink
+                    to={to}
+                    end={to === '/'}
+                    className={({ isActive }) =>
+                      `relative px-3 py-2 font-medium transition-colors whitespace-nowrap ${
+                        isActive
+                          ? 'text-[var(--ink-strong)]'
+                          : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {label}
+                        {isActive && (
+                          <span className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full" style={{ background: 'var(--color-brand-600)' }} />
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                </span>
               ))}
             </nav>
 
