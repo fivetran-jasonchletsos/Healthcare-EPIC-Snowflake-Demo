@@ -17,6 +17,7 @@ import OdiDbtWizardPage from './pages/OdiDbtWizardPage';
 import WizardLivePage from './pages/WizardLivePage';
 import ClarityScenarioPage from './pages/ClarityScenarioPage';
 import ClarityOutcomePage from './pages/ClarityOutcomePage';
+import ArchitecturePage from './pages/ArchitecturePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/agent" element={<AgentPage />} />
             <Route path="/about-agent" element={<AboutAgentPage />} />
+            <Route path="/architecture" element={<ArchitecturePage />} />
             <Route path="/pipeline" element={<PipelinePage />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/watchlist" element={<WatchlistPage />} />

@@ -18,6 +18,7 @@ const NAV_ITEMS: [string, string][] = [
   ['/patients', 'Patients'],
   ['/dashboard', 'Population Health'],
   ['/agent', 'Clinical Insights'],
+  ['/architecture', 'ODI Architecture'],
   ['/pipeline', 'Pipeline'],
   ['/dbt-wizard', 'Wizard'],
   ['/about', 'About'],
