@@ -486,7 +486,7 @@ export interface FlowNode {
   id: string;
   label: string;
   sub: string;
-  logo?: 'epic' | 'fivetran' | 'snowflake' | 'dbt' | 'app';
+  logo?: 'epic' | 'fivetran' | 'iceberg' | 'snowflake' | 'dbt' | 'app';
   status: 'healthy' | 'caution' | 'alert';
   metric?: string;
 }
@@ -641,6 +641,14 @@ function NodeIcon({ logo }: { logo?: FlowNode['logo'] }) {
     return <div className={common} style={{ background: '#E13E2E', color: '#fff' }}>E</div>;
   if (logo === 'fivetran')
     return <div className={common} style={{ background: '#0073FF', color: '#fff' }}>5x</div>;
+  if (logo === 'iceberg')
+    return (
+      <div className={common} style={{ background: '#2C7BE5', color: '#fff' }}>
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3l4 5-4 13-4-13 4-5z" />
+        </svg>
+      </div>
+    );
   if (logo === 'snowflake')
     return (
       <div className={common} style={{ background: '#29B5E8', color: '#fff' }}>
