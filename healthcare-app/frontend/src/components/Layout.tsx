@@ -9,32 +9,46 @@ import HelpTour from './HelpTour';
 // Konami code: ↑ ↑ ↓ ↓ ← → ← → B A — unlocks the SpaceSync easter egg.
 const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
 
-// Canonical 3-group nav order, shared across Clarity / Verity / Altavest:
-//   1. Narrative (Home → Scenario → Live → Outcome)
-//   2. Persona pages (industry-specific)
-//   3. ODI plumbing (Architecture → Pipeline → Wizard → About)
-// A vertical divider renders before /architecture so the two groups read
-// as separate clusters without crowding the bar.
-const NAV_ITEMS: [string, string][] = [
-  // — narrative —
-  ['/', 'Home'],
-  ['/scenario', 'Scenario'],
-  ['/wizard-live', 'Live'],
-  ['/outcome', 'Outcome'],
-  // — persona —
-  ['/executive', 'Executive'],
-  ['/patients', 'Patients'],
-  ['/dashboard', 'Population Health'],
-  ['/agent', 'Clinical Insights'],
-  // — ODI plumbing —
-  ['/architecture', 'ODI Architecture'],
-  ['/pipeline', 'Pipeline'],
-  ['/dbt-wizard', 'Wizard'],
-  ['/about', 'About'],
-];
+// Canonical nav across Clarity / Verity / Altavest. Three groups collapsed
+// from 12 flat items to 7 top-level entries (5 links + 2 dropdowns):
+//   1. Home
+//   2-5. Persona pages (industry-specific)
+//   6. dbt-Wizard ▾ — narrative dropdown (Scenario / Live / Outcome)
+//   7. ODI ▾ — plumbing dropdown (Architecture / Pipeline / About)
+type NavEntry =
+  | { kind: 'link'; to: string; label: string }
+  | { kind: 'group'; label: string; rootTo: string; matchPrefixes: string[]; children: { to: string; label: string }[] };
 
-// Items whose appearance triggers a vertical divider before them.
-const NAV_DIVIDER_BEFORE = new Set(['/architecture']);
+const NAV: NavEntry[] = [
+  { kind: 'link', to: '/',          label: 'Home' },
+  { kind: 'link', to: '/executive', label: 'Executive' },
+  { kind: 'link', to: '/patients',  label: 'Patients' },
+  { kind: 'link', to: '/dashboard', label: 'Population Health' },
+  { kind: 'link', to: '/agent',     label: 'Clinical Insights' },
+  {
+    kind: 'group',
+    label: 'dbt-Wizard',
+    rootTo: '/dbt-wizard',
+    matchPrefixes: ['/dbt-wizard', '/scenario', '/wizard-live', '/outcome'],
+    children: [
+      { to: '/dbt-wizard',  label: 'Overview' },
+      { to: '/scenario',    label: 'Scenario' },
+      { to: '/wizard-live', label: 'Live build' },
+      { to: '/outcome',     label: 'Outcome' },
+    ],
+  },
+  {
+    kind: 'group',
+    label: 'ODI',
+    rootTo: '/architecture',
+    matchPrefixes: ['/architecture', '/pipeline', '/about'],
+    children: [
+      { to: '/architecture', label: 'Architecture' },
+      { to: '/pipeline',     label: 'Pipeline' },
+      { to: '/about',        label: 'About' },
+    ],
+  },
+];
 
 const DEMOS = [
   { key: 'tax-assessment', name: 'Allegheny County Tax', industry: 'Public sector · Property assessment', url: 'https://fivetran-jasonchletsos.github.io/tax-assessment-databricks-demo/', accent: '#dc2626' },
@@ -49,6 +63,96 @@ const DEMOS = [
   { key: 'mission-control', name: 'Mission Control', industry: 'Admin · Governance + observability', url: 'https://fivetran-jasonchletsos.github.io/ODI-Mission-Control/', accent: '#22d3ee' },
 ];
 const CURRENT_DEMO = 'healthcare';
+
+// ─── NavEntryEl — renders a link or a dropdown group ────────────────────────
+function NavEntryEl({ entry, pathname }: { entry: NavEntry; pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  // close on route change
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  if (entry.kind === 'link') {
+    return (
+      <NavLink
+        to={entry.to}
+        end={entry.to === '/'}
+        className={({ isActive }) =>
+          `relative px-3 py-2 font-medium transition-colors whitespace-nowrap ${
+            isActive ? 'text-[var(--ink-strong)]' : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
+          }`
+        }
+      >
+        {({ isActive }) => (
+          <>
+            {entry.label}
+            {isActive && (
+              <span className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full" style={{ background: 'var(--color-brand-600)' }} />
+            )}
+          </>
+        )}
+      </NavLink>
+    );
+  }
+
+  // entry.kind === 'group' — dropdown
+  const isActive = entry.matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + '/'));
+  return (
+    <span ref={ref} className="relative inline-block">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`relative px-3 py-2 font-medium transition-colors whitespace-nowrap inline-flex items-center gap-1 ${
+          isActive ? 'text-[var(--ink-strong)]' : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
+        }`}
+      >
+        {entry.label}
+        <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden className={`transition-transform ${open ? 'rotate-180' : ''}`}>
+          <path d="M2 4 L5 7 L8 4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {isActive && (
+          <span className="absolute left-3 right-6 -bottom-[1px] h-[2px] rounded-full" style={{ background: 'var(--color-brand-600)' }} />
+        )}
+      </button>
+      {open && (
+        <span role="menu" className="absolute left-0 top-full mt-1 min-w-[200px] rounded-md border border-[var(--hairline)] bg-white shadow-lg overflow-hidden z-50">
+          {entry.children.map((c) => (
+            <NavLink
+              key={c.to}
+              to={c.to}
+              end={c.to === '/'}
+              className={({ isActive: ia }) =>
+                `block px-4 py-2.5 text-sm font-medium transition-colors ${
+                  ia
+                    ? 'bg-[var(--paper-deep)] text-[var(--ink-strong)]'
+                    : 'text-[var(--ink-muted)] hover:bg-[var(--paper-deep)] hover:text-[var(--ink-strong)]'
+                }`
+              }
+            >
+              {c.label}
+            </NavLink>
+          ))}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function Layout() {
   const [source, setSource] = useState<DataSource>('demo');
@@ -155,32 +259,8 @@ export default function Layout() {
             </form>
 
             <nav className="hidden lg:flex items-center gap-0.5 text-sm">
-              {NAV_ITEMS.map(([to, label]) => (
-                <span key={to} className="contents">
-                  {NAV_DIVIDER_BEFORE.has(to) && (
-                    <span aria-hidden className="mx-2 h-5 w-px self-center" style={{ background: 'var(--hairline)' }} />
-                  )}
-                  <NavLink
-                    to={to}
-                    end={to === '/'}
-                    className={({ isActive }) =>
-                      `relative px-3 py-2 font-medium transition-colors whitespace-nowrap ${
-                        isActive
-                          ? 'text-[var(--ink-strong)]'
-                          : 'text-[var(--ink-muted)] hover:text-[var(--ink-strong)]'
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {label}
-                        {isActive && (
-                          <span className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full" style={{ background: 'var(--color-brand-600)' }} />
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                </span>
+              {NAV.map((entry) => (
+                <NavEntryEl key={entry.kind === 'link' ? entry.to : entry.label} entry={entry} pathname={location.pathname} />
               ))}
             </nav>
 
@@ -236,9 +316,13 @@ export default function Layout() {
                 />
               </form>
               <nav className="grid grid-cols-2 gap-1 text-sm">
-                {NAV_ITEMS.map(([to, label]) => (
+                {NAV.flatMap((entry) =>
+                  entry.kind === 'link'
+                    ? [{ to: entry.to, label: entry.label }]
+                    : entry.children.map((c) => ({ to: c.to, label: `${entry.label} · ${c.label}` })),
+                ).map(({ to, label }) => (
                   <NavLink
-                    key={to}
+                    key={to + label}
                     to={to}
                     end={to === '/'}
                     className={({ isActive }) =>

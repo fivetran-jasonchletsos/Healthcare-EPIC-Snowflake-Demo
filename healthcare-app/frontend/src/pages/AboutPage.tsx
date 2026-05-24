@@ -39,7 +39,7 @@ export default function AboutPage() {
           freshness="4.2 min ago"
           source="Clarity Health · SQL Server CDC"
           rows="2.4M rows · 8 tables"
-          fivetranUrl="https://fivetran.com/dashboard/connectors/clarity_health_sqlserver_cdc"
+          fivetranUrl="https://fivetran.com/dashboard/connections/six_thickened/status"
         />
       </div>
 
