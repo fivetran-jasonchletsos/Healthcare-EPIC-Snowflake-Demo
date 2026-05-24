@@ -13,10 +13,10 @@ import { Sparkline } from '../components/Sparkline';
 import { DataFlowDiagram, KpiTile, AnimatedCounter, type FlowNode } from '../components/Executive';
 
 // Real Fivetran connector wired to fortitude_fawn (jason_chletsos_mdls_s3).
-// Schema: jason_chletsos_ehr_demo, service: epic_clarity, status: connected.
+// Schema: jason_chletsos_epic_clarity, service: epic_clarity, status: connected.
 // Deep-link pattern: https://fivetran.com/dashboard/connections/{id}/status
-const FIVETRAN_CONNECTOR_ID = 'six_thickened';
-const FIVETRAN_SCHEMA_NAME  = 'jason_chletsos_ehr_demo';
+const FIVETRAN_CONNECTOR_ID = 'sanctity_finally';
+const FIVETRAN_SCHEMA_NAME  = 'jason_chletsos_epic_clarity';
 const FIVETRAN_CONNECTOR_URL = `https://fivetran.com/dashboard/connections/${FIVETRAN_CONNECTOR_ID}/status`;
 const FIVETRAN_DASHBOARD_URL = 'https://fivetran.com/dashboard/connections';
 
@@ -32,14 +32,14 @@ interface Connector {
 }
 
 const CONNECTORS: Connector[] = [
-  { table: 'PATIENT',        schema: 'ehr_demo', rowsCdc: 412,   lagSec: 32, status: 'healthy', lastSyncMin: 4, throughput: [22, 18, 26, 31, 28, 24, 30, 34, 29, 27, 33, 38],               fivetranId: 'six_thickened' },
-  { table: 'PAT_ENC',        schema: 'ehr_demo', rowsCdc: 8214,  lagSec: 41, status: 'healthy', lastSyncMin: 4, throughput: [380, 420, 460, 510, 540, 560, 510, 480, 530, 560, 590, 610],   fivetranId: 'six_thickened' },
-  { table: 'PAT_ENC_DX',     schema: 'ehr_demo', rowsCdc: 14288, lagSec: 48, status: 'healthy', lastSyncMin: 4, throughput: [620, 680, 710, 760, 820, 880, 840, 800, 860, 920, 980, 1040],  fivetranId: 'six_thickened' },
-  { table: 'HSP_ACCOUNT',    schema: 'ehr_demo', rowsCdc: 6480,  lagSec: 39, status: 'healthy', lastSyncMin: 4, throughput: [240, 280, 310, 340, 360, 380, 360, 340, 380, 410, 440, 470],   fivetranId: 'six_thickened' },
-  { table: 'HSP_TRANSACTION', schema: 'ehr_demo', rowsCdc: 22146, lagSec: 52, status: 'healthy', lastSyncMin: 4, throughput: [840, 920, 1010, 1080, 1140, 1200, 1180, 1160, 1220, 1280, 1340, 1410], fivetranId: 'six_thickened' },
-  { table: 'MEDICATIONS',    schema: 'ehr_demo', rowsCdc: 3024,  lagSec: 36, status: 'healthy', lastSyncMin: 4, throughput: [110, 130, 150, 170, 180, 190, 200, 210, 220, 230, 240, 252],   fivetranId: 'six_thickened' },
-  { table: 'PROVIDERS',      schema: 'ehr_demo', rowsCdc: 24,    lagSec: 18, status: 'healthy', lastSyncMin: 4, throughput: [1, 2, 1, 0, 3, 1, 2, 1, 2, 1, 0, 2],                           fivetranId: 'six_thickened' },
-  { table: 'DEPARTMENTS',    schema: 'ehr_demo', rowsCdc: 6,     lagSec: 14, status: 'healthy', lastSyncMin: 4, throughput: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],                           fivetranId: 'six_thickened' },
+  { table: 'PATIENT',        schema: 'ehr_demo', rowsCdc: 412,   lagSec: 32, status: 'healthy', lastSyncMin: 4, throughput: [22, 18, 26, 31, 28, 24, 30, 34, 29, 27, 33, 38],               fivetranId: 'sanctity_finally' },
+  { table: 'PAT_ENC',        schema: 'ehr_demo', rowsCdc: 8214,  lagSec: 41, status: 'healthy', lastSyncMin: 4, throughput: [380, 420, 460, 510, 540, 560, 510, 480, 530, 560, 590, 610],   fivetranId: 'sanctity_finally' },
+  { table: 'PAT_ENC_DX',     schema: 'ehr_demo', rowsCdc: 14288, lagSec: 48, status: 'healthy', lastSyncMin: 4, throughput: [620, 680, 710, 760, 820, 880, 840, 800, 860, 920, 980, 1040],  fivetranId: 'sanctity_finally' },
+  { table: 'HSP_ACCOUNT',    schema: 'ehr_demo', rowsCdc: 6480,  lagSec: 39, status: 'healthy', lastSyncMin: 4, throughput: [240, 280, 310, 340, 360, 380, 360, 340, 380, 410, 440, 470],   fivetranId: 'sanctity_finally' },
+  { table: 'HSP_TRANSACTION', schema: 'ehr_demo', rowsCdc: 22146, lagSec: 52, status: 'healthy', lastSyncMin: 4, throughput: [840, 920, 1010, 1080, 1140, 1200, 1180, 1160, 1220, 1280, 1340, 1410], fivetranId: 'sanctity_finally' },
+  { table: 'MEDICATIONS',    schema: 'ehr_demo', rowsCdc: 3024,  lagSec: 36, status: 'healthy', lastSyncMin: 4, throughput: [110, 130, 150, 170, 180, 190, 200, 210, 220, 230, 240, 252],   fivetranId: 'sanctity_finally' },
+  { table: 'PROVIDERS',      schema: 'ehr_demo', rowsCdc: 24,    lagSec: 18, status: 'healthy', lastSyncMin: 4, throughput: [1, 2, 1, 0, 3, 1, 2, 1, 2, 1, 0, 2],                           fivetranId: 'sanctity_finally' },
+  { table: 'DEPARTMENTS',    schema: 'ehr_demo', rowsCdc: 6,     lagSec: 14, status: 'healthy', lastSyncMin: 4, throughput: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],                           fivetranId: 'sanctity_finally' },
 ];
 
 const DBT_MODELS = [
@@ -106,13 +106,13 @@ export default function PipelinePage() {
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
                 <a
-                  href="https://cloud.getdbt.com"
+                  href={FIVETRAN_CONNECTOR_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2.5 py-1 font-semibold text-[var(--ink-strong)] hover:border-[var(--clinical-teal)] transition-colors"
                 >
-                  <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#FF694A' }}>d</span>
-                  Open in dbt Cloud
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>F</span>
+                  Open Fivetran connector
                 </a>
                 <a
                   href="https://fivetran.com/dashboard/transformations"
@@ -121,7 +121,16 @@ export default function PipelinePage() {
                   className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2.5 py-1 font-semibold text-[var(--ink-strong)] hover:border-[var(--clinical-teal)] transition-colors"
                 >
                   <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>F</span>
-                  View Fivetran Transformations trigger
+                  Fivetran Transformations
+                </a>
+                <a
+                  href="https://github.com/fivetran-jasonchletsos/Healthcare-EPIC-Snowflake-Demo/actions/workflows/dbt_run.yml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2.5 py-1 font-semibold text-[var(--ink-strong)] hover:border-[var(--clinical-teal)] transition-colors"
+                >
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded text-[9px] font-bold text-white" style={{ background: '#FF694A' }}>d</span>
+                  dbt run history
                 </a>
               </div>
             </div>

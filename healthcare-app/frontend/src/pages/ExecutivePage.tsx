@@ -331,7 +331,7 @@ export default function ExecutivePage() {
           source="Clarity Health · Epic Clarity CDC · 8 tables"
           rows="JASON_CHLETSOS_EPIC · 4 mart schemas · 21 dbt Labs models"
           ctaTo={() => navigate('/pipeline')}
-          fivetranUrl="https://fivetran.com/dashboard/connectors/clarity_health_epic_clarity"
+          fivetranUrl="https://fivetran.com/dashboard/connections/sanctity_finally/status"
         />
 
         {/* Method note — booth visitors will read this */}

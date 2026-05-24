@@ -41,7 +41,7 @@ export default function AboutPage() {
           freshness="4.2 min ago"
           source="Clarity Health · Epic Clarity CDC"
           rows="2.4M rows · 8 tables"
-          fivetranUrl="https://fivetran.com/dashboard/connections/six_thickened/status"
+          fivetranUrl="https://fivetran.com/dashboard/connections/sanctity_finally/status"
         />
       </div>
 
