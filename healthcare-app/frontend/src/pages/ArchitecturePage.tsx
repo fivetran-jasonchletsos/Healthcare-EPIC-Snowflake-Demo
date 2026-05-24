@@ -174,7 +174,7 @@ export default function ArchitecturePage() {
       </header>
 
       {/* ── Data Flow diagram ─────────────────────────────────────────────── */}
-      <section className="research-card p-6 sm:p-8 mb-8" style={cardStyle}>
+      <section className="clinical-card p-6 sm:p-8 mb-8" style={cardStyle}>
         <div className="eyebrow mb-1">Data Flow</div>
         <h2 className="font-serif text-2xl font-semibold text-[var(--ink-strong)] mb-6">
           From Clarity EHR + four open sources to one governed gold layer
@@ -194,8 +194,8 @@ export default function ArchitecturePage() {
       </section>
 
       {/* ── Multi-engine showcase ────────────────────────────────────────── */}
-      <section className="research-card overflow-hidden mb-8" style={cardStyle}>
-        <header className="research-card-header" style={cardHeaderStyle}>
+      <section className="clinical-card overflow-hidden mb-8" style={cardStyle}>
+        <header className="clinical-card-header" style={cardHeaderStyle}>
           <div className="eyebrow">Compute is a choice</div>
           <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
             Same Iceberg tables. Five engines. One query at a time.
@@ -246,8 +246,8 @@ export default function ArchitecturePage() {
       </section>
 
       {/* ── Iceberg catalog ──────────────────────────────────────────────── */}
-      <section className="research-card overflow-hidden mb-8" style={cardStyle}>
-        <header className="research-card-header" style={cardHeaderStyle}>
+      <section className="clinical-card overflow-hidden mb-8" style={cardStyle}>
+        <header className="clinical-card-header" style={cardHeaderStyle}>
           <div className="eyebrow">Iceberg Catalog</div>
           <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
             Every table on the lake, registered in AWS Glue
@@ -294,8 +294,8 @@ export default function ArchitecturePage() {
       </section>
 
       {/* ── Data Quality — dbt Labs ──────────────────────────────────────── */}
-      <section className="research-card overflow-hidden mb-8" style={cardStyle}>
-        <header className="research-card-header flex items-start justify-between gap-4" style={cardHeaderStyle}>
+      <section className="clinical-card overflow-hidden mb-8" style={cardStyle}>
+        <header className="clinical-card-header flex items-start justify-between gap-4" style={cardHeaderStyle}>
           <div>
             <div className="eyebrow" style={{ color: '#FF694A' }}>Data Quality · dbt Labs</div>
             <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
@@ -352,7 +352,7 @@ export default function ArchitecturePage() {
 
       {/* ── ODI vs MDS comparison ────────────────────────────────────────── */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="research-card p-6 border-l-4" style={{ ...cardStyle, borderLeftColor: 'var(--ink-soft)' }}>
+        <div className="clinical-card p-6 border-l-4" style={{ ...cardStyle, borderLeftColor: 'var(--ink-soft)' }}>
           <div className="eyebrow" style={{ color: 'var(--ink-soft)' }}>Modern Data Stack</div>
           <h3 className="mt-1 font-serif text-xl font-semibold text-[var(--ink-strong)]">Warehouse at the centre</h3>
           <ul className="mt-4 space-y-2.5 text-sm text-[var(--ink-muted)]">
@@ -367,7 +367,7 @@ export default function ArchitecturePage() {
             ))}
           </ul>
         </div>
-        <div className="research-card p-6 border-l-4" style={{ ...cardStyle, borderLeftColor: '#b8975c' }}>
+        <div className="clinical-card p-6 border-l-4" style={{ ...cardStyle, borderLeftColor: '#b8975c' }}>
           <div className="eyebrow">Open Data Infrastructure</div>
           <h3 className="mt-1 font-serif text-xl font-semibold text-[var(--ink-strong)]">Standards at the centre</h3>
           <ul className="mt-4 space-y-2.5 text-sm text-[var(--ink)]">
