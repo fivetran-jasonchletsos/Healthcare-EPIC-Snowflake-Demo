@@ -432,11 +432,11 @@ function SparklinePath({
 // ─── Vendor logo marks (inline SVG, vendor-true silhouettes) ────────────────
 
 function VendorMark({ kind, size = 20 }: { kind: VendorLogo; size?: number }) {
-  const s: CSSProperties = { width: size, height: size, display: 'inline-block' };
+  const s: CSSProperties = { display: 'inline-block', overflow: 'visible' };
   switch (kind) {
     case 'snowflake':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <g fill="#29B5E8">
             <path d="M12 1.5l1.6 2.8h-3.2z" />
             <path d="M12 22.5l-1.6-2.8h3.2z" />
@@ -452,21 +452,21 @@ function VendorMark({ kind, size = 20 }: { kind: VendorLogo; size?: number }) {
       );
     case 'fivetran':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#0073EA" />
           <path d="M6 8h12M6 12h8M6 16h5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
       );
     case 'dbt':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#FF694A" />
           <text x="12" y="16" textAnchor="middle" fontSize="11" fontWeight="900" fill="#ffffff">dbt</text>
         </svg>
       );
     case 'iceberg':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <path d="M12 3l4 7-4 -1-4 1z" fill="#5fb3a1" />
           <path d="M3 19l9-6 9 6z" fill="#2c6e87" />
           <path d="M3 19l9-2 9 2v2H3z" fill="#1d4e89" />
@@ -474,91 +474,91 @@ function VendorMark({ kind, size = 20 }: { kind: VendorLogo; size?: number }) {
       );
     case 'oracle':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#c74634" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">OR</text>
         </svg>
       );
     case 'sqlserver':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#a91d22" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">SQL</text>
         </svg>
       );
     case 'hl7':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#0d9488" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">HL7</text>
         </svg>
       );
     case 'cms':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#1d4ed8" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">CMS</text>
         </svg>
       );
     case 'sec':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#0b2545" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">SEC</text>
         </svg>
       );
     case 'fred':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#16a34a" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">FRED</text>
         </svg>
       );
     case 'cfpb':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#7c3aed" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">CFPB</text>
         </svg>
       );
     case 'naic':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#5b21b6" />
           <text x="12" y="16" textAnchor="middle" fontSize="8.5" fontWeight="900" fill="#ffffff">NAIC</text>
         </svg>
       );
     case 'noaa':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#0369a1" />
           <text x="12" y="16" textAnchor="middle" fontSize="8.5" fontWeight="900" fill="#ffffff">NOAA</text>
         </svg>
       );
     case 'athena':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#b8975c" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">Ath</text>
         </svg>
       );
     case 'duckdb':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#fff100" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#0b1220">DD</text>
         </svg>
       );
     case 'trino':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#1d4e89" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">Tr</text>
         </svg>
       );
     case 'spark':
       return (
-        <svg viewBox="0 0 24 24" style={s} aria-hidden>
+        <svg width={size} height={size} viewBox="0 0 24 24" style={s} aria-hidden preserveAspectRatio="xMidYMid meet">
           <rect width="24" height="24" rx="4" fill="#e25a1c" />
           <text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">Sp</text>
         </svg>
