@@ -164,7 +164,7 @@ export default function PipelinePage() {
               value="2.42M"
               delta={{ value: '+ 4.1%', trend: 'good', vs: 'vs prior day' }}
               spark={[1.9, 2.0, 2.1, 2.05, 2.15, 2.25, 2.20, 2.18, 2.30, 2.32, 2.38, 2.42]}
-              dollarLever="TELEPORT incremental sync transfers only changed rows — ~98% bandwidth savings vs full re-sync."
+              dollarLever="CDC incremental sync transfers only changed rows — ~98% bandwidth savings vs full re-sync."
             />
             <KpiTile
               label="Snowflake compute · 7d"
