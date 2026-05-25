@@ -345,7 +345,8 @@ export default function ArchitecturePage() {
             <p className="text-sm text-[var(--ink-muted)] mt-1">
               Tests defined in dbt Labs run on every build, against the same Iceberg tables every
               engine reads. Failures block promotion to the next layer &mdash; bad data never
-              reaches the floor.
+              reaches the floor. Pairs with the Great Expectations checkpoints below: GX validates
+              the raw Bronze landings, dbt asserts the SQL-level constraints on Silver and Gold.
             </p>
           </div>
           <div className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shrink-0" style={{ background: '#FF694A' }}>
@@ -390,6 +391,9 @@ export default function ArchitecturePage() {
           <span className="uppercase tracking-wider font-semibold">dbt build · merged into Fivetran</span>
         </div>
       </section>
+
+      {/* ── Data Quality — Great Expectations (Fivetran-stewarded OSS) ──── */}
+      <GreatExpectationsPanel />
 
       {/* ── Before / After — what ODI actually replaces ──────────────────── */}
       <BeforeAfterPanel />
@@ -710,6 +714,212 @@ function Policy({ label, value }: { label: string; value: string }) {
         <span className="text-[var(--ink-muted)]"> · {value}</span>
       </div>
     </li>
+  );
+}
+
+// =============================================================================
+// GreatExpectationsPanel — GX Core as the validation gate before Silver
+// promotion. Fivetran became steward of the Great Expectations community
+// and the GX Core project on 2026-05-13; dbt tests sit alongside GX as
+// the "trust" pillar of Fivetran's ODI story (move · transform · trust).
+// =============================================================================
+interface GxSuite {
+  suite: string;
+  table: string;
+  layer: 'bronze' | 'silver' | 'gold';
+  expectations: number;
+  passing: number;
+  last_run: string;
+  why: string;
+}
+
+const GX_SUITES: GxSuite[] = [
+  {
+    suite: 'clarity.patient.completeness',
+    table: 'bronze.clarity__patient',
+    layer: 'bronze',
+    expectations: 18,
+    passing: 18,
+    last_run: '07:14:22',
+    why: 'PHI completeness — mrn / dob / ssn populated; no impossible birthdates; age in [0, 130].',
+  },
+  {
+    suite: 'clarity.encounter.referential',
+    table: 'bronze.clarity__pat_enc',
+    layer: 'bronze',
+    expectations: 22,
+    passing: 22,
+    last_run: '07:14:31',
+    why: 'Every encounter resolves to a known patient_id; admit_dt ≤ disch_dt; encounter_type ∈ accepted set.',
+  },
+  {
+    suite: 'clarity.diagnosis.value_set',
+    table: 'bronze.clarity__pat_enc_dx',
+    layer: 'bronze',
+    expectations: 14,
+    passing: 13,
+    last_run: '07:14:38',
+    why: 'ICD-10 codes match the CMS-published value set; one warn this run on 47 codes recently retired.',
+  },
+  {
+    suite: 'payor.claims.ranges',
+    table: 'bronze.payor__claims',
+    layer: 'bronze',
+    expectations: 16,
+    passing: 16,
+    last_run: '07:11:09',
+    why: 'Charge amounts in [$0, $250K]; service_dt within last 18 months; denial_code ∈ X12 standard set.',
+  },
+  {
+    suite: 'hl7.adt.schema',
+    table: 'bronze.hl7__adt_events',
+    layer: 'bronze',
+    expectations: 11,
+    passing: 11,
+    last_run: '07:12:48',
+    why: 'Streaming HL7 v2 ADT messages parse cleanly; required MSH/PID/PV1 segments present.',
+  },
+  {
+    suite: 'silver.encounter_spine.integrity',
+    table: 'silver.int_patient_encounter_spine',
+    layer: 'silver',
+    expectations: 24,
+    passing: 24,
+    last_run: '07:18:14',
+    why: 'Spine joins Clarity + HL7 + claims at 1 row per (patient_id, encounter_id); no orphans.',
+  },
+  {
+    suite: 'gold.dim_patients.contract',
+    table: 'gold.dim_patients',
+    layer: 'gold',
+    expectations: 19,
+    passing: 19,
+    last_run: '07:22:51',
+    why: 'Output contract: PII columns masked per policy; payor_class ∈ {Commercial, Medicare, Medicaid, Self-Pay}; row count within ±2% of yesterday.',
+  },
+  {
+    suite: 'gold.fct_chronic_cohorts.cardinality',
+    table: 'gold.fct_chronic_cohorts',
+    layer: 'gold',
+    expectations: 12,
+    passing: 12,
+    last_run: '07:22:59',
+    why: 'Each chronic-condition cohort has between 50 and 50K members; CHF / COPD / Diabetes never null.',
+  },
+];
+
+function GreatExpectationsPanel() {
+  const totals = GX_SUITES.reduce(
+    (a, s) => ({ exp: a.exp + s.expectations, pass: a.pass + s.passing, suites: a.suites + 1 }),
+    { exp: 0, pass: 0, suites: 0 },
+  );
+  const warns = totals.exp - totals.pass;
+
+  return (
+    <section className="mb-8 clinical-card overflow-hidden" style={cardStyle}>
+      <header className="clinical-card-header flex items-start justify-between gap-4" style={cardHeaderStyle}>
+        <div>
+          <div className="eyebrow" style={{ color: '#ff6310' }}>Data Quality · Great Expectations</div>
+          <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
+            Validation runs on Bronze before anything reaches Silver.
+          </h2>
+          <p className="text-sm text-[var(--ink-muted)] mt-1 max-w-3xl">
+            Expectation suites define what "valid" looks like for each Clarity table &mdash; PHI completeness,
+            ICD-10 value-set conformance, payor charge ranges, referential integrity to the patient master.
+            A failed expectation blocks promotion. Same lake, same Iceberg snapshots, just gated.
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <div className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white" style={{ background: '#ff6310' }}>
+            GX Core · OSS
+          </div>
+          <div className="text-[10px] text-[var(--ink-soft)] font-mono">Fivetran-stewarded · May 2026</div>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-y-0 md:divide-x divide-[var(--hairline-soft,#e8e4d8)]">
+        <RecoveryTile label="Expectation suites"  big={String(totals.suites)} sub={`across bronze · silver · gold layers`} />
+        <RecoveryTile label="Expectations · today" big={`${totals.pass}/${totals.exp}`} sub={`${warns} warn · 0 errors · gates Silver promotion`} color={warns ? '#b45309' : '#16a34a'} />
+        <RecoveryTile label="Checkpoint cadence"  big="every sync" sub="triggered by Fivetran sync-complete · runs before dbt build" />
+        <RecoveryTile label="Failed-expectation queue" big="3 rows"  sub="held in dlq.gx_quarantine · auto-retried after suite update" color="#b45309" />
+      </div>
+
+      <div className="overflow-x-auto border-t border-[var(--hairline-soft,#e8e4d8)]">
+        <table className="min-w-full text-sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <thead className="border-b border-[var(--hairline)]" style={{ background: 'var(--paper-deep,#f4efe2)' }}>
+            <tr>
+              <Th>Layer</Th>
+              <Th>Suite</Th>
+              <Th>Table under test</Th>
+              <Th align="right">Expectations</Th>
+              <Th align="right">Last run</Th>
+              <Th>What it asserts</Th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--hairline-soft,#e8e4d8)]">
+            {GX_SUITES.map((s) => {
+              const ok = s.passing === s.expectations;
+              return (
+                <tr key={s.suite} className="hover:bg-[var(--paper-deep,#f4efe2)] cursor-default">
+                  <td className="px-4 py-2.5"><LayerChip layer={s.layer} /></td>
+                  <td className="px-4 py-2.5 font-mono text-[12px] text-[var(--ink-strong)]">{s.suite}</td>
+                  <td className="px-4 py-2.5 text-xs text-[var(--ink-muted)] font-mono">{s.table}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold" style={{ color: ok ? '#16a34a' : '#b45309' }}>
+                    {s.passing}/{s.expectations}
+                    {!ok && <span className="ml-1 text-[10px] uppercase tracking-wider">warn</span>}
+                  </td>
+                  <td className="px-4 py-2.5 text-right text-xs text-[var(--ink-muted)] font-mono">{s.last_run}</td>
+                  <td className="px-4 py-2.5 text-xs text-[var(--ink)] leading-snug max-w-md">{s.why}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-[var(--hairline-soft,#e8e4d8)] border-t border-[var(--hairline-soft,#e8e4d8)]">
+        <div className="p-5">
+          <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-soft)] font-semibold mb-3">Sample expectation suite · clarity.patient.completeness</div>
+          <pre className="font-mono text-[11.5px] leading-relaxed overflow-x-auto rounded-sm p-3" style={{ background: '#0b2545', color: '#e6e9f0' }}><code>{`# clarity_patient_completeness.yml
+expectation_suite_name: clarity.patient.completeness
+data_asset_name: bronze.clarity__patient
+
+expectations:
+  - expect_column_values_to_not_be_null:
+      column: mrn
+  - expect_column_values_to_be_unique:
+      column: mrn
+  - expect_column_values_to_match_regex:
+      column: ssn
+      regex: '^[0-9]{3}-[0-9]{2}-[0-9]{4}$'
+  - expect_column_values_to_be_between:
+      column: age_years
+      min_value: 0
+      max_value: 130
+  - expect_column_values_to_be_in_set:
+      column: payor_class
+      value_set: [Commercial, Medicare, Medicaid, Self-Pay]
+  - expect_table_row_count_to_be_between:
+      min_value: 350000
+      max_value: 500000`}</code></pre>
+        </div>
+        <div className="p-5">
+          <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-soft)] font-semibold mb-3">How this fits the stack</div>
+          <ul className="space-y-2.5 text-sm">
+            <Policy label="Fivetran moves" value="CDC + batch + HL7 streams into Bronze (Iceberg)" />
+            <Policy label="Great Expectations validates" value="Bronze landings against suites before Silver promotion" />
+            <Policy label="dbt transforms" value="Silver + Gold marts; dbt tests assert SQL-level constraints" />
+            <Policy label="Failed rows" value="route to dlq.gx_quarantine on the same lake; retried after suite update" />
+            <Policy label="Open source" value="GX Core remains community-driven; Fivetran funds maintenance, ecosystem, and engineering investment" />
+          </ul>
+          <div className="mt-4 pt-3 border-t border-[var(--hairline-soft,#e8e4d8)] text-[11px] text-[var(--ink-soft)] leading-relaxed">
+            On May 13, 2026 Fivetran announced it is becoming steward of the Great Expectations open
+            source community and the GX Core project, supporting ongoing maintenance, ecosystem
+            integrations, and community engagement. Same open project, backed by sustained engineering.
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

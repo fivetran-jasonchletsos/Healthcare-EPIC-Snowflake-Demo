@@ -42,7 +42,8 @@ export type VendorLogo =
   | 'snowflake' | 'fivetran' | 'dbt' | 'iceberg' | 'glue'
   | 'oracle'    | 'sqlserver'| 'epic_clarity' | 'hl7'  | 'cms'
   | 'sec'       | 'fred'     | 'cfpb' | 'naic' | 'noaa'
-  | 'athena'    | 'duckdb'   | 'trino'| 'spark';
+  | 'athena'    | 'duckdb'   | 'trino'| 'spark'
+  | 'great_expectations';
 
 export interface ConsumerRole {
   label: string;     // "Clinicians"
@@ -164,6 +165,10 @@ export function AliveMedallion({
             <span className="am-dbt-chip">
               <VendorMark kind="dbt" size={14} />
               dbt on Snowflake compute · commits Silver + Gold as Iceberg snapshots
+            </span>
+            <span className="am-dbt-chip am-gx-chip">
+              <VendorMark kind="great_expectations" size={14} />
+              Great Expectations validates Bronze before Silver promotion
             </span>
             <span className="am-lake-truth">One set of files · ACID · time-travel</span>
           </footer>
@@ -426,6 +431,13 @@ function VendorMark({ kind, size = 20 }: { kind: VendorLogo; size?: number }) {
       return <svg {...common}><rect width="24" height="24" rx="5" fill="#dd00a1" /><text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">Tr</text></svg>;
     case 'spark':
       return <svg {...common}><rect width="24" height="24" rx="5" fill="#e25a1c" /><text x="12" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#ffffff">Sp</text></svg>;
+    case 'great_expectations':
+      return (
+        <svg {...common}>
+          <rect width="24" height="24" rx="5" fill="#ff6310" />
+          <text x="12" y="16" textAnchor="middle" fontSize="8" fontWeight="900" fill="#ffffff" letterSpacing="0.3" fontFamily="Helvetica, Arial, sans-serif">GX</text>
+        </svg>
+      );
   }
 }
 
@@ -690,6 +702,9 @@ const CSS = `
   align-items: center;
   gap: 6px;
   font-weight: 600;
+  color: var(--am-ink);
+}
+.am-gx-chip {
   color: var(--am-ink);
 }
 .am-lake-truth {
