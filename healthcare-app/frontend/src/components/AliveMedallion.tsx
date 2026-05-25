@@ -133,7 +133,7 @@ export function AliveMedallion({
 
           <footer className="am-zone-footer">
             <VendorMark kind="fivetran" size={20} />
-            <span>CDC + batch via Fivetran <span style={{ color: '#9ca3af' }}>·</span> HL7 streams via Kinesis</span>
+            <span>CDC + batch via Fivetran (Run Cache · 78% hit) <span style={{ color: '#9ca3af' }}>·</span> HL7 streams via Kinesis</span>
           </footer>
         </section>
 
