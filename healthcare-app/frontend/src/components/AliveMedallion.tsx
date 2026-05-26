@@ -133,7 +133,7 @@ export function AliveMedallion({
 
           <footer className="am-zone-footer">
             <VendorMark kind="fivetran" size={20} />
-            <span>CDC + batch via Fivetran (Run Cache · 78% hit) <span style={{ color: '#9ca3af' }}>·</span> HL7 streams via Kinesis</span>
+            <span>CDC + batch via Fivetran <span style={{ color: '#9ca3af' }}>·</span> Run Cache 78% <span style={{ color: '#9ca3af' }}>·</span> HL7 streams via Kinesis</span>
           </footer>
         </section>
 
@@ -170,7 +170,6 @@ export function AliveMedallion({
               <VendorMark kind="great_expectations" size={14} />
               Great Expectations validates Bronze before Silver promotion
             </span>
-            <span className="am-lake-truth">One set of files · ACID · time-travel</span>
           </footer>
         </section>
 
@@ -434,7 +433,7 @@ function VendorMark({ kind, size = 20 }: { kind: VendorLogo; size?: number }) {
     case 'great_expectations':
       return (
         <svg {...common}>
-          <rect width="24" height="24" rx="5" fill="#ff6310" />
+          <rect width="24" height="24" rx="5" fill="#9a3412" />
           <text x="12" y="16" textAnchor="middle" fontSize="8" fontWeight="900" fill="#ffffff" letterSpacing="0.3" fontFamily="Helvetica, Arial, sans-serif">GX</text>
         </svg>
       );

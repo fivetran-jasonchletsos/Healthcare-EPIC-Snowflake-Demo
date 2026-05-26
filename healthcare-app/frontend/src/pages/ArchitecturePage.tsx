@@ -186,6 +186,10 @@ export default function ArchitecturePage() {
           Snowflake, Athena, DuckDB, Trino, and Spark can all read the same tables &mdash; no copy,
           no extract, no proprietary format between the EHR and the analyst.
         </p>
+        <p className="mt-3 font-serif italic text-[15px] text-[var(--ink-strong)] max-w-3xl leading-relaxed">
+          Run cache decides what moves. Great Expectations decides what passes. dbt decides what
+          becomes business-ready.
+        </p>
       </header>
 
       {/* ── Live throughput hero (DE: rows in motion, ticking up) ─────────── */}
@@ -219,11 +223,11 @@ export default function ArchitecturePage() {
         </div>
       </section>
 
-      {/* ── Run Cache — Fivetran skips syncs when source data hasn't changed ─ */}
-      <RunCachePanel />
-
       {/* ── Schema-evolution ticker (Iceberg's killer feature, surfaced) ──── */}
       <SchemaEvolutionTicker />
+
+      {/* ── Run Cache — Fivetran skips syncs when source data hasn't changed ─ */}
+      <RunCachePanel />
 
       {/* ── Cost panel (the CFO line, surfaced) ──────────────────────────── */}
       <CostPanel />
@@ -521,19 +525,20 @@ function Sparklike({ values }: { values: number[] }) {
 
 // =============================================================================
 // RunCachePanel — Fivetran skips a sync entirely when source data hasn't
-// changed. Hit rate runs ~78% on the Clarity connectors; every skipped sync
-// is compute we don't pay for AND a fivetran_synced_at timestamp that
-// doesn't advance, which means dbt incrementals filtered on it process
-// zero rows and complete in seconds.
+// changed. Hit rate runs in the high-70s on the Clarity connectors; every
+// skipped sync is compute we don't pay for AND a fivetran_synced_at
+// timestamp that doesn't advance, which means dbt incrementals filtered on
+// it process zero rows and complete in seconds.
 // =============================================================================
 function RunCachePanel() {
-  // Connector-level hit rates over the last 24h (synthetic but plausible
-  // distribution: master tables change rarely, ledger tables change often).
+  // Connector-level hit rates over the last 24h. Master tables change rarely
+  // (high hit), ledger / transaction tables churn through the day (low hit).
+  // The mix lands the aggregate at ~78%.
   const CONNECTORS = [
-    { name: 'Epic Clarity EHR · patient',         scheduled: 96, skipped: 84, hit: 0.875 },
-    { name: 'Epic Clarity EHR · encounters',      scheduled: 96, skipped: 58, hit: 0.604 },
-    { name: 'Epic Clarity EHR · hsp_transaction', scheduled: 96, skipped: 42, hit: 0.438 },
-    { name: 'Payor Claims Mart · Oracle CDC',     scheduled: 48, skipped: 41, hit: 0.854 },
+    { name: 'Epic Clarity EHR · patient',         scheduled: 96, skipped: 92, hit: 0.958 },
+    { name: 'Epic Clarity EHR · encounters',      scheduled: 96, skipped: 65, hit: 0.677 },
+    { name: 'Epic Clarity EHR · hsp_transaction', scheduled: 96, skipped: 60, hit: 0.625 },
+    { name: 'Payor Claims Mart · Oracle CDC',     scheduled: 48, skipped: 44, hit: 0.917 },
     { name: 'CMS NPPES · weekly registry',        scheduled:  7, skipped:  7, hit: 1.000 },
   ];
   const tot = CONNECTORS.reduce((a, c) => ({ s: a.s + c.scheduled, k: a.k + c.skipped }), { s: 0, k: 0 });
@@ -550,9 +555,9 @@ function RunCachePanel() {
           <p className="text-sm text-[var(--ink-muted)] mt-1 max-w-3xl">
             Before each scheduled sync, Fivetran checks the source for changes. No changes
             &rarr; the sync is skipped entirely, the <code className="font-mono text-[12px]">_fivetran_synced</code> timestamp
-            doesn't advance, and dbt incrementals filtered on it process zero rows. Run cache
-            decides what moves. Great Expectations decides what passes. dbt decides what
-            becomes business-ready.
+            doesn't advance, and dbt incrementals filtered on it process zero rows.
+            Most EHR activity batches into clinic hours; the run-cache check earns its keep
+            on the overnight and weekend windows when the encounter feed quiets down.
           </p>
         </div>
         <div className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shrink-0" style={{ background: '#7c3aed' }}>
@@ -561,64 +566,35 @@ function RunCachePanel() {
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 divide-y-0 md:divide-x divide-[var(--hairline-soft,#e8e4d8)]">
-        <RecoveryTile label="Run-cache hit rate · 24h" big={`${hit}%`}                                   sub={`${tot.k} of ${tot.s} scheduled syncs skipped — source hadn't changed`} color="#7c3aed" />
-        <RecoveryTile label="Compute hours saved · 90d" big="142 h"                                       sub="≈ $284 in warehouse time at XS rate · idle-hour bill stays at zero" color="#16a34a" />
-        <RecoveryTile label="Annual savings · projected" big="$26.4k"                                     sub="Across all Clarity connectors · vs. dumb 15-min polling baseline" color="#16a34a" />
-        <RecoveryTile label="Avg skipped-sync duration" big="180 ms"                                     sub="Source-change check only · no warehouse spin-up, no rows landed" />
+        <RecoveryTile label="Run-cache hit rate · 24h"    big={`${hit}%`}                                  sub={`${tot.k} of ${tot.s} scheduled syncs skipped — source hadn't changed`} color="#7c3aed" />
+        <RecoveryTile label="Compute hours saved · 90d"   big="142 h"                                       sub="≈ $284 in warehouse time at XS rate · idle hours bill at zero" color="#16a34a" />
+        <RecoveryTile label="Annual savings · stack-wide" big="$26.4k"                                      sub="Run cache + downstream dbt skip · projected at full Clarity connector mix" color="#16a34a" />
+        <RecoveryTile label="Skipped-sync check time"     big="~200 ms"                                     sub="p50 control-plane check · log-based CDC connectors · no warehouse spin-up" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-[var(--hairline-soft,#e8e4d8)] border-t border-[var(--hairline-soft,#e8e4d8)]">
-        <div className="p-5">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-soft)] font-semibold mb-3">Hit rate · by connector · last 24h</div>
-          <ul className="space-y-2">
-            {CONNECTORS.map((c) => {
-              const pct = Math.round(c.hit * 100);
-              const colour = pct >= 80 ? '#16a34a' : pct >= 50 ? '#7c3aed' : '#b45309';
-              return (
-                <li key={c.name} className="grid grid-cols-[1.6fr_3fr_auto] gap-3 items-center text-[12px]">
-                  <span className="font-mono text-[11px] text-[var(--ink-strong)] truncate">{c.name}</span>
-                  <span className="relative h-2.5 rounded-sm overflow-hidden" style={{ background: '#f4f4ef', border: '1px solid var(--hairline-soft,#e8e4d8)' }}>
-                    <span className="absolute inset-y-0 left-0" style={{ width: `${pct}%`, background: colour, transition: 'width 600ms ease' }} />
-                  </span>
-                  <span className="font-mono text-[11px] text-[var(--ink-muted)] tabular-nums">
-                    <strong className="text-[var(--ink-strong)]">{pct}%</strong> · {c.skipped}/{c.scheduled}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="text-[11px] text-[var(--ink-soft)] leading-relaxed mt-3">
-            High-velocity tables (encounters, transactions) hit cache less often because they keep
-            changing. That's the point — we only pay for syncs that actually move data.
-          </p>
-        </div>
-        <div className="p-5">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-soft)] font-semibold mb-3">How dbt amplifies the win</div>
-          <pre className="font-mono text-[11.5px] leading-relaxed overflow-x-auto rounded-sm p-3" style={{ background: '#0b2545', color: '#e6e9f0' }}><code>{`-- inc_encounters_daily.sql
-{{
-  config(
-    materialized = 'incremental',
-    unique_key   = 'encounter_id',
-    incremental_strategy = 'merge',
-    on_schema_change     = 'append_new_columns'
-  )
-}}
-
-select *
-from {{ ref('stg_clarity__pat_enc') }}
-{% if is_incremental() %}
-  -- Filter on Fivetran's sync timestamp, not a business date.
-  -- When run cache skips the sync, this returns zero rows and
-  -- dbt finishes in seconds.
-  where fivetran_synced_at > (
-    select max(fivetran_synced_at) from {{ this }}
-  )
-{% endif %}`}</code></pre>
-          <ul className="mt-3 space-y-2 text-[12px] text-[var(--ink-muted)]">
-            <li><strong className="text-[var(--ink-strong)]">Filter on <code className="font-mono text-[11px]">_fivetran_synced</code></strong>, never on business dates &mdash; that's what propagates the run-cache decision downstream.</li>
-            <li><strong className="text-[var(--ink-strong)]">Honor <code className="font-mono text-[11px]">_fivetran_deleted</code></strong> for soft deletes; the same flag flows through every layer.</li>
-            <li><strong className="text-[var(--ink-strong)]">Never <code className="font-mono text-[11px]">--full-refresh</code></strong> on a schedule &mdash; one rebuild defeats months of saved compute.</li>
-          </ul>
+      <div className="p-5 border-t border-[var(--hairline-soft,#e8e4d8)]">
+        <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-soft)] font-semibold mb-3">Hit rate · by connector · last 24h</div>
+        <ul className="space-y-2 max-w-4xl">
+          {CONNECTORS.map((c) => {
+            const pct = Math.round(c.hit * 100);
+            const colour = pct >= 80 ? '#16a34a' : pct >= 50 ? '#7c3aed' : '#b45309';
+            return (
+              <li key={c.name} className="grid grid-cols-[1.6fr_3fr_auto] gap-3 items-center text-[12px]">
+                <span className="font-mono text-[11px] text-[var(--ink-strong)] truncate">{c.name}</span>
+                <span className="relative h-2.5 rounded-sm overflow-hidden" style={{ background: '#f4f4ef', border: '1px solid var(--hairline-soft,#e8e4d8)' }}>
+                  <span className="absolute inset-y-0 left-0" style={{ width: `${pct}%`, background: colour, transition: 'width 600ms ease' }} />
+                </span>
+                <span className="font-mono text-[11px] text-[var(--ink-muted)] tabular-nums">
+                  <strong className="text-[var(--ink-strong)]">{pct}%</strong> · {c.skipped}/{c.scheduled}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="mt-4 pt-3 border-t border-[var(--hairline-soft,#e8e4d8)] grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 text-[12px] text-[var(--ink-muted)] leading-snug">
+          <div><strong className="text-[var(--ink-strong)]">Filter on <code className="font-mono text-[11px]">_fivetran_synced</code></strong> in every dbt incremental &mdash; that's what propagates the run-cache decision downstream.</div>
+          <div><strong className="text-[var(--ink-strong)]">Honor <code className="font-mono text-[11px]">_fivetran_deleted</code></strong> for soft deletes; the staging layer carries the flag through to gold.</div>
+          <div><strong className="text-[var(--ink-strong)]">Never <code className="font-mono text-[11px]">--full-refresh</code></strong> on a schedule &mdash; one rebuild defeats months of saved compute.</div>
         </div>
       </div>
     </section>
@@ -850,7 +826,7 @@ const GX_SUITES: GxSuite[] = [
     expectations: 18,
     passing: 18,
     last_run: '07:14:22',
-    why: 'PHI completeness — mrn / dob / ssn populated; no impossible birthdates; age in [0, 130].',
+    why: 'PHI completeness — mrn / dob / ssn populated; no impossible birthdates; age in [0, 120].',
   },
   {
     suite: 'clarity.encounter.referential',
@@ -928,7 +904,7 @@ function GreatExpectationsPanel() {
     <section className="mb-8 clinical-card overflow-hidden" style={cardStyle}>
       <header className="clinical-card-header flex items-start justify-between gap-4" style={cardHeaderStyle}>
         <div>
-          <div className="eyebrow" style={{ color: '#ff6310' }}>Data Quality · Great Expectations</div>
+          <div className="eyebrow" style={{ color: '#9a3412' }}>Data Quality · Great Expectations</div>
           <h2 className="font-serif text-xl font-semibold text-[var(--ink-strong)] mt-0.5">
             Validation runs on Bronze before anything reaches Silver.
           </h2>
@@ -939,10 +915,10 @@ function GreatExpectationsPanel() {
           </p>
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <div className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white" style={{ background: '#ff6310' }}>
+          <div className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white" style={{ background: '#9a3412' }}>
             GX Core · OSS
           </div>
-          <div className="text-[10px] text-[var(--ink-soft)] font-mono">Fivetran-stewarded · May 2026</div>
+          <div className="text-[10px] text-[var(--ink-soft)] font-mono">Fivetran-stewarded</div>
         </div>
       </header>
 
@@ -1004,7 +980,7 @@ expectations:
   - expect_column_values_to_be_between:
       column: age_years
       min_value: 0
-      max_value: 130
+      max_value: 120
   - expect_column_values_to_be_in_set:
       column: payor_class
       value_set: [Commercial, Medicare, Medicaid, Self-Pay]
