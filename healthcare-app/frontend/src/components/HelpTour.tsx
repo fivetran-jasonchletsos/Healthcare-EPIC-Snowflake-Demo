@@ -29,9 +29,9 @@ const STEPS: Step[] = [
         <div className="h-7 rounded-md bg-slate-100 border border-slate-200 flex items-center px-3 text-xs text-slate-500">
           Search by patient name, MRN, or city…
         </div>
-        <div className="mt-2 space-y-1">
+        <div className="mt-2 space-y-1.5">
           {['Ramirez, Elena · MRN 0100482 · Pittsburgh', 'Okafor, Daniel · MRN 0100231 · Cleveland', 'Nakamura, Yuki · MRN 0100819 · Erie'].map((r, i) => (
-            <div key={i} className="h-5 rounded bg-slate-50 border border-slate-100 px-2 text-[11px] flex items-center text-slate-600">
+            <div key={i} className="min-h-[22px] rounded bg-slate-50 border border-slate-100 px-2 py-1 text-[11px] flex items-center text-slate-600 truncate">
               {r}
             </div>
           ))}
@@ -132,9 +132,13 @@ export default function HelpTour() {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
 
-  // Auto-open on first visit only.
+  // Auto-open on first visit only. Gate behind sm: width (>=640px) so
+  // narrow phones don't get a modal that overflows the viewport.
   useEffect(() => {
     try {
+      if (typeof window !== 'undefined' && window.matchMedia && !window.matchMedia('(min-width: 640px)').matches) {
+        return;
+      }
       if (!localStorage.getItem(LS_KEY)) {
         // Small delay so initial-load loading states settle before the modal pops.
         const t = setTimeout(() => setOpen(true), 1200);
@@ -211,7 +215,7 @@ export default function HelpTour() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) closeTour(); }}
         >
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+          <div className="w-full max-w-2xl mx-4 rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
             {/* Progress dots */}
             <div className="flex items-center gap-1.5 px-6 pt-5">
               {STEPS.map((_, i) => (
@@ -234,7 +238,7 @@ export default function HelpTour() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6 p-4 sm:p-6">
               <div className="sm:col-span-3">
                 <div
                   className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider mb-3"
@@ -262,7 +266,7 @@ export default function HelpTour() {
             </div>
 
             {/* Footer controls */}
-            <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200">
+            <div className="flex items-center justify-between gap-2 px-4 sm:px-6 py-3 sm:py-4 bg-slate-50 border-t border-slate-200">
               <button
                 onClick={prev}
                 disabled={step === 0}
