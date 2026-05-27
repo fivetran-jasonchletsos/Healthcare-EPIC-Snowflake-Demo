@@ -78,6 +78,13 @@ export default function WizardLivePage() {
   const codePanelRef = useRef<HTMLPreElement | null>(null);
   const yamlPanelRef = useRef<HTMLPreElement | null>(null);
 
+  // Auto-scroll pause flags — set when the user manually scrolls away from the bottom.
+  // Cleared when the user scrolls back near the bottom. Keeps the build animation
+  // visible by default while letting users freely scroll up to read prior SQL.
+  const narrUserScrolled = useRef(false);
+  const codeUserScrolled = useRef(false);
+  const yamlUserScrolled = useRef(false);
+
   // Load playback data
   useEffect(() => {
     Promise.all([
@@ -148,18 +155,44 @@ export default function WizardLivePage() {
   }, [playing, speed, currentEvent, state.narrTyped, state.codeTyped, state.cursor, events.length, complete]);
 
   // Autoscroll panels by setting scrollTop directly — never scroll the window.
+  // Skip autoscroll if the user has scrolled up to read prior content; resume
+  // once they scroll back near the bottom.
   useEffect(() => {
     const el = narrPanelRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (el && !narrUserScrolled.current) el.scrollTop = el.scrollHeight;
   }, [state.cursor, state.narrTyped]);
   useEffect(() => {
     const el = codePanelRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (el && !codeUserScrolled.current) el.scrollTop = el.scrollHeight;
   }, [state.sqlSoFar]);
   useEffect(() => {
     const el = yamlPanelRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (el && !yamlUserScrolled.current) el.scrollTop = el.scrollHeight;
   }, [state.yamlSoFar]);
+
+  // Detect user scrolling — pause autoscroll when they leave the bottom,
+  // resume when they return within 32px of the bottom.
+  useEffect(() => {
+    const NEAR_BOTTOM_PX = 32;
+    const bind = (
+      el: HTMLElement | null,
+      flag: React.MutableRefObject<boolean>,
+    ) => {
+      if (!el) return () => {};
+      const handler = () => {
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+        flag.current = distanceFromBottom > NEAR_BOTTOM_PX;
+      };
+      el.addEventListener('scroll', handler, { passive: true });
+      return () => el.removeEventListener('scroll', handler);
+    };
+    const offs = [
+      bind(narrPanelRef.current, narrUserScrolled),
+      bind(codePanelRef.current, codeUserScrolled),
+      bind(yamlPanelRef.current, yamlUserScrolled),
+    ];
+    return () => { offs.forEach(off => off()); };
+  }, [scenario, events.length]);
 
   const reset = () => { setState(INITIAL); setComplete(false); setPlaying(true); };
   const cycleSpeed = () => { const i = SPEEDS.indexOf(speed); setSpeed(SPEEDS[(i + 1) % SPEEDS.length]); };
@@ -445,10 +478,10 @@ export default function WizardLivePage() {
         </section>
 
         {/* ── RIGHT: Live code panels ── */}
-        <section className="flex flex-col gap-3" style={{ height: 'calc(100dvh - 440px)', minHeight: 300 }}>
+        <section className="flex flex-col gap-3" style={{ height: 'calc(100dvh - 440px)', minHeight: 300, minWidth: 0 }}>
 
           {/* SQL panel */}
-          <div className="clinical-card flex flex-col" style={{ flex: '1.7 1 0' }}>
+          <div className="clinical-card flex flex-col" style={{ flex: '1.7 1 0', minHeight: 0 }}>
             <header
               className="px-5 py-3 border-b flex items-center justify-between"
               style={{ borderColor: 'var(--hairline)' }}
@@ -485,6 +518,7 @@ export default function WizardLivePage() {
                 overscrollBehavior: 'contain',
                 borderBottomLeftRadius: '0.25rem',
                 borderBottomRightRadius: '0.25rem',
+                minHeight: 0,
               }}
             >
               {state.sqlSoFar.length === 0 ? (
@@ -504,7 +538,7 @@ export default function WizardLivePage() {
           </div>
 
           {/* YAML panel */}
-          <div className="clinical-card flex flex-col" style={{ flex: '1 1 0' }}>
+          <div className="clinical-card flex flex-col" style={{ flex: '1 1 0', minHeight: 0 }}>
             <header
               className="px-5 py-3 border-b flex items-center justify-between"
               style={{ borderColor: 'var(--hairline)' }}
@@ -541,6 +575,7 @@ export default function WizardLivePage() {
                 overscrollBehavior: 'contain',
                 borderBottomLeftRadius: '0.25rem',
                 borderBottomRightRadius: '0.25rem',
+                minHeight: 0,
               }}
             >
               {state.yamlSoFar.length === 0 ? (
