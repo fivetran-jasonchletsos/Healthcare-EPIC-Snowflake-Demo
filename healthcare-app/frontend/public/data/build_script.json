@@ -81,7 +81,7 @@
       "step_label": "Test Authoring",
       "body": "Writing the YAML companion. Description first, then the schema contract — every column gets a type so downstream consumers can resolve it without ambiguity.",
       "code_target": "yaml",
-      "code_append": "version: 2\n\nmodels:\n  - name: fct_sepsis_bundle_by_service_line_daily\n    description: |\n      Sepsis bundle element completion and compliance rates aggregated to\n      (service_line, encounter_date). Denominator is encounters where a\n      sepsis alert fired. Built by dbt-wizard sub-agents on 2026-05-23\n      in response to the quality-team escalation on the cardiology\n      compliance dip of 2026-05-20.\n    config:\n      contract:\n        enforced: true\n      tags: [quality, ai_built]\n      meta:\n        owner: quality_patient_safety\n        built_by: dbt-wizard\n        consumes: [stg_clarity__pat_enc, stg_clarity__vitals, stg_clarity__orders, dim_departments]\n\n"
+      "code_append": "version: 2\n\nmodels:\n  - name: fct_sepsis_bundle_by_service_line_daily\n    description: |\n      Sepsis bundle element completion and compliance rates aggregated to\n      (service_line, encounter_date). Denominator is encounters where a\n      sepsis alert fired. Built by dbt-wizard sub-agents on 2026-05-22\n      in response to the quality-team escalation on the cardiology\n      compliance dip of 2026-05-20.\n    config:\n      contract:\n        enforced: true\n      tags: [quality, ai_built]\n      meta:\n        owner: quality_patient_safety\n        built_by: dbt-wizard\n        consumes: [stg_clarity__pat_enc, stg_clarity__vitals, stg_clarity__orders, dim_departments]\n\n"
     },
     {
       "from": "verification",

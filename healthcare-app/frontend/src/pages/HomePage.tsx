@@ -107,7 +107,7 @@ export default function HomePage() {
                   dbt Wizard · live build
                 </span>
                 <span className="eyebrow" style={{ color: 'var(--clinical-teal)' }}>Track B</span>
-                <span className="eyebrow ml-auto">BLD-2026-05-23-0007</span>
+                <span className="eyebrow ml-auto">BLD-2026-05-22-0007</span>
               </div>
 
               <div className="px-6 pt-5 pb-6 flex-1 flex flex-col">
