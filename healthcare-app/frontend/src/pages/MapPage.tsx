@@ -13,9 +13,9 @@ import {
 } from '../components/Executive';
 
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconRetinaUrl: `${import.meta.env.BASE_URL}leaflet/marker-icon-2x.png`,
+  iconUrl: `${import.meta.env.BASE_URL}leaflet/marker-icon.png`,
+  shadowUrl: `${import.meta.env.BASE_URL}leaflet/marker-shadow.png`,
 });
 
 type Mode = 'count' | 'charges' | 'chronic';
