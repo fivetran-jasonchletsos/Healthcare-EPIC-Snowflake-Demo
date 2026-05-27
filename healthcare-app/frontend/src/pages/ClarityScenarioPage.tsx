@@ -117,6 +117,9 @@ export default function ClarityScenarioPage() {
           <p className="font-serif text-2xl font-semibold leading-tight text-[var(--ink-strong)]">
             "{s.question}"
           </p>
+          <p className="mt-2 text-[13px] text-[var(--ink-muted)] leading-snug">
+            Scope: ER-admitted patients triaged to Cardiology service line.
+          </p>
         </div>
       </header>
 

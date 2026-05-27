@@ -399,7 +399,7 @@ export default function Layout() {
           <div>
             <div className="eyebrow mb-2">Data Pipeline</div>
             <p className="leading-relaxed mb-3">
-              Epic Clarity → Fivetran → Iceberg (MDLS) → Snowflake / Athena / Trino → dbt Labs → static JSON snapshot
+              Epic Clarity → Fivetran → Iceberg on S3 → dbt → Great Expectations → Snowflake / Athena / Trino → Cortex
             </p>
             <div className="flex items-center gap-2 text-[11px]">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">
