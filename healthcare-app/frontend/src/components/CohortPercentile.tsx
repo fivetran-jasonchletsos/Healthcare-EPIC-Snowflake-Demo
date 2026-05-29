@@ -30,9 +30,12 @@ export default function CohortPercentile({ patId, age, sex, encounters, charges,
 
   const stats = useMemo(() => {
     if (!peers || peers.length === 0) return null;
-    const encs = [...peers.map((p) => p.encounter_count), encounters].sort((a, b) => a - b);
-    const chs = [...peers.map((p) => p.total_charges), charges].sort((a, b) => a - b);
-    const chrs = [...peers.map((p) => p.active_chronic_count), chronic].sort((a, b) => a - b);
+    // Rank this patient against the PEER distribution only — injecting the
+    // patient's own value would count them at/above themselves and overstate
+    // every percentile (worst for small cohorts).
+    const encs = peers.map((p) => p.encounter_count).sort((a, b) => a - b);
+    const chs = peers.map((p) => p.total_charges).sort((a, b) => a - b);
+    const chrs = peers.map((p) => p.active_chronic_count).sort((a, b) => a - b);
 
     const pct = (vals: number[], v: number) => {
       const rank = vals.filter((x) => x <= v).length;

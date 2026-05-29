@@ -20,9 +20,12 @@ export default function PatientDetailPage() {
   const [accounts, setAccounts] = useState<AccountsResponse | null>(null);
   const [comparables, setComparables] = useState<ComparablesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+    setError(false);
     Promise.all([
       api.getPatient(patId),
       api.getEncounters(patId),
@@ -31,20 +34,32 @@ export default function PatientDetailPage() {
       api.getComparables(patId),
     ])
       .then(([p, e, d, a, c]) => {
+        if (cancelled) return;
         setPatient(p);
         setEncounters(e);
         setDiagnoses(d);
         setAccounts(a);
         setComparables(c);
       })
-      .finally(() => setLoading(false));
+      .catch(() => { if (!cancelled) setError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [patId]);
 
-  if (loading || !patient) {
+  if (loading) {
     return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-[var(--ink-soft)]">Loading chart…</div>;
   }
+  if (error || !patient) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-20 text-center text-[var(--ink-soft)]">
+        <p className="font-serif text-lg text-[var(--ink-strong)]">Patient chart unavailable</p>
+        <p className="mt-1 text-sm">This patient isn’t in the current snapshot.</p>
+        <Link to="/patients" className="mt-4 inline-block text-sm text-[var(--clinical-teal)] hover:underline">← Back to patients</Link>
+      </div>
+    );
+  }
 
-  const balance = accounts?.summary.outstanding_balance ?? 0;
+  const balance = accounts?.summary?.outstanding_balance ?? 0;
   const burden = patient.active_chronic_count;
   const burdenTone =
     burden >= 3 ? { cls: 'alert', label: 'High chronic burden' } : burden >= 1 ? { cls: 'caution', label: `${burden} chronic` } : { cls: 'healthy', label: 'Stable' };
@@ -55,8 +70,9 @@ export default function PatientDetailPage() {
     .filter(Boolean)
     .sort()
     .reverse()[0];
-  const daysSinceLast = lastEncounterDate
-    ? Math.floor((Date.now() - new Date(lastEncounterDate).getTime()) / (1000 * 60 * 60 * 24))
+  const lastEncounterTime = lastEncounterDate ? new Date(lastEncounterDate).getTime() : NaN;
+  const daysSinceLast = Number.isFinite(lastEncounterTime)
+    ? Math.floor((Date.now() - lastEncounterTime) / (1000 * 60 * 60 * 24))
     : null;
 
   let nextAction: { tone: string; label: string; title: string; rationale: string } | null = null;

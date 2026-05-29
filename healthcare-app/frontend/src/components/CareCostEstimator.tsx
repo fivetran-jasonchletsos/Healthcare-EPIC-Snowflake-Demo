@@ -41,20 +41,23 @@ export default function CareCostEstimator({ totalCharges, encounters, payerHint 
   const projection = useMemo(() => {
     const avgPerVisit = encounters > 0 ? totalCharges / encounters : 350;
     const billed = avgPerVisit * futureVisits;
-    const afterDeductible = Math.max(0, billed - deductible);
+    // Deductible only applies up to what's actually billed — you can't pay a
+    // $2,500 deductible against $1,800 of care.
+    const deductibleApplied = Math.min(deductible, billed);
+    const afterDeductible = billed - deductibleApplied;
     const insurance = afterDeductible * coverage;
+    const coinsurance = afterDeductible - insurance;
     const copayTotal = futureVisits * copay;
-    const oop = deductible + (afterDeductible - insurance) + copayTotal;
-    return { avgPerVisit, billed, insurance, oop, copayTotal };
+    const oop = deductibleApplied + coinsurance + copayTotal;
+    return { avgPerVisit, billed, insurance, oop, copayTotal, deductibleApplied, coinsurance };
   }, [totalCharges, encounters, futureVisits, deductible, coverage, copay]);
 
-  const coinsurance = Math.max(0, projection.billed - projection.insurance - deductible - projection.copayTotal);
-  // Stacked composition of the OOP — used for a single horizontal bar in
-  // place of three competing colored tiles.
-  const totalOop = Math.max(1, deductible + coinsurance + projection.copayTotal);
+  // Stacked composition of the OOP — the same parts that sum to projection.oop,
+  // so the bar always agrees with the headline figure.
+  const totalOop = Math.max(1, projection.oop);
   const seg = [
-    { key: 'Deductible', value: deductible, color: '#0e7490' },
-    { key: 'Coinsurance', value: coinsurance, color: '#94a3b8' },
+    { key: 'Deductible', value: projection.deductibleApplied, color: '#0e7490' },
+    { key: 'Coinsurance', value: projection.coinsurance, color: '#94a3b8' },
     { key: 'Copays', value: projection.copayTotal, color: '#cbd5e1' },
   ];
 

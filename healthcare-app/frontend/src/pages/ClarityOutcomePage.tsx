@@ -77,12 +77,27 @@ const NODE_COLOR: Record<string, string> = {
 
 export default function ClarityOutcomePage() {
   const [o, setO] = useState<OutcomeData | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     fetch(import.meta.env.BASE_URL?.replace(/\/$/, '') + '/data/outcome.json')
-      .then(r => r.json())
-      .then(setO);
+      .then(r => {
+        if (!r.ok) throw new Error(`outcome.json: ${r.status}`);
+        return r.json();
+      })
+      .then(d => { if (!cancelled) setO(d); })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
   }, []);
+
+  if (failed) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-12 font-mono text-sm text-[var(--ink-muted)]">
+        Outcome data unavailable.
+      </div>
+    );
+  }
 
   if (!o) {
     return (

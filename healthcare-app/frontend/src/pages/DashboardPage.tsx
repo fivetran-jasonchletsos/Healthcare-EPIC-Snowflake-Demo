@@ -128,7 +128,9 @@ export default function DashboardPage() {
     const highBurdenCount = new Array(buckets).fill(0);
     for (const p of patients) {
       const y = Number((p.birth_date ?? '').slice(0, 4));
-      if (!Number.isFinite(y)) continue;
+      // Match the min/max filter above: a blank birth_date yields year 0, which
+      // would otherwise clamp into bucket 0 and corrupt the oldest cohort.
+      if (!Number.isFinite(y) || y <= 1900) continue;
       let idx = Math.floor(((y - minY) / span) * buckets);
       if (idx >= buckets) idx = buckets - 1;
       if (idx < 0) idx = 0;

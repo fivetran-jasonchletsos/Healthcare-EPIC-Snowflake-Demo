@@ -95,6 +95,10 @@ async function loadDetail(patId: string): Promise<DetailBundle> {
       return synthesizeDetail(patId);
     }
   })();
+  // Don't poison the cache with a rejected promise: if the bundle fails to
+  // resolve (e.g. an unknown pat_id from a stale link), drop it so a later
+  // view can retry instead of replaying the rejection all session.
+  p.catch(() => detailCache.delete(patId));
   detailCache.set(patId, p);
   return p;
 }
@@ -151,9 +155,9 @@ export const api = {
       const q = params.q.toLowerCase();
       results = results.filter(
         (p) =>
-          p.full_name.toLowerCase().includes(q) ||
-          p.pat_id.toLowerCase().includes(q) ||
-          p.med_rec_num.toLowerCase().includes(q) ||
+          (p.full_name ?? '').toLowerCase().includes(q) ||
+          (p.pat_id ?? '').toLowerCase().includes(q) ||
+          (p.med_rec_num ?? '').toLowerCase().includes(q) ||
           (p.city ?? '').toLowerCase().includes(q),
       );
     }
