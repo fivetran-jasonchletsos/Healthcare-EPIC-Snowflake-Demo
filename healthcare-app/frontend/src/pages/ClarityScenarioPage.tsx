@@ -53,7 +53,15 @@ export default function ClarityScenarioPage() {
   const [tMinus, setTMinus] = useState('T-14:00:00');
 
   useEffect(() => {
-    fetch(wizardDataUrl('scenario.json')).then(r => r.json()).then(setS);
+    let cancelled = false;
+    fetch(wizardDataUrl('scenario.json'))
+      .then(r => {
+        if (!r.ok) throw new Error(`scenario.json: ${r.status}`);
+        return r.json();
+      })
+      .then(d => { if (!cancelled) setS(d); })
+      .catch(() => { /* leave on the loading state rather than crash */ });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
