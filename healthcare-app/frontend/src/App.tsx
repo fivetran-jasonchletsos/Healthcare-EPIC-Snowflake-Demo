@@ -15,6 +15,7 @@ import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import OdiDbtWizardPage from './pages/OdiDbtWizardPage';
 import WizardLivePage from './pages/WizardLivePage';
+import ActivationLivePage from './pages/ActivationLivePage';
 import ClarityScenarioPage from './pages/ClarityScenarioPage';
 import ClarityOutcomePage from './pages/ClarityOutcomePage';
 import ArchitecturePage from './pages/ArchitecturePage';
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/about-agent" element={<AboutAgentPage />} />
             <Route path="/architecture" element={<ArchitecturePage />} />
             <Route path="/pipeline" element={<PipelinePage />} />
+            <Route path="/activations-live" element={<ActivationLivePage />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/watchlist" element={<WatchlistPage />} />
             <Route path="/about" element={<AboutPage />} />

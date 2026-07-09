@@ -40,11 +40,12 @@ const NAV: NavEntry[] = [
     kind: 'group',
     label: 'ODI',
     rootTo: '/architecture',
-    matchPrefixes: ['/architecture', '/pipeline', '/about'],
+    matchPrefixes: ['/architecture', '/pipeline', '/about', '/activations-live'],
     children: [
-      { to: '/architecture', label: 'Architecture' },
-      { to: '/pipeline',     label: 'Pipeline' },
-      { to: '/about',        label: 'About' },
+      { to: '/architecture',     label: 'Architecture' },
+      { to: '/pipeline',         label: 'Pipeline' },
+      { to: '/about',            label: 'About' },
+      { to: '/activations-live', label: 'Activations' },
     ],
   },
 ];
@@ -399,12 +400,12 @@ export default function Layout() {
           <div>
             <div className="eyebrow mb-2">Data Pipeline</div>
             <p className="leading-relaxed mb-3">
-              Epic Clarity → Fivetran → Iceberg on S3 → dbt labs + dbt-wizard → Great Expectations → Snowflake / Athena / Trino → run-time agents
+              Epic Clarity → Fivetran → Iceberg on S3 → dbt labs + dbt-wizard → Great Expectations → Snowflake / Athena / Trino → run-time agents → NewCo Activations → TigerConnect
             </p>
             <div className="flex items-center gap-2 text-[11px]">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">
-                <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>F</span>
-                <span className="font-semibold text-[var(--ink-strong)]">Fivetran</span>
+                <span className="inline-flex items-center justify-center h-4 px-1 rounded text-[9px] font-bold text-white" style={{ background: '#0073FF' }}>N</span>
+                <span className="font-semibold text-[var(--ink-strong)]">NewCo</span>
               </span>
               <span className="text-[var(--ink-soft)]">+</span>
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-white px-2 py-1">
